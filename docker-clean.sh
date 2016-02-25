@@ -10,7 +10,6 @@ declare HAS_VERSION=1
 function version {
      echo "$@" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
  }
-
 #Checks if current version of docker works
 #Set HAS_VERSION to 0 if they do have a correct version.
  function checkVersion  {
@@ -39,23 +38,23 @@ function version {
  }
 
 #Stop all running containers to clean them
-function stopContainers{
+function stopContainers {
     docker stop $(docker ps -a -q)
 }
 
 #Cleans all containers that are stopped.
-function cleanContainers{
+function cleanContainers {
     docker rm $(docker ps -a -q)
 }
 
 #Clears all images
 #Credit goes to http://jimhoskins.com/2013/07/27/remove-untagged-docker-images.html
-function cleanImages{
+function cleanImages {
     docker rmi $(docker images | grep "^<none>" | awk '{print $3}')
 }
 
 #clears all volumes.
-function cleanVolumes{
+function cleanVolumes {
     docker volume rm $(docker volume ls -qf dangling=true)
 }
 
@@ -65,7 +64,7 @@ checkDocker
 checkVersion
 cleanContainers
 cleanImages
-if [HAS_VERSION -eq 0]; then
+if [ HAS_VERSION -eq 0 ]; then
     cleanVolumes
 else
     exit 0;
