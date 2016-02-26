@@ -3,7 +3,7 @@
 
 #ENVIRONMENT VARIABLES
 declare REQUIRED_VERSION="1.9.0"
-declare HAS_VERSION=1
+declare HAS_VERSION=false
 
 #FUNCTIONS
 #Prints out Version in numerical order to compare.
@@ -15,7 +15,7 @@ function version {
  function checkVersion  {
      local Docker_Version="$(docker --version | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')"
      if [ $(version "$Docker_Version") -gt $(version "$REQUIRED_VERSION") ]; then
-         HAS_VERSION=0
+         HAS_VERSION=true
      else
          echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
          echo "Please upgrade your Docker daemon. Until then, the Volume processing will not work."
@@ -39,23 +39,43 @@ function version {
 
 #Stop all running containers to clean them
 function stopContainers {
-    docker stop $(docker ps -a -q)
+    activeContainers="$(docker ps -a -q)"
+    if [ ! "$activeContainers" ]; then
+        echo No Running Containers To Stop!
+    else
+        docker rm $activeContainers
+    fi
 }
 
 #Cleans all containers that are stopped.
 function cleanContainers {
-    docker rm $(docker ps -a -q)
+    stoppedContainers="$(docker ps -a -q)"
+    if [ ! "$stoppedContainers" ]; then
+        echo No Containers To Clean!
+    else
+        docker rm $stoppedContainers
+    fi
 }
 
 #Clears all images
 #Credit goes to http://jimhoskins.com/2013/07/27/remove-untagged-docker-images.html
 function cleanImages {
-    docker rmi $(docker images | grep "^<none>" | awk '{print $3}')
+    untaggedImages="$(docker images | grep "^<none>" | awk '{print $3}')"
+    if [ ! "$untaggedImages" ]; then
+        echo No Untagged Images!
+    else
+        docker rmi $untaggedImages
+    fi
 }
 
 #clears all volumes.
 function cleanVolumes {
-    docker volume rm $(docker volume ls -qf dangling=true)
+    danglingVolumes="$(docker volume ls -qf dangling=true)"
+    if [ ! "$danglingVolumes" ]; then
+        echo No Dangling Volumes!
+    else
+        docker rmi $danglingVolumes
+    fi
 }
 
 
@@ -64,7 +84,7 @@ checkDocker
 checkVersion
 cleanContainers
 cleanImages
-if [ HAS_VERSION -eq 0 ]; then
+if [ $HAS_VERSION == true ]; then
     cleanVolumes
 else
     exit 0;
