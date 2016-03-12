@@ -106,22 +106,24 @@ function dockerClean {
 	    exit 0;
 	fi
 }
-ARB_B=0
 
 #Driver with options
+declare HELP_MENU=false
 Check
 while [ "$1" != "" ]; do
 	case $1 in 
-		-i | -a | --images) deleteImages
-		dockerClean ;;
-		-f | --force) stopContainers 
-		dockerClean ;;
-		-h | --help) 
+		-i | -a | --images) deleteImages ;;
+		-f | --force) stopContainers ;;
+		-h | --help) HELP_MENU=true
 		echo Options: 
 		echo "		"-a or -i or --images "to stop and delete all Containers and Images"
 		echo "		"-f or --force "to stop Containers"
 		echo "		"-h or --help "for list of flags"
-		echo "\n";;	
+		echo "\n" ;;	
 	esac
 	shift
-done							
+done	
+						
+if [ $HELP_MENU == false ]; then
+	dockerClean
+fi
