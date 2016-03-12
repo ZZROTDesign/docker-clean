@@ -96,7 +96,7 @@ function Check {
 	checkVersion
 }
 
-#Runs all of the 
+#Default run option, cleans containers and images
 function dockerClean {
 	cleanContainers
 	cleanImages
