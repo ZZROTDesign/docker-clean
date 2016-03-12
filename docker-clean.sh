@@ -80,7 +80,7 @@ function cleanVolumes {
 
 #Stops and removes all containers, removes images
 function deleteImages {
-	#stopContainers
+	stopContainers
 	listedImages="$(docker images -q)"
 	if [ ! "$listedImages" ]; then
 		echo No Images to delete!
