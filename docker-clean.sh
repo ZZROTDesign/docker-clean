@@ -118,15 +118,16 @@ function restartMachine {
 
 #Driver with options
 declare HELP_MENU=false
-declare RESTART=true
+declare RESTART=false
 Check
 while [ "$1" != "" ]; do
 	case $1 in 
 		-i | -a | --images) deleteImages ;; 
 		-f | --force) stopContainers ;;
-		-r | --reset) deleteImages 
-						RESTART=true ;;
-		-h | --help) HELP_MENU=true
+		-r | --reset) deleteImages
+						dockerClean 
+						restartMachine ;;
+		-h | --help | *) HELP_MENU=true
 		echo Options: 
 		echo "		"-a or -i or --images "to stop and delete all Containers and Images"
 		echo "		"-f or --force "to stop Containers"
