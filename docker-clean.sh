@@ -78,15 +78,52 @@ function cleanVolumes {
     fi
 }
 
+#Stops and removes all containers, removes images
+function deleteImages {
+	stopContainers
+	listedImages="$(docker images -q)"
+	if [ ! "$listedImages" ]; then
+		echo No Images to delete!
+	else
+		echo delete
+		docker rmi $listedImages
+	fi
+}
 
+#Runs Check Functions
+function Check {
+	checkDocker
+	checkVersion
+}
 
-checkDocker
-checkVersion
-stopContainers
-cleanContainers
-cleanImages
-if [ $HAS_VERSION == true ]; then
-    cleanVolumes
-else
-    exit 0;
+#Default run option, cleans containers and images
+function dockerClean {
+	cleanContainers
+	cleanImages
+	if [ $HAS_VERSION == true ]; then
+	    cleanVolumes
+	else
+	    exit 0;
+	fi
+}
+
+#Driver with options
+declare HELP_MENU=false
+Check
+while [ "$1" != "" ]; do
+	case $1 in 
+		-i | -a | --images) deleteImages ;;
+		-f | --force) stopContainers ;;
+		-h | --help) HELP_MENU=true
+		echo Options: 
+		echo "		"-a or -i or --images "to stop and delete all Containers and Images"
+		echo "		"-f or --force "to stop Containers"
+		echo "		"-h or --help "for list of flags"
+		echo "\n" ;;	
+	esac
+	shift
+done	
+						
+if [ $HELP_MENU == false ]; then
+	dockerClean
 fi
