@@ -43,7 +43,7 @@ function stopContainers {
     if [ ! "$activeContainers" ]; then
         echo No Running Containers To Stop!
     else
-        docker rm $activeContainers
+        docker rm -f $activeContainers
     fi
 }
 
@@ -82,6 +82,7 @@ function cleanVolumes {
 
 checkDocker
 checkVersion
+stopContainers
 cleanContainers
 cleanImages
 if [ $HAS_VERSION == true ]; then
