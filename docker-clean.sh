@@ -107,14 +107,27 @@ function dockerClean {
 	fi
 }
 
+#Restarts and reRuns docker-machine env active machine
+function restartMachine {
+	active="$(docker-machine active)"
+	docker-machine restart $active
+	eval $(docker-machine env $active)
+	echo Running docker-machine env $active...
+	echo "New IP Address for" $active":" $(docker-machine ip)
+}
+
 #Driver with options
 declare HELP_MENU=false
+declare RESTART=false
 Check
 while [ "$1" != "" ]; do
 	case $1 in 
-		-i | -a | --images) deleteImages ;;
+		-i | -a | --images) deleteImages ;; 
 		-f | --force) stopContainers ;;
-		-h | --help) HELP_MENU=true
+		-r | --reset) deleteImages
+						dockerClean 
+						restartMachine ;;
+		-h | --help | *) HELP_MENU=true
 		echo Options: 
 		echo "		"-a or -i or --images "to stop and delete all Containers and Images"
 		echo "		"-f or --force "to stop Containers"
@@ -127,3 +140,8 @@ done
 if [ $HELP_MENU == false ]; then
 	dockerClean
 fi
+
+if [ $RESTART == true ]; then
+	restartMachine
+fi
+	
