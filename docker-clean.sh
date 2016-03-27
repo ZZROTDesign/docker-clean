@@ -46,10 +46,9 @@ parseCli(){
 	elif [[ $# -eq 1 ]]; then
 		case $1 in
 			-v | --version) version ;;
-			-f | --force) stopContainers dockerClean ;;
-			-i | --images) imagesDefault ;;
-			-r | --reset) resetDefault ;;
-			-a | --all) allDefault ;;
+			-c | --containers) dockerClean 1 ;;
+			-i | --images) dockerClean 2 ;;
+			-a | --all) dockerClean 3 ;;
 			-h | --help | *) usage ;;
 		esac
 	else
@@ -69,11 +68,10 @@ function version {
 function usage {
 	echo "Options:"
 	echo "-v or --version to print the current version"
-	echo "-f or --force to stop and delete running containers."
-	echo "-i or --images to delete all images, not just untagged."
-	echo "-a or --all to stop and delete running containers and images."
+	echo "-c or --containers to stop and delete running containers."
+	echo "-i or --images to stop and delete all containers as well as tagged images"
+	echo "-a or --all to stop and delete running containers, all images, and restart your docker-machine"
 	echo "-h or --help for this menu."
-	echo "\n"
 }
 
 # @info:	Prints out 3-point version (000.000.000) without decimals for comparison
@@ -108,24 +106,24 @@ function printVersion {
      fi
  }
 
-# @info:	Stops all running docker containers
-function stopContainers {
-    activeContainers="$(docker ps -a -q)"
-    if [ ! "$activeContainers" ]; then
-        echo No Running Containers To Stop!
-    else
-        docker rm -f $activeContainers
-    fi
-}
-
 # @info:	Removes all stopped docker containers.
 function cleanContainers {
-    stoppedContainers="$(docker ps -f STATUS=exited -q)"
+    stoppedContainers="$(docker ps -qf STATUS=exited )"
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
         docker rm $stoppedContainers
     fi
+}
+
+# @info:	Removes all containers (including running) with force.
+function cleanAllContainers {
+	allContainers="$(docker ps -a -q)"
+	if [ ! "$allContainers" ]; then
+		echo No Containers To Clean!
+	else
+		docker rm -f $allContainers
+	fi
 }
 
 # @info:	Removes all untagged docker images.
@@ -139,6 +137,16 @@ function cleanImages {
     fi
 }
 
+# @info:	Deletes all Images including tagged
+function cleanAllImages {
+	listedImages="$(docker images -q)"
+	if [ ! "$listedImages" ]; then
+		echo No Images to Delete!
+	else
+		docker rmi -f $listedImages
+	fi
+}
+
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
     danglingVolumes="$(docker volume ls -qf dangling=true)"
@@ -149,16 +157,13 @@ function cleanVolumes {
     fi
 }
 
-# @info:	Stops all containers, and deletes all images.
-function deleteImages {
-	stopContainers
-	listedImages="$(docker images -q)"
-	if [ ! "$listedImages" ]; then
-		echo No Images to delete!
-	else
-		echo delete
-		docker rmi $listedImages
-	fi
+# @info:	Restarts and reRuns docker-machine env active machine
+function restartMachine {
+	active="$(docker-machine active)"
+	docker-machine restart $active
+	eval $(docker-machine env $active)
+	echo Running docker-machine env $active...
+	echo "New IP Address for" $active ":" $(docker-machine ip)
 }
 
 # @info:	Runs the checks before the main code can be run.
@@ -168,23 +173,33 @@ function Check {
 }
 
 # @info:	Default run option, cleans stopped containers and images
+# @args:	1 = Force Clean all Containers, 2 = Force Clean Containers and Images. 3 = Force Clean Containers, Images, and Restart
 function dockerClean {
-	cleanContainers
-	cleanImages
+
+	if [ "$1" == 1 ]; then
+		cleanAllContainers
+		cleanImages
+	elif [ "$1" == 2 ]; then
+		cleanAllContainers
+		cleanAllImages
+	elif [ "$1" == 3 ]; then
+		cleanAllContainers
+		cleanAllImages
+	else
+		cleanContainers
+		cleanImages
+	fi
+
+	#Check if Has Version
 	if [ $HAS_VERSION == true ]; then
 	    cleanVolumes
-	else
-	    exit 0;
 	fi
-}
 
-# @info:	Restarts and reRuns docker-machine env active machine
-function restartMachine {
-	active="$(docker-machine active)"
-	docker-machine restart $active
-	eval $(docker-machine env $active)
-	echo Running docker-machine env $active...
-	echo "New IP Address for" $active":" $(docker-machine ip)
+	#This should be after cleaning the Volumes hence the seperation.
+	if [ "$1" == 3 ]; then
+		restartMachine
+	fi
+
 }
 
 #END FUNCTIONS
