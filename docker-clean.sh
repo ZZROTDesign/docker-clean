@@ -1,20 +1,65 @@
 #!/bin/sh
-# Maintained by Sean Kilgarriff
+# Maintained by Sean Kilgarriff and Killian Brackey
 
 #ENVIRONMENT VARIABLES
+
+declare VERSION="1.0.0"
+
 declare REQUIRED_VERSION="1.9.0"
 declare HAS_VERSION=false
 
+
 #FUNCTIONS
-#Prints out Version in numerical order to compare.
+
+
+
+#Parses the input and flags to run the right commands
+parseCli(){
+
+	if [ "$#" -eq 0 ]; then
+		dockerClean
+	elif [[ $# -eq 1 ]]; then
+		case $1 in
+			-v | --version) version ;;
+			-f | --force) stopContainers dockerClean ;;
+			-i | --images) imagesDefault ;;
+			-r | --reset) resetDefault ;;
+			-a | --all) allDefault ;;
+			-h | --help | *) usage ;;
+		esac
+	else
+		usage
+	fi
+}
+
+
+
+
+#Prints out this program's version
 function version {
+	echo $VERSION
+}
+
+function usage {
+	echo "Options:"
+	echo "-v or --version to print the current version"
+	echo "-f or --force to stop and delete running containers."
+	echo "-i or --images to delete all images, not just untagged."
+	echo "-a or --all to stop and delete running containers and images."
+	echo "-h or --help for this menu."
+	echo "\n"
+}
+
+#Prints out program's version in numerical order to compare.
+function printVersion {
      echo "$@" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
  }
+
 #Checks if current version of docker works
 #Set HAS_VERSION to 0 if they do have a correct version.
  function checkVersion  {
      local Docker_Version="$(docker --version | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')"
-     if [ $(version "$Docker_Version") -gt $(version "$REQUIRED_VERSION") ]; then
+     if [ $(printVersion "$Docker_Version") -gt $(printVersion "$REQUIRED_VERSION") ]; then
          HAS_VERSION=true
      else
          echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
@@ -116,32 +161,5 @@ function restartMachine {
 	echo "New IP Address for" $active":" $(docker-machine ip)
 }
 
-#Driver with options
-declare HELP_MENU=false
-declare RESTART=false
 Check
-while [ "$1" != "" ]; do
-	case $1 in 
-		-i | -a | --images) deleteImages ;; 
-		-f | --force) stopContainers ;;
-		-r | --reset) deleteImages
-						dockerClean 
-						restartMachine ;;
-		-h | --help | *) HELP_MENU=true
-		echo Options: 
-		echo "		"-a or -i or --images "to stop and delete all Containers and Images"
-		echo "		"-f or --force "to stop Containers"
-		echo "		"-h or --help "for list of flags"
-		echo "\n" ;;	
-	esac
-	shift
-done	
-						
-if [ $HELP_MENU == false ]; then
-	dockerClean
-fi
-
-if [ $RESTART == true ]; then
-	restartMachine
-fi
-	
+parseCli "$@"
