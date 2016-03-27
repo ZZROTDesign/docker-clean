@@ -120,7 +120,7 @@ function stopContainers {
 
 # @info:	Removes all stopped docker containers.
 function cleanContainers {
-    stoppedContainers="$(docker ps -a -q)"
+    stoppedContainers="$(docker ps -f STATUS=exited -q)"
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
@@ -186,6 +186,8 @@ function restartMachine {
 	echo Running docker-machine env $active...
 	echo "New IP Address for" $active":" $(docker-machine ip)
 }
+
+#END FUNCTIONS
 
 
 # @info:	Main function
