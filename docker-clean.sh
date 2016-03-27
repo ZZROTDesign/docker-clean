@@ -2,7 +2,7 @@
 # Maintained by Sean Kilgarriff and Killian Brackey
 #
 # The MIT License (MIT)
-# Copyright © 2015 ZZROT LLC <zzrotdesign@gmail.com>
+# Copyright © 2016 ZZROT LLC <zzrotdesign@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the “Software”), to deal
@@ -25,17 +25,20 @@
 
 #ENVIRONMENT VARIABLES
 
+# @info:	Docker-clean current version
 declare VERSION="1.0.0"
 
+# @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
+
+# @info:	Boolean for storing Docker version info
 declare HAS_VERSION=false
 
 
 #FUNCTIONS
 
-
-
-#Parses the input and flags to run the right commands
+# @info:    Parses and validates the CLI arguments
+# @args:	Global Arguments $@
 parseCli(){
 
 	if [ "$#" -eq 0 ]; then
@@ -57,11 +60,12 @@ parseCli(){
 
 
 
-#Prints out this program's version
+# @info:	Prints out Docker-clean current version
 function version {
 	echo $VERSION
 }
 
+# @info:	Prints out usage
 function usage {
 	echo "Options:"
 	echo "-v or --version to print the current version"
@@ -72,13 +76,13 @@ function usage {
 	echo "\n"
 }
 
-#Prints out program's version in numerical order to compare.
+# @info:	Prints out 3-point version (000.000.000) without decimals for comparison
+# @args:	Docker Version of the client
 function printVersion {
      echo "$@" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
  }
 
-#Checks if current version of docker works
-#Set HAS_VERSION to 0 if they do have a correct version.
+# @info:	Checks Docker Version and then configures the HAS_VERSION var.
  function checkVersion  {
      local Docker_Version="$(docker --version | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')"
      if [ $(printVersion "$Docker_Version") -gt $(printVersion "$REQUIRED_VERSION") ]; then
@@ -89,7 +93,7 @@ function printVersion {
      fi
  }
 
-#Make sure that Docker is install/connected.
+# @info:	Checks to see if Docker is installed and connected
  function checkDocker {
      #Run Docker ps to make sure that docker is installed
      #As well as that the Daemon is connected.
@@ -104,7 +108,7 @@ function printVersion {
      fi
  }
 
-#Stop all running containers to clean them
+# @info:	Stops all running docker containers
 function stopContainers {
     activeContainers="$(docker ps -a -q)"
     if [ ! "$activeContainers" ]; then
@@ -114,7 +118,7 @@ function stopContainers {
     fi
 }
 
-#Cleans all containers that are stopped.
+# @info:	Removes all stopped docker containers.
 function cleanContainers {
     stoppedContainers="$(docker ps -a -q)"
     if [ ! "$stoppedContainers" ]; then
@@ -124,7 +128,7 @@ function cleanContainers {
     fi
 }
 
-#Clears all images
+# @info:	Removes all untagged docker images.
 #Credit goes to http://jimhoskins.com/2013/07/27/remove-untagged-docker-images.html
 function cleanImages {
     untaggedImages="$(docker images | grep "^<none>" | awk '{print $3}')"
@@ -135,7 +139,7 @@ function cleanImages {
     fi
 }
 
-#clears all volumes.
+# @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
     danglingVolumes="$(docker volume ls -qf dangling=true)"
     if [ ! "$danglingVolumes" ]; then
@@ -145,7 +149,7 @@ function cleanVolumes {
     fi
 }
 
-#Stops and removes all containers, removes images
+# @info:	Stops all containers, and deletes all images.
 function deleteImages {
 	stopContainers
 	listedImages="$(docker images -q)"
@@ -157,13 +161,13 @@ function deleteImages {
 	fi
 }
 
-#Runs Check Functions
+# @info:	Runs the checks before the main code can be run.
 function Check {
 	checkDocker
 	checkVersion
 }
 
-#Default run option, cleans containers and images
+# @info:	Default run option, cleans stopped containers and images
 function dockerClean {
 	cleanContainers
 	cleanImages
@@ -174,7 +178,7 @@ function dockerClean {
 	fi
 }
 
-#Restarts and reRuns docker-machine env active machine
+# @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
 	active="$(docker-machine active)"
 	docker-machine restart $active
@@ -183,5 +187,7 @@ function restartMachine {
 	echo "New IP Address for" $active":" $(docker-machine ip)
 }
 
+
+# @info:	Main function
 Check
 parseCli "$@"
