@@ -8,7 +8,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 
 ## Install
-    curl -s https://raw.githubusercontent.com/Skilgarriff/docker-clean/master/docker-clean.sh |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean.sh |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 
