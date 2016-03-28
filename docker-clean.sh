@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Maintained by Sean Kilgarriff and Killian Brackey
 #
 # The MIT License (MIT)
