@@ -25,6 +25,7 @@
 
 #ENVIRONMENT VARIABLES
 
+#TODO: Add stop containers flag to just stop containers
 # @info:	Docker-clean current version
 declare VERSION="1.0.0"
 
