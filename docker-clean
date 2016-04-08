@@ -69,8 +69,8 @@ function version {
 function usage {
 	echo "Options:"
 	echo "-v or --version to print the current version"
-	echo "-s or --stop to stop all running containers."
-	echo "-c or --containers to stop and delete running containers."
+	echo "-s or --stop to stop all running containers"
+	echo "-c or --containers to stop and delete running containers"
 	echo "-i or --images to stop and delete all containers as well as tagged images"
 	echo "-a or --all to stop and delete running containers, all images, and restart your docker-machine"
 	echo "-h or --help for this menu."
