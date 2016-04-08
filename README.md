@@ -11,6 +11,10 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
     curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean.sh |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
+    
+## Homebrew Install
+    brew tap zzrotdesign/tap
+    brew install docker-clean
 
 ## License
 
