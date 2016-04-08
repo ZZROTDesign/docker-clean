@@ -68,8 +68,8 @@ function version {
 # @info:	Prints out usage
 function usage {
 	echo "Options:"
-	echo "-s or --stop to stop all running containers."
 	echo "-v or --version to print the current version"
+	echo "-s or --stop to stop all running containers."
 	echo "-c or --containers to stop and delete running containers."
 	echo "-i or --images to stop and delete all containers as well as tagged images"
 	echo "-a or --all to stop and delete running containers, all images, and restart your docker-machine"
@@ -110,11 +110,12 @@ function printVersion {
 
 # @info: Stops all running docker containers.
 function stop {
-	runningContainers="$(docker ps -a -q)"
-	if [ ! "runningContainers" ]; then
+	runningContainers="$(docker ps -q)"
+	if [ ! "$runningContainers" ]; then
 		echo No running containers!
 	else
-		docker stop $runningContainers
+		echo Stopping running containers...
+		docker stop --time=10 $runningContainers
 	fi
 }
 
