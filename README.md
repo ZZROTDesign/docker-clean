@@ -19,6 +19,8 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
     brew install docker-clean
     
 ## Usage
+docker-clean:
+    Default without arguments deletes stopped containers, dangling volumes, and untagged images.
     -v or --version to print the current version
     -s or --stop to stop all running containers
     -c or --containers to stop and delete running containers
