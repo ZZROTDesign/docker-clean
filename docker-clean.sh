@@ -154,7 +154,7 @@ function cleanVolumes {
     if [ ! "$danglingVolumes" ]; then
         echo No Dangling Volumes!
     else
-        docker rmi $danglingVolumes
+        docker volume rm $danglingVolumes
     fi
 }
 
