@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.1.2"
+declare VERSION="1.1.3"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -144,17 +144,20 @@ function cleanAllContainers {
 # @info:	Removes all untagged docker images.
 #Credit goes to http://jimhoskins.com/2013/07/27/remove-untagged-docker-images.html
 function cleanImages {
-    untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
-    if [ ! "$untaggedImages" ]; then
+		# Commented is for older version docker, has a few bugs
+		# with parent/child images
+    #untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
+		untaggedImages="$(docker images -aq --filter "dangling=true")"
+		if [ ! "$untaggedImages" ]; then
         echo No Untagged Images!
     else
-        docker rmi $untaggedImages
+        docker rmi -f $untaggedImages
     fi
 }
 
 # @info:	Deletes all Images including tagged
 function cleanAllImages {
-	listedImages="$(docker images -q)"
+	listedImages="$(docker images -aq)"
 	if [ ! "$listedImages" ]; then
 		echo No Images to Delete!
 	else
