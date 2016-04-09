@@ -163,7 +163,6 @@ function cleanAllImages {
 	else
 		docker rmi -f $listedImages
 	fi
-	echo DONE with images
 }
 
 # @info:	Removes all Dangling Docker Volumes.
