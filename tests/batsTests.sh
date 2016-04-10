@@ -10,6 +10,7 @@
 
 #TODO clean up builds with setup and teardown functions
 
+
 @test "Check that docker client is available" {
   command -v docker
 }
@@ -20,7 +21,7 @@
 }
 
 @test "Docker Clean Version echoes" {
-  run ../docker-clean -v
+  run ./docker-clean -v
   [ $status = 0 ]
 }
 
@@ -32,12 +33,12 @@
 
 @test "Help menu opens" {
   # On -h flag
-  run ../docker-clean -h
+  run ./docker-clean -h
   [[ ${lines[0]} =~ "Options:" ]]
-  run ../docker-clean --help
+  run ./docker-clean --help
   [[ ${lines[0]} =~ "Options:" ]]
   # On unspecified tag
-  run ../docker-clean -z
+  run ./docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
   clean
 }
@@ -47,7 +48,7 @@
   [ $status = 0 ]
   runningContainers="$(docker ps -q)"
   [ $runningContainers ]
-  run ../docker-clean -s
+  run ./docker-clean -s
   runningContainers="$(docker ps -q)"
   [ ! $runningContainers ]
 
@@ -61,7 +62,7 @@
   run docker kill $(docker ps -a -q)
   [ "$stoppedContainers" ]
 
-  run ../docker-clean
+  run ./docker-clean
 
   stoppedContainers="$(docker ps -qf STATUS=exited )"
   createdContainers="$(docker ps -qf STATUS=created)"
@@ -76,7 +77,7 @@
   [ $status = 0 ]
   allContainers="$(docker ps -a -q)"
   [ "$allContainers" ]
-  run ../docker-clean -c
+  run ./docker-clean -c
   allContainers="$(docker ps -a -q)"
   [ ! "$allContainers" ]
 
@@ -90,7 +91,7 @@
   untaggedImages="$(docker images -aq --filter "dangling=true")"
   [ "$untaggedImages" ]
 
-  run ../docker-clean
+  run ./docker-clean
   untaggedImages="$(docker images -aq --filter "dangling=true")"
   [ ! "$untaggedImages" ]
 
@@ -103,7 +104,7 @@
   listedImages="$(docker images -aq)"
   [ "$listedImages" ]
 
-  run ../docker-clean --images
+  run ./docker-clean --images
   listedImages="$(docker images -aq)"
   [ ! "$listedImages" ]
 
@@ -129,7 +130,7 @@
   run docker kill $(docker ps -a -q)
   [ "$stoppedContainers" ]
   #[ "$untaggedImages" ]
-  run ../docker-clean
+  run ./docker-clean
 
   stoppedContainers="$(docker ps -qf STATUS=exited )"
   createdContainers="$(docker ps -qf STATUS=created)"

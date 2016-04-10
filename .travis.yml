@@ -17,7 +17,7 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 
-  - curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean | sudo tee /usr/local/bin/docker-clean > /dev/null && \ sudo chmod +x /usr/local/bin/docker-clean
+  #- curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean | sudo tee /usr/local/bin/docker-clean > /dev/null && \ sudo chmod +x /usr/local/bin/docker-clean
 
   # Bats installation
   - sudo add-apt-repository ppa:duggan/bats --yes
@@ -38,4 +38,4 @@ before_script:
   - tree /
 
 script:
-  - bats tests/localBatsTests.sh
+  - bats batsTests.sh
