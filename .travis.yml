@@ -32,9 +32,8 @@ before_install:
 # Install for Shunit
 #before_script:
 #  - curl -: "https://shunit2.googlecode.com/files/shunit2-2.1.6.tgx" | tar zx
+before_script:
+  - tree docker-clean/
 
 script:
   - bats tests/batsTests.sh
-
-  after_install:
-    - tree docker-clean/
