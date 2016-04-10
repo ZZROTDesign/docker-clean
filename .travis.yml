@@ -17,6 +17,9 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 
+  - curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean | sudo tee /usr/local/bin/docker-clean > /dev/null && \
+  - sudo chmod +x /usr/local/bin/docker-clean
+
   # Bats installation
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
@@ -33,7 +36,7 @@ before_install:
 #before_script:
 #  - curl -: "https://shunit2.googlecode.com/files/shunit2-2.1.6.tgx" | tar zx
 before_script:
-  - tree docker-clean/
+  - tree /
 
 script:
-  - bats tests/batsTests.sh
+  - bats tests/localBatsTests.sh
