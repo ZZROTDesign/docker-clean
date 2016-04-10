@@ -58,8 +58,6 @@ parseCli(){
 }
 
 
-
-
 # @info:	Prints out Docker-clean current version
 function version {
 	echo $VERSION
