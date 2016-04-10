@@ -12,14 +12,17 @@ before_install:
 
   # upgrade docker-engine to specific version
   - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
-
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
+
+  # Bats installation
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
+
+  -sudo apt-get install tree
 
 
   #- curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean |
@@ -32,3 +35,6 @@ before_install:
 
 script:
   - bats tests/batsTests.sh
+
+  after_install:
+    - tree docker-clean/
