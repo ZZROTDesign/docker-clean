@@ -22,7 +22,7 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
 
-  -sudo apt-get install tree
+  - sudo apt-get install tree
 
 
   #- curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean |
