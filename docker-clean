@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.1.4"
+declare VERSION="1.1.5"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -125,8 +125,11 @@ function cleanContainers {
         echo No Containers To Clean!
     else
         docker rm $stoppedContainers
-				docker rm $createdContainers
     fi
+
+		if [ "$createdContainers" ]; then
+			docker rm $createdContainers
+		fi
 }
 
 # @info:	Removes all containers (including running) with force.

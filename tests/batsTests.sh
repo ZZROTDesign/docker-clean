@@ -6,25 +6,16 @@
 # To run the tests locally run brew install bats or
 # sudo apt-get install bats and then bats batsTest.bats
 
+# WARNING: Runing these tests will clear all of your images/Containers
+
 @test "Check that docker client is available" {
   command -v docker
-}
-
-@test "Check that we have a /tmp directory" {
-  run stat /tmp
-  [ $status = 0 ]
-}
-
-@test "Check that total is listed" {
-  run ls -l
-  [[ ${lines[0]} =~ "total" ]]
 }
 
 @test "Run docker ps" {
   run docker ps
   [ $status = 0 ]
 }
-
 
 @test "Docker Clean Version echoes" {
   run ../docker-clean -v
@@ -45,17 +36,74 @@
 @test "Test container stopping (-s --stop)" {
   build
   [ $status = 0 ]
-  
+  runningContainers="$(docker ps -q)"
+  [ $runningContainers ]
+  run ../docker-clean -s
+  runningContainers="$(docker ps -q)"
+  [ ! $runningContainers ]
+
+  #clean
 }
+
+# TODO figure out the -qf STATUS exited
+# TODO learn how to create an untagged image
+@test "Default run through (no args)" {
+  build
+  [ $status = 0 ]
+  stoppedContainers="$(docker ps -a)"
+  untaggedImages="$(docker images -aq --filter "dangling=true")"
+  run docker kill $(docker ps -a -q)
+  [ "$stoppedContainers" ]
+  #[ "$untaggedImages" ]
+  run ../docker-clean
+
+  stoppedContainers="$(docker ps -qf STATUS=exited )"
+  createdContainers="$(docker ps -qf STATUS=created)"
+  [ ! "$stoppedContainers" ]
+  [ ! "$createdContainers" ]
+  [ ! "$untaggedImages" ]
+
+  #clean
+}
+
+@test "Test of -c --containers " {
+  build
+  [ $status = 0 ]
+
+  #clean
+}
+
+@test "Image deletion (-i --images)" {
+  build
+  [ $status = 0 ]
+
+  #clean
+}
+
+#TODO create a volume and make its own test
+
 
 
 # Helper FUNCTIONS
+
+# NOT currently working with bats testing
+function runContainers() {
+  run docker run -d zzrot/alpine-caddy
+  run docker run -d zzrot/alpine-node
+  run docker run -d zzrot/whale-awkward
+}
+
 function build() {
-    run docker rm -f $(docker ps -a -q)
+    if [ $(docker ps -a -q) ]; then
+      docker rm -f $(docker ps -a -q)
+    fi
     run docker pull zzrot/whale-awkward
     run docker pull zzrot/alpine-caddy
     run docker pull zzrot/alpine-node
-    run docker run -d ghost
+    run docker run -d nginx
+    #run docker run -d ghost
+    #run docker run -d alpine-caddy
+    #run docker kill ghost
 }
 
 function clean() {
