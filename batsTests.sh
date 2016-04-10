@@ -1,5 +1,6 @@
 #!/usr/bin/env bats
 
+# PRODUCTION Bats Tests for Travis CI
 # Initial pass at testing for docker-clean
 # These tests simply test each of the options currently available
 
@@ -9,6 +10,7 @@
 # WARNING: Runing these tests will clear all of your images/Containers
 
 #TODO clean up builds with setup and teardown functions
+
 
 @test "Check that docker client is available" {
   command -v docker
