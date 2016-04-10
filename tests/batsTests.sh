@@ -26,6 +26,7 @@
 @test "Testing build function for other functions" {
   build
   [ $status = 0 ]
+  clean
 }
 
 @test "Help menu opens" {
@@ -37,6 +38,7 @@
   # On unspecified tag
   run ../docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
+  clean
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -48,7 +50,7 @@
   runningContainers="$(docker ps -q)"
   [ ! $runningContainers ]
 
-  #clean
+  clean
 }
 
 @test "Clean Containers test" {
@@ -65,7 +67,7 @@
   [ ! "$stoppedContainers" ]
   [ ! "$createdContainers" ]
 
-  #clean
+  clean
 }
 
 @test "Clean All Containers Test" {
@@ -77,7 +79,7 @@
   allContainers="$(docker ps -a -q)"
   [ ! "$allContainers" ]
 
-  #clean
+  clean
 }
 
 @test "Clean images (not all)" {
@@ -91,7 +93,7 @@
   untaggedImages="$(docker images -aq --filter "dangling=true")"
   [ ! "$untaggedImages" ]
 
-  #clean
+  clean
 }
 
 @test "Clean all images function" {
@@ -104,7 +106,7 @@
   listedImages="$(docker images -aq)"
   [ ! "$listedImages" ]
 
-  #clean
+  clean
 }
 
 @test "Clean Volumes function" {
@@ -112,7 +114,7 @@
   build
   [ $status = 0 ]
 
-  #clean
+  clean
 }
 
 
@@ -134,7 +136,7 @@
   [ ! "$createdContainers" ]
   [ ! "$untaggedImages" ]
 
-  #clean
+  clean
 }
 
 @test "Test of -c --containers " {
