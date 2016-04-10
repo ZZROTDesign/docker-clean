@@ -23,9 +23,5 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
 
-# Install for Shunit
-#before_script:
-#  - curl -: "https://shunit2.googlecode.com/files/shunit2-2.1.6.tgx" | tar zx
-
 script:
   - bats batsTests.sh

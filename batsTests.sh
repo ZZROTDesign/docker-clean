@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
 # PRODUCTION Bats Tests for Travis CI
+
 # Initial pass at testing for docker-clean
 # These tests simply test each of the options currently available
 
@@ -9,14 +10,11 @@
 
 # WARNING: Runing these tests will clear all of your images/Containers
 
-#TODO clean up builds with setup and teardown functions
-
-
 @test "Check that docker client is available" {
   command -v docker
 }
 
-@test "Run docker ps" {
+@test "Run docker ps (check daemon connectivity)" {
   run docker ps
   [ $status = 0 ]
 }
@@ -38,6 +36,7 @@
   [[ ${lines[0]} =~ "Options:" ]]
   run ./docker-clean --help
   [[ ${lines[0]} =~ "Options:" ]]
+
   # On unspecified tag
   run ./docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
@@ -57,14 +56,12 @@
 }
 
 @test "Clean Containers test" {
-
   stoppedContainers="$(docker ps -a)"
   untaggedImages="$(docker images -aq --filter "dangling=true")"
   run docker kill $(docker ps -a -q)
   [ "$stoppedContainers" ]
 
   run ./docker-clean
-
   stoppedContainers="$(docker ps -qf STATUS=exited )"
   createdContainers="$(docker ps -qf STATUS=created)"
   [ ! "$stoppedContainers" ]
@@ -123,7 +120,7 @@
 
 # TODO figure out the -qf STATUS exited
 # TODO learn how to create an untagged image
-@test "Default run through (no args)" {
+@test "Default run through (without arguments)" {
   build
   [ $status = 0 ]
   stoppedContainers="$(docker ps -a)"
@@ -142,32 +139,14 @@
   clean
 }
 
-@test "Test of -c --containers " {
-  build
-  [ $status = 0 ]
-
-  #clean
-}
-
-@test "Image deletion (-i --images)" {
-  build
-  [ $status = 0 ]
-
-  #clean
-}
-
-#TODO create a volume and make its own test
-
-
-
 # Helper FUNCTIONS
 
 # NOT currently working with bats testing
-function runContainers() {
-  run docker run -d zzrot/alpine-caddy
-  run docker run -d zzrot/alpine-node
-  run docker run -d zzrot/whale-awkward
-}
+#function runContainers() {
+#  run docker run -d zzrot/alpine-caddy
+#  run docker run -d zzrot/alpine-node
+#  run docker run -d zzrot/whale-awkward
+#}
 
 function build() {
     if [ $(docker ps -a -q) ]; then
