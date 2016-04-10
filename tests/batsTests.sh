@@ -8,6 +8,7 @@
 
 # WARNING: Runing these tests will clear all of your images/Containers
 
+#TODO clean up builds with setup and teardown functions
 @test "Check that docker client is available" {
   command -v docker
 }
@@ -19,6 +20,11 @@
 
 @test "Docker Clean Version echoes" {
   run ../docker-clean -v
+  [ $status = 0 ]
+}
+
+@test "Testing build function for other functions" {
+  build
   [ $status = 0 ]
 }
 
@@ -44,6 +50,71 @@
 
   #clean
 }
+
+@test "Clean Containers test" {
+
+  stoppedContainers="$(docker ps -a)"
+  untaggedImages="$(docker images -aq --filter "dangling=true")"
+  run docker kill $(docker ps -a -q)
+  [ "$stoppedContainers" ]
+
+  run ../docker-clean
+
+  stoppedContainers="$(docker ps -qf STATUS=exited )"
+  createdContainers="$(docker ps -qf STATUS=created)"
+  [ ! "$stoppedContainers" ]
+  [ ! "$createdContainers" ]
+
+  #clean
+}
+
+@test "Clean All Containers Test" {
+  build
+  [ $status = 0 ]
+  allContainers="$(docker ps -a -q)"
+  [ "$allContainers" ]
+  run ../docker-clean -c
+  allContainers="$(docker ps -a -q)"
+  [ ! "$allContainers" ]
+
+  #clean
+}
+
+@test "Clean images (not all)" {
+  skip
+  build
+  [ $status = 0 ]
+  untaggedImages="$(docker images -aq --filter "dangling=true")"
+  [ "$untaggedImages" ]
+
+  run ../docker-clean
+  untaggedImages="$(docker images -aq --filter "dangling=true")"
+  [ ! "$untaggedImages" ]
+
+  #clean
+}
+
+@test "Clean all images function" {
+  build
+  [ $status = 0 ]
+  listedImages="$(docker images -aq)"
+  [ "$listedImages" ]
+
+  run ../docker-clean --images
+  listedImages="$(docker images -aq)"
+  [ ! "$listedImages" ]
+
+  #clean
+}
+
+@test "Clean Volumes function" {
+  skip "Work in progress"
+  build
+  [ $status = 0 ]
+
+  #clean
+}
+
 
 # TODO figure out the -qf STATUS exited
 # TODO learn how to create an untagged image
