@@ -9,15 +9,15 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 ## Install
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean.sh |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
-    
+
 ## Homebrew Install
 
     brew tap zzrotdesign/tap
     brew install docker-clean
-    
+
 ## Usage
 
     docker-clean:
@@ -28,7 +28,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
     -i or --images to stop and delete all containers as well as tagged images
     -a or --all to stop and delete running containers, all images, and restart your docker-machine
     -h or --help help page
-    
+
 ## License
 
 The code is available under the [MIT License](/LICENSE).
