@@ -22,3 +22,22 @@ function count {
 }
 
 count
+
+function cleanContainers {
+    stoppedContainers="$(docker ps -qf STATUS=exited )"
+		createdContainers="$(docker ps -qf STATUS=created)"
+		stopped_count=$(count stoppedContainers)
+		created_count=$(count createdContainers)
+    if [ ! "$stoppedContainers" ]; then
+        echo No Containers To Clean!
+    else
+				echo Cleaning containers...
+        docker rm $stoppedContainers &>/dev/null
+				echo Stopped containers cleaned: $stopped_count
+    fi
+
+		if [ "$createdContainers" ]; then
+			docker rm $createdContainers &>/dev/null
+			echo Created containers cleaned: $created_count
+		fi
+}

@@ -140,10 +140,13 @@ function cleanContainers {
 # @info:	Removes all containers (including running) with force.
 function cleanAllContainers {
 	allContainers="$(docker ps -a -q)"
+	container_count=$(count allContainers)
 	if [ ! "$allContainers" ]; then
 		echo No Containers To Clean!
 	else
-		docker rm -f $allContainers
+		echo Cleaning containers...
+		docker rm -f $allContainers &>/dev/null
+		echo Stopped containers cleaned: $container_count
 	fi
 }
 
