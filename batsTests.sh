@@ -144,7 +144,7 @@
   build
   [ $status = 0 ]
   run docker kill $(docker ps -a -q)
-  #run ./docker-clean -c
+  run ./docker-clean
   [[ ${lines[0]} =~ "Cleaning containers..." ]]
   [[ ${lines[1]} =~ "Containers cleaned: 1" ]]
   run ./docker-clean -i
