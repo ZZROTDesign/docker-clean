@@ -151,7 +151,7 @@
   [[ ${lines[1]} =~ "Cleaning Images..."  ]]
   [[ ${lines[2]} =~ "Images cleaned: 4" ]]
 
-  #clean
+  clean
 }
 
 # Helper FUNCTIONS
