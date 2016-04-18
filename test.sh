@@ -11,8 +11,8 @@
 #               echo bad option
 #              fi
 #          done
-function count {
-  runningContainers="$(docker images -aq)"  #"$(docker ps -qf STATUS=exited )" #"$(docker ps -q)"
+function counter {
+  runningContainers="$(docker ps -a -q)" #"$(docker images -aq)"  #"$(docker ps -qf STATUS=exited )" #"$(docker ps -q)"
   length=${#runningContainers[@]}
   number_of_occurrences=$(grep -o "" <<< "$runningContainers" | wc -l)
   echo $runningContainers
@@ -21,7 +21,19 @@ function count {
 
 }
 
-count
+echo $running_Count
+
+function count {
+    echo got here
+		toCount="$1"
+    echo arg passed: $toCount
+		number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
+		echo $number_of_occurrences
+}
+runningContainers="$(docker ps -a -q)"
+number=$(count "$runningContainers")
+echo $number
+#count
 
 function cleanContainers {
     stoppedContainers="$(docker ps -qf STATUS=exited )"

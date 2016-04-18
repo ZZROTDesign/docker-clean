@@ -121,8 +121,8 @@ function stop {
 function cleanContainers {
     stoppedContainers="$(docker ps -qf STATUS=exited )"
 		createdContainers="$(docker ps -qf STATUS=created)"
-		stopped_count=$(count stoppedContainers)
-		created_count=$(count createdContainers)
+		stopped_count=$(count "$stoppedContainers")
+		created_count=$(count "$createdContainers")
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
@@ -140,13 +140,14 @@ function cleanContainers {
 # @info:	Removes all containers (including running) with force.
 function cleanAllContainers {
 	allContainers="$(docker ps -a -q)"
-	container_count=$(count allContainers)
+	container_count=$(count "$allContainers")
+	echo $container_count
 	if [ ! "$allContainers" ]; then
 		echo No Containers To Clean!
 	else
 		echo Cleaning containers...
 		docker rm -f $allContainers &>/dev/null
-		echo Stopped containers cleaned: $container_count
+		echo Containers cleaned: $container_count
 	fi
 }
 
@@ -231,13 +232,9 @@ function dockerClean {
 
 # counts length of string passed in
 function count {
-	if [ -z "$1" ]
-		then break
-	else
 		toCount="$1"
 		number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
 		echo $number_of_occurrences
-	fi
 }
 #END FUNCTIONS
 
