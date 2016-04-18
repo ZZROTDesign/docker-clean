@@ -21,7 +21,7 @@
   #run docker stop $(docker ps -a -q)
   run ./docker-clean -c
   [[ ${lines[0]} =~ "Cleaning containers..." ]]
-  [[ ${lines[1]} =~ "Containers cleaned:*" ]]
+  [[ ${lines[1]} =~ ^*c* ]]
   run ./docker-clean -i
   [[ ${lines[1]} =~ "Cleaning Images..."  ]]
   [[ ${lines[2]} =~ "Images cleaned: 4" ]]
