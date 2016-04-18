@@ -121,16 +121,19 @@ function stop {
 function cleanContainers {
     stoppedContainers="$(docker ps -qf STATUS=exited )"
 		createdContainers="$(docker ps -qf STATUS=created)"
-		containter_count=$(count stoppedContainers)
-		echo Container count: $containter_count
+		stopped_count=$(count stoppedContainers)
+		created_count=$(count createdContainers)
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
-        docker rm $stoppedContainers
+				echo Cleaning containers...
+        docker rm $stoppedContainers &>/dev/null
+				echo Stopped containers cleaned: $stopped_count
     fi
 
 		if [ "$createdContainers" ]; then
-			docker rm $createdContainers
+			docker rm $createdContainers &>/dev/null
+			echo Created containers cleaned: $created_count
 		fi
 }
 
@@ -225,13 +228,13 @@ function dockerClean {
 
 # counts length of string passed in
 function count {
-	if [ -z "$1" }
-	then break
-else
-	toCount="$1"
-	number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
-	echo $number_of_occurrences
-fi
+	if [ -z "$1" ]
+		then break
+	else
+		toCount="$1"
+		number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
+		echo $number_of_occurrences
+	fi
 }
 #END FUNCTIONS
 
