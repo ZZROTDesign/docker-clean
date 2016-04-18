@@ -18,7 +18,17 @@
   run docker ps
   [ $status = 0 ]
 }
+# Test for counting correctly
+@test "Testing counting function" {
+  build
+  [ $status = 0 ]
+  run docker kill $(docker ps -a -q)
+  run ../docker-clean
+  [[ ${lines[0]} =~ "Cleaning containers..." ]]
+  [[ ${lines[1]} =~ "Stopped containers cleaned: 1" ]]
 
+  #clean
+}
 @test "Docker Clean Version echoes" {
   run ../docker-clean -v
   [ $status = 0 ]
@@ -39,7 +49,7 @@
   # On unspecified tag
   run ../docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
-  clean
+  #clean
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -51,7 +61,7 @@
   runningContainers="$(docker ps -q)"
   [ ! $runningContainers ]
 
-  clean
+  #clean
 }
 
 @test "Clean Containers test" {
@@ -68,7 +78,7 @@
   [ ! "$stoppedContainers" ]
   [ ! "$createdContainers" ]
 
-  clean
+  #clean
 }
 
 @test "Clean All Containers Test" {
@@ -80,7 +90,7 @@
   allContainers="$(docker ps -a -q)"
   [ ! "$allContainers" ]
 
-  clean
+  #clean
 }
 
 @test "Clean images (not all)" {
@@ -94,7 +104,7 @@
   untaggedImages="$(docker images -aq --filter "dangling=true")"
   [ ! "$untaggedImages" ]
 
-  clean
+  #clean
 }
 
 @test "Clean all images function" {
@@ -107,7 +117,7 @@
   listedImages="$(docker images -aq)"
   [ ! "$listedImages" ]
 
-  clean
+  #clean
 }
 
 @test "Clean Volumes function" {
@@ -115,7 +125,7 @@
   build
   [ $status = 0 ]
 
-  clean
+  #clean
 }
 
 
@@ -137,7 +147,7 @@
   [ ! "$createdContainers" ]
   [ ! "$untaggedImages" ]
 
-  clean
+  #clean
 }
 
 @test "Test of -c --containers " {
@@ -150,13 +160,29 @@
 @test "Image deletion (-i --images)" {
   build
   [ $status = 0 ]
+  listedImages="$(docker images -aq)"
+  [ "$listedImages" ]
 
+  run ../docker-clean --images
+  listedImages="$(docker images -aq)"
+  [ ! "$listedImages" ]
   #clean
 }
 
 #TODO create a volume and make its own test
 
+# Test for counting correctly
+@test "Testing counting function" {
+  #skip "working on currently"
+  build
+  [ $status = 0 ]
+  run docker kill $(docker ps -a -q)
+  run ../docker-clean
+  [[ ${lines[0]} =~ "Cleaning containers..." ]]
+  [[ ${lines[1]} =~ "Stopped containers cleaned: 1" ]]
 
+  #clean
+}
 
 # Helper FUNCTIONS
 
