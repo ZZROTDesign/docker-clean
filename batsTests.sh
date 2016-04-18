@@ -18,11 +18,10 @@
 @test "Testing counting function" {
   build
   [ $status = 0 ]
-  run docker stop $(docker ps -a -q)
-  run ./docker-clean
+  #run docker stop $(docker ps -a -q)
+  run ./docker-clean -c
   [[ ${lines[0]} =~ "Cleaning containers..." ]]
-  echo ${lines[1]}
-  [[ ${lines[1]} =~ "Stopped containers cleaned: 1" ]]
+  [[ ${lines[1]} =~ "Containers cleaned: 1" ]]
   run ./docker-clean -i
   [[ ${lines[1]} =~ "Cleaning Images..."  ]]
   [[ ${lines[2]} =~ "Images cleaned: 4" ]]
