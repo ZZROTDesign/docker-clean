@@ -141,7 +141,6 @@ function cleanContainers {
 function cleanAllContainers {
 	allContainers="$(docker ps -a -q)"
 	container_count=$(count "$allContainers")
-	echo $container_count
 	if [ ! "$allContainers" ]; then
 		echo No Containers To Clean!
 	else
