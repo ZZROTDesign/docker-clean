@@ -158,30 +158,39 @@ function cleanImages {
 		# with parent/child images
     #untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
 		untaggedImages="$(docker images -aq --filter "dangling=true")"
+		image_count=$(count "$untaggedImages")
 		if [ ! "$untaggedImages" ]; then
         echo No Untagged Images!
     else
-        docker rmi -f $untaggedImages
+				echo Cleaning Images...
+        docker rmi -f $untaggedImages &>/dev/null
+				echo Images cleaned: $image_count
     fi
 }
 
 # @info:	Deletes all Images including tagged
 function cleanAllImages {
 	listedImages="$(docker images -aq)"
+	image_count=$(count "$listedImages")
 	if [ ! "$listedImages" ]; then
 		echo No Images to Delete!
 	else
-		docker rmi -f $listedImages
+		echo Cleaning Images...
+		docker rmi -f $listedImages &>/dev/null
+		echo Images cleaned: $image_count
 	fi
 }
 
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
     danglingVolumes="$(docker volume ls -qf dangling=true)"
+		volume_count=$(count "$danglingVolumes")
     if [ ! "$danglingVolumes" ]; then
         echo No Dangling Volumes!
     else
-        docker volume rm $danglingVolumes
+				echo Cleaning Images...
+        docker volume rm $danglingVolumes &>/dev/null
+				echo Volumes cleaned: $volume_count
     fi
 }
 
