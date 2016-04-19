@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.2.1"
+declare VERSION="1.2.2"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -196,20 +196,22 @@ function cleanVolumes {
 # @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
 	operating_system=$(testOS)
-	if [[ operating_system =~ "mac" ]]; then
+	if [[ $operating_system =~ "mac" ]]; then
 		active="$(docker-machine active)"
 		docker-machine restart $active
 		eval $(docker-machine env $active)
 		echo Running docker-machine env $active...
 		echo "New IP Address for" $active ":" $(docker-machine ip)
-	elif [[ operating_system =~ "linux" ]]; then
-		echo Restarting Docker service (requires super user)...
+	elif [[ $operating_system =~ "linux" ]]; then
+		echo Restarting Docker...
+		echo Restarting this service requires sudo privileges
 		sudo docker service restart
 	else
 		echo It appears your OS is not compatible with our docker engine restart
-		echo (Windows compatibility work in progress)
+		echo Windows compatibility work in progress
 		echo It you feel you are seeing this as an error please visit
-		echo https://github.com/ZZROTDesign/docker-clean and open an issue.
+		echo "https://github.com/ZZROTDesign/docker-clean and open an issue."
+	fi
 }
 
 # @info:	Runs the checks before the main code can be run.
