@@ -205,7 +205,7 @@ function restartMachine {
 	elif [[ $operating_system =~ "linux" ]]; then
 		echo Restarting Docker...
 		echo Restarting this service requires sudo privileges
-		sudo docker service restart
+		sudo service docker restart
 	else
 		echo It appears your OS is not compatible with our docker engine restart
 		echo Windows compatibility work in progress
