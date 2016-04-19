@@ -21,7 +21,7 @@ function counter {
 
 }
 
-echo $running_Count
+#echo $running_Count
 
 function count {
     echo got here
@@ -30,9 +30,9 @@ function count {
 		number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
 		echo $number_of_occurrences
 }
-runningContainers="$(docker ps -a -q)"
-number=$(count "$runningContainers")
-echo $number
+#unningContainers="$(docker ps -a -q)"
+#number=$(count "$runningContainers")
+#echo $number
 #count
 
 function cleanContainers {
@@ -53,3 +53,20 @@ function cleanContainers {
 			echo Created containers cleaned: $created_count
 		fi
 }
+
+function build() {
+    if [ $(docker ps -a -q) ]; then
+      docker rm -f $(docker ps -a -q)
+    fi
+     docker pull zzrot/whale-awkward
+     docker pull zzrot/alpine-caddy
+     docker pull zzrot/alpine-node
+     docker run -d nginx
+    #run docker run -d ghost
+    #run docker run -d alpine-caddy
+    #run docker kill ghost
+}
+
+build
+count "$(docker images -a -q)"
+count "$(docker ps -a -q)"

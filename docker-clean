@@ -127,13 +127,13 @@ function cleanContainers {
         echo No Containers To Clean!
     else
 				echo Cleaning containers...
-        docker rm $stoppedContainers &>/dev/null
 				echo Stopped containers cleaned: $stopped_count
+        docker rm $stoppedContainers &>/dev/null
     fi
 
 		if [ "$createdContainers" ]; then
-			docker rm $createdContainers &>/dev/null
 			echo Created containers cleaned: $created_count
+			docker rm $createdContainers &>/dev/null
 		fi
 }
 
@@ -145,8 +145,8 @@ function cleanAllContainers {
 		echo No Containers To Clean!
 	else
 		echo Cleaning containers...
-		docker rm -f $allContainers &>/dev/null
 		echo Containers cleaned: $container_count
+		docker rm -f $allContainers &>/dev/null
 	fi
 }
 
@@ -162,8 +162,8 @@ function cleanImages {
         echo No Untagged Images!
     else
 				echo Cleaning Images...
-        docker rmi -f $untaggedImages &>/dev/null
 				echo Images cleaned: $image_count
+        docker rmi -f $untaggedImages &>/dev/null
     fi
 }
 
@@ -175,8 +175,8 @@ function cleanAllImages {
 		echo No Images to Delete!
 	else
 		echo Cleaning Images...
-		docker rmi -f $listedImages &>/dev/null
 		echo Images cleaned: $image_count
+		docker rmi -f $listedImages &>/dev/null
 	fi
 }
 
@@ -187,9 +187,9 @@ function cleanVolumes {
     if [ ! "$danglingVolumes" ]; then
         echo No Dangling Volumes!
     else
-				echo Cleaning Images...
-        docker volume rm $danglingVolumes &>/dev/null
+				echo Cleaning volumes...
 				echo Volumes cleaned: $volume_count
+        docker volume rm $danglingVolumes &>/dev/null
     fi
 }
 
