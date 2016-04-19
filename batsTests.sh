@@ -154,7 +154,15 @@
   clean
 }
 
-
+# Testing for successful restart
+# TODO Write a more intensive restart test
+ @test "Restart function" {
+  build
+  [ $status = 0 ]
+  run ../docker-clean -a
+  [ $status = 0 ]
+  clean
+}
 
 # Helper FUNCTIONS
 

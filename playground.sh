@@ -99,7 +99,7 @@ function build() {
     #run docker kill ghost
 }
 
-#build
+build
 #count "$(docker images -a -q)"
 #count "$(docker ps -a -q)"
 
