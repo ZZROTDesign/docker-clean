@@ -13,15 +13,17 @@
 #          done
 ## ** Script for testing os **
 # Credit https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux/17072017#17072017?newreg=b1cdf253d60546f0acfb73e0351ea8be
-#function testOS {
-#  if [ "$(uname)" == "Darwin" ]; then
-#      # Do something under Mac OS X platform
-#  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-#      # Do something under GNU/Linux platform
-#  elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-#      # Do something under Windows NT platform
-#  fi
-#}
+function testOS {
+  if [ "$(uname)" == "Darwin" ]; then
+      # Do something under Mac OS X platform
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+      # Do something under GNU/Linux platform
+  elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+      # Do something under Windows NT platform
+  fi
+}
+
+testOS
 
 function counter {
   runningContainers="$(docker ps -a -q)" #"$(docker images -aq)"  #"$(docker ps -qf STATUS=exited )" #"$(docker ps -q)"
@@ -94,6 +96,8 @@ function build() {
     #run docker kill ghost
 }
 
-build
-count "$(docker images -a -q)"
-count "$(docker ps -a -q)"
+#build
+#count "$(docker images -a -q)"
+#count "$(docker ps -a -q)"
+
+# Verbosity testing
