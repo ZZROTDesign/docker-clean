@@ -157,7 +157,7 @@
 # Testing for successful restart
 # TODO Write a more intensive restart test
  @test "Restart function" {
-  skip ("Curently not working with travis")
+  skip "Curently not working with travis"
   build
   [ $status = 0 ]
   run ../docker-clean -a
