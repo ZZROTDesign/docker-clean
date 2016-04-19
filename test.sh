@@ -11,6 +11,18 @@
 #               echo bad option
 #              fi
 #          done
+## ** Script for testing os **
+# Credit https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux/17072017#17072017?newreg=b1cdf253d60546f0acfb73e0351ea8be
+#function testOS {
+#  if [ "$(uname)" == "Darwin" ]; then
+#      # Do something under Mac OS X platform
+#  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+#      # Do something under GNU/Linux platform
+#  elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+#      # Do something under Windows NT platform
+#  fi
+#}
+
 function counter {
   runningContainers="$(docker ps -a -q)" #"$(docker images -aq)"  #"$(docker ps -qf STATUS=exited )" #"$(docker ps -q)"
   length=${#runningContainers[@]}
@@ -23,17 +35,32 @@ function counter {
 
 #echo $running_Count
 
-function count {
+function countTest {
     echo got here
 		toCount="$1"
     echo arg passed: $toCount
-		number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
+    size=$((${#toCount} % 12 ))
+    size=$size
+    echo $size
+    number=$toCount | grep -o " " | wc -l
+		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
 		echo $number_of_occurrences
 }
 #unningContainers="$(docker ps -a -q)"
 #number=$(count "$runningContainers")
 #echo $number
 #count
+function count {
+		toCount="$1"
+    length=${#toCount}
+		## Works on OSX, not Linux
+		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
+
+    if [[ $length != 0 ]]; then
+      number_of_occurrences=$(($length % 12 + 1))
+		fi
+		echo $number_of_occurrences
+}
 
 function cleanContainers {
     stoppedContainers="$(docker ps -qf STATUS=exited )"

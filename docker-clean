@@ -241,7 +241,13 @@ function dockerClean {
 # counts length of string passed in
 function count {
 		toCount="$1"
-		number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
+    length=${#toCount}
+		## Works on OSX, not Linux
+		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
+
+    if [[ $length != 0 ]]; then
+      number_of_occurrences=$(($length % 12 + 1))
+		fi
 		echo $number_of_occurrences
 }
 #END FUNCTIONS
