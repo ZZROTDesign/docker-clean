@@ -24,10 +24,15 @@
   [ $status = 0 ]
 }
 
-@test "Testing build function for most other function tests" {
+@test "Default build and clean testing helper functions" {
   build
   [ $status = 0 ]
+  [ $(docker ps -a -q) ]
+  [ $(docker images -a -q) ]
+
   clean
+  [ ! $(docker ps -a -q) ]
+  [ ! $(docker images -a -q) ]
 }
 
 @test "Help menu opens" {

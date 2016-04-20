@@ -35,10 +35,15 @@
   [[ ${lines[0]} =~ "Options:" ]]
 }
 
-@test "Testing default build testing function for other functions" {
+@test "Testing default build and clean testing functions" {
   build
   [ $status = 0 ]
+  [ $(docker ps -a -q) ]
+  [ $(docker images -a q) ]
+
   clean
+  [ ! $(docker ps -a -q) ]
+  [ ! $(docker images -a -q) ]
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -180,7 +185,7 @@
  @test "Restart function" {
   build
   [ $status = 0 ]
-  ../docker-clean -a | grep 'started' 
+  ../docker-clean -a | grep 'started'
   [ $status = 0 ]
   #clean
 }
