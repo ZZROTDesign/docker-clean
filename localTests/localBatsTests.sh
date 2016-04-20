@@ -38,12 +38,12 @@
 @test "Testing default build and clean testing functions" {
   build
   [ $status = 0 ]
-  [ $(docker ps -a -q) ]
-  [ $(docker images -a q) ]
 
   clean
-  [ ! $(docker ps -a -q) ]
-  [ ! $(docker images -a -q) ]
+  runningContainers="$(docker ps -q)"
+  [ ! $runningContainers ]
+  images=$(docker images -q)
+  [ ! $images ]
 }
 
 @test "Test container stopping (-s --stop)" {
