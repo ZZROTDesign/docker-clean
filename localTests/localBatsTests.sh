@@ -180,7 +180,7 @@
  @test "Restart function" {
   build
   [ $status = 0 ]
-  run ../docker-clean -a
+  ../docker-clean -a | grep 'started' 
   [ $status = 0 ]
   #clean
 }

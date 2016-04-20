@@ -154,15 +154,16 @@
   clean
 }
 
-# Testing for successful restart
-# TODO Write a more intensive restart test
- @test "Restart function" {
-  skip
-  build
-  [ $status = 0 ]
-  run ../docker-clean -a
-  [ $status = 0 ]
-  clean
+# Testing for successful restart on Linux
+@test "Restart function" {
+   ./docker-clean -a | grep 'stop'
+   ps -e | grep 'docker'
+
+  #build
+  #[ $status = 0 ]
+  #run ./docker-clean -a
+  #[ $status = 0 ]
+  #clean
 }
 
 # Helper FUNCTIONS
