@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.2.4"
+declare VERSION="1.2.5"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -67,17 +67,13 @@ function version {
 function usage {
   echo
 	echo "Options:"
-  echo "-h or --help for this menu"
-  echo "-v or --version to print the current docker-clean version"
+  echo "-h or --help        Opens this help menu"
+  echo "-v or --version     Prints the current docker-clean version"
   echo
-  echo "-a or --all Stops and removes all containers, images, and restarts docker"
-  echo "-c or --containers Stops and removes stopped and running containers"
-  echo "-i or --images Stops and removes all containers and tagged images"
-	echo "-s or --stop Stops all running containers"
-
-
-
-
+  echo "-a or --all         Stops and removes all Containers, Images, and Restarts docker"
+  echo "-c or --containers  Stops and removes Stopped and Running Containers"
+  echo "-i or --images      Stops and removes all Containers and Images"
+	echo "-s or --stop        Stops all running Containers"
 }
 
 # @info:	Prints out 3-point version (000.000.000) without decimals for comparison
@@ -256,11 +252,11 @@ function dockerClean {
 
 }
 
-# counts length of string passed in
+# @info: counts length of string passed in
 function count {
 		toCount="$1"
     length=${#toCount}
-		## Works on OSX, not Linux
+		## Works on OSX, Linux, but not Travis CI
 		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
 
     if [[ $length != 0 ]]; then
