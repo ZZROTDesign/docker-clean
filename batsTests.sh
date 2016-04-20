@@ -14,21 +14,6 @@
   command -v docker
 }
 
-# Test for counting correctly
-@test "Testing counting function" {
-  build
-  [ $status = 0 ]
-  run docker kill $(docker ps -a -q)
-  run ./docker-clean
-  [[ ${lines[0]} =~ "Cleaning containers..." ]]
-  [[ ${lines[1]} =~ "Stopped containers cleaned: 1" ]]
-  run ./docker-clean -i
-  [[ ${lines[1]} =~ "Cleaning Images..."  ]]
-  [[ ${lines[2]} =~ "Images cleaned: 4" ]]
-
-  clean
-}
-
 @test "Run docker ps (check daemon connectivity)" {
   run docker ps
   [ $status = 0 ]
@@ -39,7 +24,7 @@
   [ $status = 0 ]
 }
 
-@test "Testing build function for other functions" {
+@test "Testing build function for most other function tests" {
   build
   [ $status = 0 ]
   clean
@@ -55,7 +40,7 @@
   # On unspecified tag
   run ./docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
-  clean
+  #clean
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -134,8 +119,8 @@
 
 
 # TODO figure out the -qf STATUS exited
-# TODO learn how to create an untagged image
-@test "Default run through (without arguments)" {
+# TODO Write test with an untagged image
+@test "Default run through -- docker-clean (without arguments)" {
   build
   [ $status = 0 ]
   stoppedContainers="$(docker ps -a)"
@@ -154,6 +139,21 @@
   clean
 }
 
+# Test for counting correctly
+@test "Testing counting function" {
+  build
+  [ $status = 0 ]
+  run docker kill $(docker ps -a -q)
+  run ./docker-clean
+  [[ ${lines[0]} =~ "Cleaning containers..." ]]
+  [[ ${lines[1]} =~ "Stopped containers cleaned: 1" ]]
+  run ./docker-clean -i
+  [[ ${lines[1]} =~ "Cleaning Images..."  ]]
+  [[ ${lines[2]} =~ "Images cleaned: 4" ]]
+
+  clean
+}
+
 # Testing for successful restart
 # TODO Write a more intensive restart test
  @test "Restart function" {
@@ -167,24 +167,14 @@
 
 # Helper FUNCTIONS
 
-# NOT currently working with bats testing
-#function runContainers() {
-#  run docker run -d zzrot/alpine-caddy
-#  run docker run -d zzrot/alpine-node
-#  run docker run -d zzrot/whale-awkward
-#}
-
 function build() {
     if [ $(docker ps -a -q) ]; then
       docker rm -f $(docker ps -a -q)
     fi
     run docker pull zzrot/whale-awkward
-    run docker pull zzrot/alpine-caddy
+    run docker pull zzrot/alpine-ghost
     run docker pull zzrot/alpine-node
-    run docker run -d nginx
-    #run docker run -d ghost
-    #run docker run -d alpine-caddy
-    #run docker kill ghost
+    run docker run -d zzrot/alpine-caddy
 }
 
 function clean() {

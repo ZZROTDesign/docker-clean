@@ -24,12 +24,6 @@
   [ $status = 0 ]
 }
 
-@test "Testing build function for other functions" {
-  build
-  [ $status = 0 ]
-  clean
-}
-
 @test "Help menu opens" {
   # On -h flag
   run ../docker-clean -h
@@ -39,7 +33,12 @@
   # On unspecified tag
   run ../docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
-  #clean
+}
+
+@test "Testing default build testing function for other functions" {
+  build
+  [ $status = 0 ]
+  clean
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -200,12 +199,9 @@ function build() {
       docker rm -f $(docker ps -a -q)
     fi
     run docker pull zzrot/whale-awkward
-    run docker pull zzrot/alpine-caddy
+    run docker pull zzrot/alpine-ghost
     run docker pull zzrot/alpine-node
-    run docker run -d nginx
-    #run docker run -d ghost
-    #run docker run -d alpine-caddy
-    #run docker kill ghost
+    run docker run -d zzrot/alpine-caddy
 }
 
 function clean() {

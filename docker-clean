@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.2.2"
+declare VERSION="1.2.3"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -66,12 +66,17 @@ function version {
 # @info:	Prints out usage
 function usage {
 	echo "Options:"
-	echo "-v or --version to print the current version"
+  echo "-h or --help for this menu"
+  echo "-v or --version to print the current version"
+  echo ""
+  echo "-a or --all to stop and delete running containers, all images, and restart your docker-machine"
+  echo "-c or --containers to stop and delete stopped and running containers"
+  echo "-i or --images to stop and delete all containers as well as tagged images"
 	echo "-s or --stop to stop all running containers"
-	echo "-c or --containers to stop and delete stopped and running containers"
-	echo "-i or --images to stop and delete all containers as well as tagged images"
-	echo "-a or --all to stop and delete running containers, all images, and restart your docker-machine"
-	echo "-h or --help for this menu"
+
+
+
+
 }
 
 # @info:	Prints out 3-point version (000.000.000) without decimals for comparison
