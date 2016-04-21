@@ -54,14 +54,7 @@ parseCli(){
 
 		#statements
 	elif [[ $# -eq 1 ]]; then
-		case $1 in
-			-s | --stop) stop ;;
-			-v | --version) version ;;
-			-c | --containers) dockerClean 1 ;;
-			-i | --images) dockerClean 2 ;;
-			-a | --all) dockerClean 3 ;;
-			-h | --help | *) usage ;;
-		esac
+		flagOptions $1
 	else
 		usage
 	fi
