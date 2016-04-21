@@ -145,12 +145,8 @@ function cleanContainers {
         echo No Containers To Clean!
     else
 				echo Cleaning containers...
+				docker rm $stoppedContainers 2>&1 | log
 				echo Stopped containers cleaned: $stopped_count
-				if [[ VERBOSE == true ]]; then
-					docker rm $stoppedContainers
-				else
-					docker rm $stoppedContainers &>/dev/null
-				fi
     fi
 
 		if [ "$createdContainers" ]; then
@@ -285,6 +281,14 @@ function count {
 		echo $number_of_occurrences
 }
 
+function log {
+	read IN
+	if [[ $VERBOSE == true ]]; then
+		echo $IN
+	else
+	 	echo not verbose #&>/dev/null
+	fi
+}
 ## ** Script for testing os **
 # Credit https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux/17072017#17072017?newreg=b1cdf253d60546f0acfb73e0351ea8be
 # Echo mac for Mac OS X, echo linux for GNU/Linux, echo windows for Window
