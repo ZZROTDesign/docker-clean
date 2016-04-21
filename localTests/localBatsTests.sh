@@ -154,11 +154,11 @@
 @test "Image deletion (-i --images)" {
   build
   [ $status = 0 ]
-  listedImages="$(docker images -aq)"
+  listedImages="$(docker images -a -q)"
   [ "$listedImages" ]
 
   run ../docker-clean --images
-  listedImages="$(docker images -aq)"
+  listedImages="$(docker images -a -q)"
   [ ! "$listedImages" ]
   #clean
 }

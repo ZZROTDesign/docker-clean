@@ -285,8 +285,6 @@ function log {
 	read IN
 	if [[ $VERBOSE == true ]]; then
 		echo $IN
-	else
-	 	echo not verbose #&>/dev/null
 	fi
 }
 ## ** Script for testing os **
@@ -310,7 +308,3 @@ function testOS {
 # @info:	Main function
 Check
 parseCli "$@"
-if [[ $VERBOSE == true ]]; then
-	#statements
-	echo VERBOSE IS TRUE!!
-fi
