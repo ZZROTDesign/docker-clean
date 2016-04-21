@@ -14,6 +14,21 @@
   command -v docker
 }
 
+@test "Image deletion (-i --images)" {
+  skip
+  build
+  [ $status = 0 ]
+  #listedImages="$(docker images -a -q)"
+  # "$listedImages" ]
+
+  run ../docker-clean --images -v
+  listedImages="$(docker images -q)"
+  count="${#listedImages}"
+  [ "$count" -eq 0 ]
+  #[ ! $listedImages ]
+  #clean
+}
+
 @test "Run docker ps" {
   run docker ps
   [ $status = 0 ]
@@ -101,18 +116,18 @@
   #clean
 }
 
-@test "Clean all images function" {
-  build
-  [ $status = 0 ]
-  listedImages="$(docker images -aq)"
-  [ "$listedImages" ]
-
-  run ../docker-clean --images
-  listedImages="$(docker images -aq)"
-  [ ! "$listedImages" ]
+#@test "Clean all images function" {
+#  build
+#  [ $status = 0 ]
+#  listedImages="$(docker images -aq)"
+#  [ "$listedImages" ]
+#
+#  run ../docker-clean --images
+#  listedImages="$(docker images -aq)"
+#  [ ! "$listedImages" ]
 
   #clean
-}
+#}
 
 @test "Clean Volumes function" {
   skip "Work in progress"
@@ -151,17 +166,12 @@
   #clean
 }
 
-@test "Image deletion (-i --images)" {
-  build
-  [ $status = 0 ]
-  listedImages="$(docker images -a -q)"
-  [ "$listedImages" ]
-
-  run ../docker-clean --images
-  listedImages="$(docker images -a -q)"
-  [ ! "$listedImages" ]
-  #clean
-}
+#@test "Image deletion (-i --images)" {
+#  build
+#  [ $status = 0 ]
+##  [ "$listedImages" ]
+#
+#####
 
 #TODO create a volume and make its own test
 

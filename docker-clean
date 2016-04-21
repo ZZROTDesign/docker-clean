@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.2.5"
+declare VERSION="1.2.6"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -187,7 +187,7 @@ function cleanImages {
 
 # @info:	Deletes all Images including tagged
 function cleanAllImages {
-	listedImages="$(docker images -aq)"
+	listedImages="$(docker images -a -q)"
 	image_count=$(count "$listedImages")
 	if [ ! "$listedImages" ]; then
 		echo No Images to Delete!
@@ -287,6 +287,7 @@ function log {
 		echo $IN
 	fi
 }
+
 ## ** Script for testing os **
 # Credit https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux/17072017#17072017?newreg=b1cdf253d60546f0acfb73e0351ea8be
 # Echo mac for Mac OS X, echo linux for GNU/Linux, echo windows for Window
@@ -308,3 +309,4 @@ function testOS {
 # @info:	Main function
 Check
 parseCli "$@"
+exit 0

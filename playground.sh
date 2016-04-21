@@ -93,13 +93,18 @@ function build() {
      docker pull zzrot/whale-awkward
      docker pull zzrot/alpine-caddy
      docker pull zzrot/alpine-node
-     docker run -d nginx
+     docker run -d zzrot/alpine-caddy
     #run docker run -d ghost
     #run docker run -d alpine-caddy
     #run docker kill ghost
 }
 
 build
+images=$(docker images -a -q)
+echo ${#images}
+../docker-clean --images
+after=$(docker images -a -q)
+echo ${#after}
 #count "$(docker images -a -q)"
 #count "$(docker ps -a -q)"
 
