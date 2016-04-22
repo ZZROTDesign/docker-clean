@@ -193,7 +193,12 @@ function cleanAllImages {
 		echo No Images to Delete!
 	else
 		echo Cleaning Images...
-		docker rmi -f $listedImages 2>&1 | log
+		tryCount=0
+		while [[ "$listedImages" && $tryCount -lt 5 ]]; do
+			((tryCount+=1))
+			docker rmi -f $listedImages 2>&1 | log
+			listedImages="$(docker images -a -q)"
+		done
 		echo Images cleaned: $image_count
 	fi
 }

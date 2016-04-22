@@ -15,17 +15,16 @@
 }
 
 @test "Image deletion (-i --images)" {
-  skip
   build
   [ $status = 0 ]
-  #listedImages="$(docker images -a -q)"
-  # "$listedImages" ]
+  listedImages="$(docker images -a -q)"
+  echo $listedImages first output
+  [ "$listedImages" ]
 
-  run ../docker-clean --images -v
-  listedImages="$(docker images -q)"
-  count="${#listedImages}"
-  [ "$count" -eq 0 ]
-  #[ ! $listedImages ]
+  run ../docker-clean -i
+  listedImages="$(docker images -aq)"
+  echo $listedImages is the output
+  [ ! $listedImages ]
   #clean
 }
 
