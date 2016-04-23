@@ -171,10 +171,10 @@
 
 # Testing for successful restart on Linux
 @test "Restart function" {
-   ./docker-clean -a | grep 'stop'
-   ps -e | grep 'docker'
+   #./docker-clean -a | grep 'stop'
+   #ps -e | grep 'docker'
 
-   docker ps &>/dev/null
+   run docker ps &>/dev/null
    [ $status = 0 ]
   #build
   #[ $status = 0 ]
