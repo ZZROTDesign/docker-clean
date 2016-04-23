@@ -160,6 +160,15 @@
   clean
 }
 
+@test "Verbose log function (-l --log)" {
+    build
+    [ $status = 0 ]
+    docker stop "$(docker ps -q)"
+    stoppedContainers="$(docker ps -a -q)"
+    run ./docker-clean -l 2>&1 | grep $stoppedContainers
+
+}
+
 # Testing for successful restart on Linux
 @test "Restart function" {
    ./docker-clean -a | grep 'stop'
