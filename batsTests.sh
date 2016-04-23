@@ -29,10 +29,10 @@
   [ $status = 0 ]
 
   clean
-  runningContainers="$(docker ps -q)"
+  runningContainers="$(docker ps -aq)"
   [ ! $runningContainers ]
-  images=$(docker images -q)
-  [ ! $images ]
+  #images=$(docker images -q)
+  #[ ! $images ]
   }
 
 @test "Help menu opens" {
