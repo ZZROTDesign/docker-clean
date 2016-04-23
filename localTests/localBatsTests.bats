@@ -19,8 +19,10 @@
     [ $status = 0 ]
     docker stop "$(docker ps -q)"
     stoppedContainers="$(docker ps -a -q)"
-    ../docker-clean -l 2>&1 | grep $stoppedContainers
+    ../docker-clean -l 2>&1
+    [[ $output =~ "$stoppedContainers" ]]
 
+    clean
 }
 
 
