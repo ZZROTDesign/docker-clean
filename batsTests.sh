@@ -31,8 +31,6 @@
   clean
   runningContainers="$(docker ps -aq)"
   [ ! $runningContainers ]
-  #images=$(docker images -q)
-  #[ ! $images ]
   }
 
 @test "Help menu opens" {
@@ -167,6 +165,8 @@
    ./docker-clean -a | grep 'stop'
    ps -e | grep 'docker'
 
+   docker ps &>/dev/null
+   [ $status = 0 ]
   #build
   #[ $status = 0 ]
   #run ./docker-clean -a
