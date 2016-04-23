@@ -100,11 +100,11 @@ function build() {
 }
 
 build
-images=$(docker images -a -q)
-echo ${#images}
-../docker-clean --images
-after=$(docker images -a -q)
-echo ${#after}
+#images=$(docker images -a -q)
+#echo ${#images}
+#../docker-clean --images
+#after=$(docker images -a -q)
+#echo ${#after}
 #count "$(docker images -a -q)"
 #count "$(docker ps -a -q)"
 

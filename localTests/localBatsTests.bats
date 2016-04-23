@@ -14,16 +14,26 @@
   command -v docker
 }
 
+@test "Verbose log function (-l --log)" {
+    build
+    [ $status = 0 ]
+    docker stop "$(docker ps -q)"
+    stoppedContainers="$(docker ps -a -q)"
+    ../docker-clean -l 2>&1 | grep $stoppedContainers
+
+}
+
+
 @test "Image deletion (-i --images)" {
   build
   [ $status = 0 ]
   listedImages="$(docker images -a -q)"
-  echo $listedImages first output
+  #echo $listedImages first output
   [ "$listedImages" ]
 
   run ../docker-clean -i
   listedImages="$(docker images -aq)"
-  echo $listedImages is the output
+  #echo $listedImages is the output
   [ ! $listedImages ]
   #clean
 }
@@ -58,6 +68,7 @@
   [ ! $runningContainers ]
   images=$(docker images -q)
   [ ! $images ]
+  clean
 }
 
 @test "Test container stopping (-s --stop)" {
