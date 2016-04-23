@@ -99,8 +99,6 @@
   clean
 }
 
-# Currently not working with bats but tests out perfectly locally and
-# on remote machines.  Opening an issue with BATS
 @test "Clean all images function" {
   build
   [ $status = 0 ]

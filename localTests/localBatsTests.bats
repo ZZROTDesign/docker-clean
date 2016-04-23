@@ -26,18 +26,17 @@
 }
 
 
-@test "Image deletion (-i --images)" {
+@test "Clean all images function" {
   build
   [ $status = 0 ]
-  listedImages="$(docker images -a -q)"
-  #echo $listedImages first output
+  listedImages="$(docker images -aq)"
   [ "$listedImages" ]
 
-  run ../docker-clean -i
+  run ../docker-clean --images
   listedImages="$(docker images -aq)"
-  #echo $listedImages is the output
-  [ ! $listedImages ]
-  #clean
+  [ ! "$listedImages" ]
+
+  clean
 }
 
 @test "Run docker ps" {
@@ -225,7 +224,7 @@ function build() {
     if [ $(docker ps -a -q) ]; then
       docker rm -f $(docker ps -a -q)
     fi
-    run docker pull zzrot/whale-awkward
+    #run docker pull zzrot/whale-awkward
     run docker pull zzrot/alpine-ghost
     run docker pull zzrot/alpine-node
     run docker run -d zzrot/alpine-caddy
