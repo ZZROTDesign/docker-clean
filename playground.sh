@@ -1,4 +1,6 @@
 #!/bin/bash
+# This script is used to build and try test cases during development
+
 #          OPTIONS="Hello Quit"
 #          select opt in $OPTIONS; do
 #              if [ "$opt" = "Quit" ]; then

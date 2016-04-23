@@ -36,7 +36,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
     -i or --images      Stops and removes all Containers and Images
     -s or --stop        Stops all running Containers
 
-    -l or --log         Adding this as an additional flag will list all"
+    -l or --log         Adding this as an additional flag will list all
                         image, volume, and container deleting output
 
 
