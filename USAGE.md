@@ -9,13 +9,11 @@ After the very quick installation docker-clean will be ready to go out of the bo
 Commands run:
 
 ```
+# Containers
 docker rm $(docker ps -qf STATUS=exited )
 docker rm $(docker ps -qf STATUS=created)
-
 docker rmi -f $(docker images -aq --filter "dangling=true")
-
 docker volume rm $(docker volume ls -qf dangling=true)
-
 ```
 
 will complete the default run through.  This simple clean function will only clean out images that do not have a tag, dangling volumes, and stopped containers.  
