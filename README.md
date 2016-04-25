@@ -22,7 +22,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 ## Usage
 
-For a more in depth look at the usage and commands run with run without browsing the script itself check out our [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/master/USAGE.md).
+For a more in depth look at the usage and commands run without browsing the script itself check out our [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/master/USAGE.md).
 
     docker-clean [optional flags below]
 
