@@ -84,3 +84,25 @@ Restart (Linux)
 
 
 Stops and removes all containers, images, and dangling volumes and restarts the docker daemon (supports OSX, Windows, and Linux).
+
+### Additional Flags
+
+For debugging purposes and so you can see the more traditional output from these commands there are a couple of additional flags.
+
+#### Version
+`docker-clean -v` or `--version`
+
+Prints the docker clean version
+
+#### Log (Verbose)
+Adding `-l` or `--log` as an additional flag will print out the full output from the docker commands on each of the other options as opposed to the suppressed output with counts.  This typically is the ID of the images, containers, and volumes being removed.  The id's have been left in for the `-s`, `--stop` function.
+
+Examples:
+```
+$ docker-clean -l` or `--log`
+$ docker-clean --containers --log
+$ docker-clean -s -l
+```
+
+## Issues
+If you find any issues with these commands, it would be great if you opened an issue, or forked and submitted a pull request!
