@@ -224,7 +224,7 @@ function build() {
     if [ $(docker ps -a -q) ]; then
       docker rm -f $(docker ps -a -q)
     fi
-    #run docker pull zzrot/whale-awkward
+    run docker pull zzrot/whale-awkward
     run docker pull zzrot/alpine-ghost
     run docker pull zzrot/alpine-node
     run docker run -d zzrot/alpine-caddy
