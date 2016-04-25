@@ -45,7 +45,8 @@ Removes all containers and images.
 Commands run:
 
 ```
-
+docker rm -f $(docker ps -a -q)
+docker rmi -f $(docker images -aq --filter "dangling=true")
 ```
 Stops and remove all containers.
 
