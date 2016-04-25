@@ -3,6 +3,7 @@ This guide walks through proper usage and briefly explains the command behind th
 
 The command to clean dangling volumes runs only if the docker version is compatible with the command.
 
+## Default Usage
 After the very quick installation docker-clean will be ready to go out of the box.  Assuming the Docker daemon is running, trying
 
 `$ docker-clean`
@@ -20,9 +21,11 @@ docker volume rm $(docker volume ls -qf dangling=true)
 ```
 
 will complete the default run through.  This simple clean function will only clean out images that do not have a tag, dangling volumes, and stopped containers.  
-
+## Flags
 
 Then come the additional options and flags.  At any point running with a flag `-h`, `--help`, or a flag not specified will bring up the flag reference menu.
+
+#### Stop Containers
 
 `$ docker-clean -s` or `--stop`
 
@@ -33,6 +36,21 @@ docker stop --time=10 $(docker ps -q)
 ```
 
 Stops all running containers and will not remove any images or containers.
+
+#### Clean Containers
+
+`$ docker-clean -c` or `--containers`
+
+Commands run:
+
+```
+docker rm -f $(docker ps -a -q)
+docker rmi -f $(docker images -aq --filter "dangling=true")
+docker volume rm $(docker volume ls -qf dangling=true)
+```
+Stops and removes all containers.
+
+#### Clean Images and Containers
 
 `$ docker-clean -i` or `--images`
 
@@ -45,16 +63,7 @@ docker volume rm $(docker volume ls -qf dangling=true)
 ```
 Removes all containers and images.
 
-`$ docker-clean -c` or `--containers`
-
-Commands run:
-
-```
-docker rm -f $(docker ps -a -q)
-docker rmi -f $(docker images -aq --filter "dangling=true")
-docker volume rm $(docker volume ls -qf dangling=true)
-```
-Stops and removes all containers.
+#### Cleans All and Restart Daemon
 
 `$ docker-clean -a` or `--all`
 
