@@ -28,10 +28,25 @@ Command run:
 docker stop --time=10 $(docker ps -q)
 ```
 
-will stop all running containers and will not remove any images or containers.
+Stops all running containers and will not remove any images or containers.
 
-`$ docker-clean -i` or `--images` will remove all containers and images.
+`$ docker-clean -i` or `--images`
 
-`$ docker-clean -c` or `--containers` will stop and remove all containers.
+Commands run:
+
+```
+docker rm -f $(docker ps -a -q)
+docker rm -f $(docker images -a -q)
+```
+Removes all containers and images.
+
+`$ docker-clean -c` or `--containers`
+
+Commands run:
+
+```
+
+```
+Stops and remove all containers.
 
 `$ docker-clean -a` or `--all` will stop and remove all containers, images, and dangling volumes and restarts the docker daemon (supports OSX, Windows, and Linux).
