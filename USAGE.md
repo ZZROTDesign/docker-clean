@@ -1,7 +1,5 @@
 # Usage
-This guide walks through proper usage and briefly explains the command behind the usage for those that are familiar with some of the commands Docker provides.  The commands listed run after sanity checks to confirm the command will run properly.
-
-The command to clean dangling volumes runs only if the docker version is compatible with the command.
+This guide walks through proper usage and briefly explains the command(s) behind the usage for those that are familiar with some of the commands Docker provides.  The commands listed run after sanity checks to confirm the command will run properly.
 
 ## Default Usage
 After the very quick installation docker-clean will be ready to go out of the box.  Assuming the Docker daemon is running, trying
@@ -21,6 +19,7 @@ docker volume rm $(docker volume ls -qf dangling=true)
 ```
 
 will complete the default run through.  This simple clean function will only clean out images that do not have a tag, dangling volumes, and stopped containers.  
+
 ## Flags
 
 Then come the additional options and flags.  At any point running with a flag `-h`, `--help`, or a flag not specified will bring up the flag reference menu.
@@ -63,7 +62,7 @@ docker volume rm $(docker volume ls -qf dangling=true)
 ```
 Removes all containers and images.
 
-#### Cleans All and Restart Daemon
+#### Clean All and Restart Daemon
 
 `$ docker-clean -a` or `--all`
 
