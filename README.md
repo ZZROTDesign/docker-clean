@@ -53,6 +53,8 @@ For a more in depth look at the usage and commands run without browsing the scri
 
 Don't hesitate to get in contact with either one of us with problems, questions, etc.
 
+Feel free to check out our [blog post](https://blog.zzrot.com/docker-clean-utility/) on why we put this script together.
+
 
 ### Adding new features
 
