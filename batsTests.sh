@@ -13,23 +13,6 @@
 @test "Check that docker client is available" {
   command -v docker
 }
-@test "Restart function" {
-    operating_system=$(testOS)
-    if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
-      ./docker-clean -a | grep 'started'
-      run docker ps &>/dev/null
-      [ $status = 0 ]
-    elif [[ $operating_system =~ "linux" ]]; then
-      ./docker-clean -a | grep 'stop'
-      #ps -e | grep 'docker'
-
-      run docker ps &>/dev/null
-      [ $status = 0 ]
-    else
-      echo "Operating system not valid"
-      [[ false ]]
-    fi
-}
 
 @test "Run docker ps (check daemon connectivity)" {
   run docker ps
@@ -186,23 +169,23 @@
     clean
 }
 # Testing for successful restart
-#@test "Restart function" {
-#    operating_system=$(testOS)
-#    if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
-#      ./docker-clean -a | grep 'started'
-#      run docker ps &/dev/null
-#      [ $status = 0 ]
-#    elif [[ $operating_system =~ "linux" ]]; then
-#      ./docker-clean -a | grep 'stop'
-#      #ps -e | grep 'docker'
-#
-#      run docker ps &>/dev/null
-#      [ $status = 0 ]
-#    else
-#      echo "Operating system not valid"
-#      [[ false ]]
-#    fi
-#}
+@test "Restart function" {
+    operating_system=$(testOS)
+    if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
+      ./docker-clean -a | grep 'started'
+      run docker ps &>/dev/null
+      [ $status = 0 ]
+    elif [[ $operating_system =~ "linux" ]]; then
+      ./docker-clean -a | grep 'stop'
+      #ps -e | grep 'docker'
+
+      run docker ps &>/dev/null
+      [ $status = 0 ]
+    else
+      echo "Operating system not valid"
+      [[ false ]]
+    fi
+}
 
 # Helper FUNCTIONS
 
