@@ -1,6 +1,8 @@
 # Usage
 This guide walks through proper usage and briefly explains the command behind the usage for those that are familiar with some of the commands Docker provides.  The commands listed run after sanity checks to confirm the command will run properly.
 
+The command to clean dangling volumes runs only if the docker version is compatible with the command.
+
 After the very quick installation docker-clean will be ready to go out of the box.  Assuming the Docker daemon is running, trying
 
 `$ docker-clean`
@@ -12,6 +14,8 @@ docker rm $(docker ps -qf STATUS=exited )
 docker rm $(docker ps -qf STATUS=created)
 
 docker rmi -f $(docker images -aq --filter "dangling=true")
+
+docker volume rm $(docker volume ls -qf dangling=true)
 
 ```
 
@@ -37,6 +41,7 @@ Commands run:
 ```
 docker rm -f $(docker ps -a -q)
 docker rm -f $(docker images -a -q)
+docker volume rm $(docker volume ls -qf dangling=true)
 ```
 Removes all containers and images.
 
@@ -47,6 +52,7 @@ Commands run:
 ```
 docker rm -f $(docker ps -a -q)
 docker rmi -f $(docker images -aq --filter "dangling=true")
+docker volume rm $(docker volume ls -qf dangling=true)
 ```
 Stops and removes all containers.
 
@@ -57,6 +63,7 @@ Commands run:
 ```
 docker rm -f $(docker ps -a -q)
 docker rm -f $(docker images -a -q)
+docker volume rm $(docker volume ls -qf dangling=true)
 ```
 Restart (Mac, Windows)
 
