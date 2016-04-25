@@ -48,6 +48,23 @@ Commands run:
 docker rm -f $(docker ps -a -q)
 docker rmi -f $(docker images -aq --filter "dangling=true")
 ```
-Stops and remove all containers.
+Stops and removes all containers.
 
-`$ docker-clean -a` or `--all` will stop and remove all containers, images, and dangling volumes and restarts the docker daemon (supports OSX, Windows, and Linux).
+`$ docker-clean -a` or `--all`
+
+Commands run:
+
+```
+docker rm -f $(docker ps -a -q)
+docker rm -f $(docker images -a -q)
+```
+Restart (Mac, Windows)
+
+`docker-machine restart`
+
+Restart (Linux)
+
+`sudo service docker restart`
+
+
+Stops and removes all containers, images, and dangling volumes and restarts the docker daemon (supports OSX, Windows, and Linux).
