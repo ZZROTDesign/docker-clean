@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v1.3.0)](https://travis-ci.org/ZZROTDesign/docker-clean)
+[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v1.3.1)](https://travis-ci.org/ZZROTDesign/docker-clean)
 [![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
 # Docker-Clean
 
