@@ -168,14 +168,23 @@
 
     clean
 }
-# Testing for successful restart on Linux
+# Testing for successful restart
 @test "Restart function" {
-   ./docker-clean -a | grep 'stop'
-   #ps -e | grep 'docker'
+    operating_system=$(testOS)
+    if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
+      ./docker-clean -a | grep 'started'
+      run docker ps &>/dev/null
+      [ $status = 0 ]
+    elif [[ $operating_system =~ "linux" ]]; then
+      ./docker-clean -a | grep 'stop'
+      #ps -e | grep 'docker'
 
-   run docker ps &>/dev/null
-   [ $status = 0 ]
-
+      run docker ps &>/dev/null
+      [ $status = 0 ]
+    else
+      echo "Operating system not valid"
+      [[ false ]]
+    fi
 }
 
 # Helper FUNCTIONS
@@ -194,4 +203,20 @@ function clean() {
   run docker kill $(docker ps -a -q)
   run docker rm -f $(docker ps -a -q)
   run docker rmi -f $(docker images -aq)
+}
+
+## ** Script for testing os **
+# Credit https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux/17072017#17072017?newreg=b1cdf253d60546f0acfb73e0351ea8be
+# Echo mac for Mac OS X, echo linux for GNU/Linux, echo windows for Window
+function testOS {
+  if [ "$(uname)" == "Darwin" ]; then
+      # Do something under Mac OS X platform
+      echo mac
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+      # Do something under GNU/Linux platform
+      echo linux
+  elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+      # Do something under Windows NT platform
+      echo windows
+  fi
 }
