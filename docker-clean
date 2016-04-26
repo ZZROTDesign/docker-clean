@@ -339,7 +339,7 @@ function cleanAllImages {
 
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
-	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker images -a -q)"
+	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on removal of dangling volumes:"
 		if [[ ! $danglingVolumes ]]; then
@@ -351,14 +351,18 @@ function cleanVolumes {
 				local driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
 				echo "DRIVER: $driver NAME: $i"
 			done
+			echo #For spacing
 		fi # End dry run
 	else
 	    if [ ! "$danglingVolumes" ]; then
-	        echo No Dangling Volumes!
+	        echo "No dangling volumes!"
 	    else
-					echo Cleaning volumes...
-	        docker volume rm $danglingVolumes 2>&1 | log
-					echo Volumes cleaned: $volume_count
+					echo "Cleaning volumes..."
+					local count=0
+	        		if docker volume rm $danglingVolumes 2>&1 | log ; then
+						count=$((count+1))
+					fi
+					echo "Volumes cleaned: $count"
 	    fi
 	fi
 }
