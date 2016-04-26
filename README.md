@@ -40,6 +40,10 @@ For a more in depth look at the usage and commands run without browsing the scri
     -l or --log         Adding this as an additional flag will list all
                         image, volume, and container deleting output
 
+    -n or --dry-run     Dry run, added at the end to run each command and see
+                        the results without removing or stopping anything.
+                        For a full walk through of it check out the [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/dry-run/USAGE.md)
+
 
 
 
