@@ -42,7 +42,7 @@ For a more in depth look at the usage and commands run without browsing the scri
 
     -n or --dry-run     Dry run, added at the end to run each command and see
                         the results without removing or stopping anything.
-                        For a full walk through of it check out the [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/dry-run/USAGE.md)
+For a full walk through of dry-run for this branch check out the [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/dry-run/USAGE.md)
 
 
 
