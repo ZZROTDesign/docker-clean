@@ -10,7 +10,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 ## Install (will install pre-release with dry run)
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.3.1/docker-clean |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.3.2.R0/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 
