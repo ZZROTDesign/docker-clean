@@ -383,14 +383,6 @@ function cleanNetworks {
 	fi
 }
 
-# @info:	Reads an string, and returns an array constructed from each newline character.
-# @args:	$1 = A string
-function intoArray {
-	IFS='\n' read -r -a array <<< "$1"
-	return array
-}
-
-
 # @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
 	if [[ $DRY_RUN == false ]]; then
