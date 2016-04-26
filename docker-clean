@@ -25,7 +25,6 @@
 
 #ENVIRONMENT VARIABLES
 
-#TODO: Add stop containers flag to just stop containers
 # @info:	Docker-clean current version
 declare VERSION="1.3.1"
 
@@ -110,7 +109,6 @@ function printVersion {
      else
          echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
          echo "Please upgrade your Docker daemon. Until then, the Volume processing will not work."
-				 exit 1
      fi
  }
 
@@ -215,15 +213,13 @@ function cleanVolumes {
     if [ ! "$danglingVolumes" ]; then
         echo No Dangling Volumes!
     else
-<<<<<<< HEAD
-        docker volume rm $danglingVolumes
-=======
 				echo Cleaning volumes...
         docker volume rm $danglingVolumes 2>&1 | log
 				echo Volumes cleaned: $volume_count
->>>>>>> remotes/github/develop
     fi
 }
+
+
 
 # @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
