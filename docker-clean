@@ -1,8 +1,8 @@
 #!/bin/bash
-# Maintained by Sean Kilgarriff and Killian Brackey
+# Maintained by Sean Kilgarriff and Killian Brackey at ZZROT Design
 #
 # The MIT License (MIT)
-# Copyright © 2016 ZZROT LLC <zzrotdesign@gmail.com>
+# Copyright © 2016 ZZROT LLC <docker@zzrot.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the “Software”), to deal
@@ -27,7 +27,7 @@
 
 #TODO: Add stop containers flag to just stop containers
 # @info:	Docker-clean current version
-declare VERSION="1.0.0"
+declare VERSION="1.3.1"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -35,6 +35,8 @@ declare REQUIRED_VERSION="1.9.0"
 # @info:	Boolean for storing Docker version info
 declare HAS_VERSION=false
 
+# @info: Boolean for verbose mode
+declare VERBOSE=false
 
 #FUNCTIONS
 
@@ -44,22 +46,34 @@ parseCli(){
 
 	if [ "$#" -eq 0 ]; then
 		dockerClean
-	elif [[ $# -eq 1 ]]; then
-		case $1 in
-			-s | --stop) stop;;
-			-v | --version) version ;;
-			-c | --containers) dockerClean 1 ;;
-			-i | --images) dockerClean 2 ;;
-			-a | --all) dockerClean 3 ;;
-			-h | --help | *) usage ;;
+	elif [[ $# -eq 2 ]]; then
+
+		case $2 in
+			-l | --log) VERBOSE=true ;;
 		esac
+		flagOptions $1;
+
+		#statements
+	elif [[ $# -eq 1 ]]; then
+		flagOptions $1
 	else
 		usage
 	fi
 }
 
-
-
+function flagOptions() {
+	case $1 in
+		-l | --log)
+								VERBOSE=true
+		 						dockerClean ;;
+		-s | --stop) stop ;;
+		-v | --version) version ;;
+		-c | --containers) dockerClean 1 ;;
+		-i | --images) dockerClean 2 ;;
+		-a | --all) dockerClean 3 ;;
+		-h | --help | *) usage ;;
+	esac
+}
 
 # @info:	Prints out Docker-clean current version
 function version {
@@ -68,13 +82,18 @@ function version {
 
 # @info:	Prints out usage
 function usage {
+  echo
 	echo "Options:"
-	echo "-v or --version to print the current version"
-	echo "-s or --stop to stop all running containers."
-	echo "-c or --containers to stop and delete running containers."
-	echo "-i or --images to stop and delete all containers as well as tagged images"
-	echo "-a or --all to stop and delete running containers, all images, and restart your docker-machine"
-	echo "-h or --help for this menu."
+  echo "-h or --help        Opens this help menu"
+  echo "-v or --version     Prints the current docker-clean version"
+  echo
+  echo "-a or --all         Stops and removes all Containers, Images, and Restarts docker"
+  echo "-c or --containers  Stops and removes Stopped and Running Containers"
+  echo "-i or --images      Stops and removes all Containers and Images"
+	echo "-s or --stop        Stops all running Containers"
+	echo
+	echo "-l or --log         Adding this as an additional flag will list all"
+	echo "                    image, volume, and container deleting output"
 }
 
 # @info:	Prints out 3-point version (000.000.000) without decimals for comparison
@@ -91,6 +110,7 @@ function printVersion {
      else
          echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
          echo "Please upgrade your Docker daemon. Until then, the Volume processing will not work."
+				 exit 1
      fi
  }
 
@@ -102,7 +122,7 @@ function printVersion {
      DOCKER_CHECK=$?
 
      #If Docker Check returns 1 (Error), send a message and exit.
-     if [ "$DOCKER_CHECK" -eq 1 ]; then
+     if [ ! "$DOCKER_CHECK" ]; then
          echo "Docker is either not installed, or the Docker Daemon is not currently connected."
          echo "Please check your installation and try again."
          exit 1;
@@ -123,61 +143,108 @@ function stop {
 # @info:	Removes all stopped docker containers.
 function cleanContainers {
     stoppedContainers="$(docker ps -qf STATUS=exited )"
+		createdContainers="$(docker ps -qf STATUS=created)"
+		stopped_count=$(count "$stoppedContainers")
+		created_count=$(count "$createdContainers")
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
-        docker rm $stoppedContainers
+				echo Cleaning containers...
+				docker rm $stoppedContainers 2>&1 | log
+				echo Stopped containers cleaned: $stopped_count
     fi
+
+		if [ "$createdContainers" ]; then
+			docker rm $createdContainers 2>&1 | log
+			echo Created containers cleaned: $created_count
+		fi
 }
 
 # @info:	Removes all containers (including running) with force.
 function cleanAllContainers {
 	allContainers="$(docker ps -a -q)"
+	container_count=$(count "$allContainers")
 	if [ ! "$allContainers" ]; then
 		echo No Containers To Clean!
 	else
-		docker rm -f $allContainers
+		echo Cleaning containers...
+		docker rm -f $allContainers 2>&1 | log
+		echo Containers cleaned: $container_count
 	fi
 }
 
 # @info:	Removes all untagged docker images.
 #Credit goes to http://jimhoskins.com/2013/07/27/remove-untagged-docker-images.html
 function cleanImages {
-    untaggedImages="$(docker images | grep "^<none>" | awk '{print $3}')"
-    if [ ! "$untaggedImages" ]; then
+		# Commented is for older version docker, has a few bugs
+		# with parent/child images
+    #untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
+		untaggedImages="$(docker images -aq --filter "dangling=true")"
+		image_count=$(count "$untaggedImages")
+		if [ ! "$untaggedImages" ]; then
         echo No Untagged Images!
     else
-        docker rmi $untaggedImages
+				echo Cleaning Images...
+				docker rmi -f $untaggedImages 2>&1 | log
+				echo Images cleaned: $image_count
     fi
 }
 
 # @info:	Deletes all Images including tagged
 function cleanAllImages {
-	listedImages="$(docker images -q)"
+	listedImages="$(docker images -a -q)"
+	image_count=$(count "$listedImages")
 	if [ ! "$listedImages" ]; then
 		echo No Images to Delete!
 	else
-		docker rmi -f $listedImages
+		echo Cleaning Images...
+		tryCount=0
+		while [[ "$listedImages" && $tryCount -lt 5 ]]; do
+			((tryCount+=1))
+			docker rmi -f $listedImages 2>&1 | log
+			listedImages="$(docker images -a -q)"
+		done
+		echo Images cleaned: $image_count
 	fi
 }
 
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
     danglingVolumes="$(docker volume ls -qf dangling=true)"
+		volume_count=$(count "$danglingVolumes")
     if [ ! "$danglingVolumes" ]; then
         echo No Dangling Volumes!
     else
+<<<<<<< HEAD
         docker volume rm $danglingVolumes
+=======
+				echo Cleaning volumes...
+        docker volume rm $danglingVolumes 2>&1 | log
+				echo Volumes cleaned: $volume_count
+>>>>>>> remotes/github/develop
     fi
 }
 
 # @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
-	active="$(docker-machine active)"
-	docker-machine restart $active
-	eval $(docker-machine env $active)
-	echo Running docker-machine env $active...
-	echo "New IP Address for" $active ":" $(docker-machine ip)
+	operating_system=$(testOS)
+	if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
+		active="$(docker-machine active)"
+		docker-machine restart $active
+		eval $(docker-machine env $active)
+		echo Running docker-machine env $active...
+		echo "New IP Address for" $active ":" $(docker-machine ip)
+	elif [[ $operating_system =~ "linux" ]]; then
+		echo Restarting Docker...
+		echo Restarting this service requires sudo privileges
+		sudo service docker restart
+	else
+		echo It appears your OS is not compatible with our docker engine restart
+		echo Windows compatibility work in progress
+		echo It you feel you are seeing this as an error please visit
+		echo "https://github.com/ZZROTDesign/docker-clean and open an issue."
+		exit 2
+	fi
 }
 
 # @info:	Runs the checks before the main code can be run.
@@ -216,9 +283,45 @@ function dockerClean {
 
 }
 
+# @info: counts length of string passed in
+function count {
+		toCount="$1"
+    length=${#toCount}
+		## Works on OSX, Linux, but not Travis CI
+		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
+
+    if [[ $length != 0 ]]; then
+      number_of_occurrences=$(($length % 12 + 1))
+		fi
+		echo $number_of_occurrences
+}
+
+function log {
+	read IN
+	if [[ $VERBOSE == true ]]; then
+		echo $IN
+	fi
+}
+
+## ** Script for testing os **
+# Credit https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux/17072017#17072017?newreg=b1cdf253d60546f0acfb73e0351ea8be
+# Echo mac for Mac OS X, echo linux for GNU/Linux, echo windows for Window
+function testOS {
+  if [ "$(uname)" == "Darwin" ]; then
+      # Do something under Mac OS X platform
+      echo mac
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+      # Do something under GNU/Linux platform
+      echo linux
+  elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+      # Do something under Windows NT platform
+      echo windows
+  fi
+}
 #END FUNCTIONS
 
 
 # @info:	Main function
 Check
 parseCli "$@"
+exit 0

@@ -1,0 +1,23 @@
+language: bash
+sudo: required
+services: docker
+env:
+  global:
+  - DOCKER_VERSION=1.11.0-0~trusty
+  - DOCKER_COMPOSE_VERSION=1.7.0
+before_install:
+- apt-cache madison docker-engine
+- sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
+- sudo rm /usr/local/bin/docker-compose
+- curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+  -s`-`uname -m` > docker-compose
+- chmod +x docker-compose
+- sudo mv docker-compose /usr/local/bin
+- sudo add-apt-repository ppa:duggan/bats --yes
+- sudo apt-get update -qq
+- sudo apt-get install -qq bats
+script:
+- bats batsTests.sh
+notifications:
+  slack:
+    secure: MYDLBgnN/PBccyQy93CnEJMLjMa7F+AsIzzfzwPPl8DPj4K2dXoc7zlmaBxbg4KNRunJWND6I4JuN9D+zqUwRrcIuIVx38qv2CHr6PDmF7oS6w2oFw7FnA35jPVshMAqZz2nXc1eFyrnsZ71YV/9XNXr4M5gJn7d8OTHtknqfBm4V8bUQX7Zldo9tK7OziPZ+dyV3TlUqEyZe3YHf4xoSPT00B75JT/zIo+REJr5Wvw4JYScMgbR54WRveGNqSOZbcK8VRAB/NN3Kt0kPuCWjtZbBgNzkIVxoydbN6rrKUh5k+o/4WdfiBkflbrjEfXuAzG3jj1g29xr32WZQlLxUW8uJXPUwTdAnyJ563176bG2pLQxUXLsjanC8Zh9LdREwhg7KYOOE0Gd91PjP2xRJc6RtI+tAV/MURRLxaMbSbzDBAalVVbB4jdQRuEjPp439hfqsqN6P47xnKrq3sV9thjc95PcO6aS2sYTXTo5Qeeh2inz+9GWnzZCU59lD+elVqncuQ44k6j7vsjhv6SnmCHZZgb7PC3CVIrZqwcuGw8eVIJqZ5+nIz3h3qRAnGuGkM+WWiI/avi87BdK8IAPKMG4KJFNw6EWsqXFUIGe4RfqW0nEXAyowePeSDC3ewNFMN2uBVhmKjDI7ynEmpti0yeW5hso58p+lRkasqx86/0=
