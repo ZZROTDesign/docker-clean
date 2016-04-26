@@ -34,6 +34,8 @@ For a more in depth look at the usage and commands run without browsing the scri
 
     -a or --all         Stops and removes all Containers, Images, and Restarts docker
     -c or --containers  Stops and removes Stopped and Running Containers
+		-net or --networks  Removes all empty Networks
+
     -i or --images      Stops and removes all Containers and Images
     -s or --stop        Stops all running Containers
 
