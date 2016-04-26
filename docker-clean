@@ -138,23 +138,20 @@ function printVersion {
  }
 
 # @info: Stops all running docker containers.
-# TODO Parse json in docker ispect <Container ID> for container names
+# TODO make two(or 3) arrays with container names and images (cont id)
 function stop {
 	runningContainers="$(docker ps -q)"
-
-	if [[ DRY_RUN == true ]]; then
-		# {{json .Config.Image}} for Image, .Name for name
-		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
-
+	if [[ $DRY_RUN ]]; then
 		echo Dry Run:
-		if [[ ! runningContainers ]]; then
+		if [[ ! $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
-			echo list
 		else
+			# {{json .Config.Image}} for Image, .Name for name
+		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
 		echo Running without -n or --dry-run flag will stop the listed containers:
 		echo $running_container_names
 		#docker ps
-	fi
+	fi # End Dry Run
 else
 	if [ ! "$runningContainers" ]; then
 		echo No running containers!
@@ -171,6 +168,19 @@ function cleanContainers {
 		createdContainers="$(docker ps -qf STATUS=created)"
 		stopped_count=$(count "$stoppedContainers")
 		created_count=$(count "$createdContainers")
+
+		if [[ $DRY_RUN == true ]]; then
+
+			echo Dry run on removal of stopped containers:
+			if [[ ! $stoppedContainers ]]; then
+				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
+			else
+			stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
+			echo Running without -n or --dry-run flag will stop the listed containers:
+			echo $stopped_container_names
+		fi # End dry run
+
+		else
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
@@ -183,6 +193,7 @@ function cleanContainers {
 			docker rm $createdContainers 2>&1 | log
 			echo Created containers cleaned: $created_count
 		fi
+	fi
 }
 
 # @info:	Removes all containers (including running) with force.
