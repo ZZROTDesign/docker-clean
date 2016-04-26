@@ -279,22 +279,25 @@ function cleanImages {
 				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
 				echo
 			else
-				stopped_container_names=$(docker inspect -f '{{json .Name}}' $untaggedImages)
-				echo Running without -n or --dry-run flag will remove these $image_count untagged images:
-				echo $stopped_container_names
+				echo "Running without -n or --dry-run flag will remove the listed untagged images:"
+				for i in "${images[@]}"; do
+					local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
+					echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
+				done
 				echo
 			fi # End dry run
 		else
-			if [ -n "$untaggedImages" ]; then
-	        echo No Untagged Images!
+			if [ ! "$untaggedImages" ]; then
+	        echo "No Untagged Images!"
 	    else
 					local count=0
-					echo Cleaning Images...
+					echo "Cleaning Images..."
 					for i in "${untaggedImages[@]}"; do
-						docker rm "$i" 2>&1 | log
-						count=$((count+1))
+						if docker rmi -f $i 2>&1 | log ; then
+							count=$((count+1))
+						fi
 					done
-					echo Images cleaned: ${#untaggedImages[@]}
+					echo "Images cleaned: $count"
 	    fi
 	fi
 }
