@@ -159,10 +159,10 @@ function stop {
 		fi # End Dry Run
 	else
 		if [ ! "$runningContainers" ]; then
-			echo No running containers!
+			echo "No running containers!"
 		else
 			local count=0
-			echo Stopping running containers...
+			echo "Stopping running containers..."
 			for i in "${runningContainers[@]}"; do
 				docker stop "$i" 2>&1 | log
 				count=$((count+1))
@@ -353,8 +353,8 @@ function cleanNetworks {
 			done
 		fi # End Dry Run
 	else
-		if [ ! "$runningContainers" ]; then
-			echo No running containers!
+		if [ ! "$emptyNetworks" ]; then
+			echo "No empty networks!"
 		else
 			local count=0
 			echo Stopping running containers...
