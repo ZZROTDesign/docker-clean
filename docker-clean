@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.3.1"
+declare VERSION="1.3.2"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -138,10 +138,10 @@ function printVersion {
  }
 
 # @info: Stops all running docker containers.
-# TODO make two(or 3) arrays with container names and images (cont id)
+# TODO make two(or 3) arrays with container names and images (container id)
 function stop {
 	runningContainers="$(docker ps -q)"
-	if [[ $DRY_RUN ]]; then
+	if [[ $DRY_RUN == true ]]; then
 		echo Dry Run:
 		if [[ ! $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
