@@ -30,7 +30,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.3.2.R0"
+declare VERSION="1.3.2.R1"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -177,14 +177,14 @@ function cleanContainers {
 
 		if [[ $DRY_RUN == true ]]; then
 
-			echo Dry run on removal of stopped containers:
+			echo "Dry run on removal of stopped containers:"
 			if [[ ! $stoppedContainers ]]; then
 				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
 				echo
 			fi
 			if [[ $stoppedContainers ]]; then
 				stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
-				echo Running without -n or --dry-run flag will stop these $stopped_count containers:
+				echo Running without -n or --dry-run flag will remove these $stopped_count containers:
 				echo $stopped_container_names
 				echo
 			fi
