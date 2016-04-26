@@ -340,28 +340,31 @@ function cleanAllImages {
 
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
-    danglingVolumes="$(docker volume ls -qf dangling=true)"
-		volume_count=$(count "$danglingVolumes" volume)
-
-		if [[ $DRY_RUN == true ]]; then
-			echo Dry run on removal of dangling Volumes:
-			if [[ ! $danglingVolumes ]]; then
-				echo "No dangling volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
-				echo
-			else
-				stopped_container_names=$(docker volume inspect -f '{{json .Mountpoint}}' $danglingVolumes)
-				echo "Running without -n or --dry-run flag will remove $volume_count dangling volume\(s\) at the listed mount point\(s\):"
-				echo $stopped_container_names
-				echo
-			fi # End dry run
+	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
+	if [[ $DRY_RUN == true ]]; then
+		echo "Dry run on removal of dangling volumes:"
+		if [[ ! $danglingVolumes ]]; then
+			echo "No danlging volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
+			echo
 		else
-    if [ ! "$danglingVolumes" ]; then
-        echo No Dangling Volumes!
-    else
-				echo Cleaning volumes...
-        docker volume rm $danglingVolumes 2>&1 | log
-				echo Volumes cleaned: $volume_count
-    fi
+			echo "Running without -n or --dry-run flag will stop the listed dangling volumes:"
+			for i in "${danglingVolumes[@]}"; do
+				local driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
+				echo "DRIVER: $driver NAME: $i"
+			done
+			echo #For spacing
+		fi # End dry run
+	else
+	    if [ ! "$danglingVolumes" ]; then
+	        echo "No dangling volumes!"
+	    else
+					echo "Cleaning volumes..."
+					local count=0
+	        		if docker volume rm $danglingVolumes 2>&1 | log ; then
+						count=$((count+1))
+					fi
+					echo "Volumes cleaned: $count"
+	    fi
 	fi
 }
 
