@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?v1.4.0)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
+[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v1.4.0)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
 # Docker-Clean
 
 A simple Shell script to clean up the Docker Daemon.
