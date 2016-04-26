@@ -22,11 +22,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+# TODO: List array separations
+# TODO: Revamp for multiple flags together
+# TODO: flag containers with mounted volumes (after array todo complete)
+
 
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.3.1"
+declare VERSION="1.3.2.R0"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -36,6 +40,9 @@ declare HAS_VERSION=false
 
 # @info: Boolean for verbose mode
 declare VERBOSE=false
+
+# @info: Boolean for dry run to see before removing
+declare DRY_RUN=false
 
 #FUNCTIONS
 
@@ -49,10 +56,10 @@ parseCli(){
 
 		case $2 in
 			-l | --log) VERBOSE=true ;;
+			-n | --dry-run) DRY_RUN=true ;;
 		esac
 		flagOptions $1;
 
-		#statements
 	elif [[ $# -eq 1 ]]; then
 		flagOptions $1
 	else
@@ -62,6 +69,9 @@ parseCli(){
 
 function flagOptions() {
 	case $1 in
+		-n | --dry-run)
+								DRY_RUN=true
+								dockerClean ;;
 		-l | --log)
 								VERBOSE=true
 		 						dockerClean ;;
@@ -90,6 +100,9 @@ function usage {
   echo "-c or --containers  Stops and removes Stopped and Running Containers"
   echo "-i or --images      Stops and removes all Containers and Images"
 	echo "-s or --stop        Stops all running Containers"
+	echo
+	echo "--dry-run           Adding this additional flag at the end will list items to be"
+	echo "                    removed without running the remove or stop commands"
 	echo
 	echo "-l or --log         Adding this as an additional flag will list all"
 	echo "                    image, volume, and container deleting output"
@@ -128,22 +141,61 @@ function printVersion {
  }
 
 # @info: Stops all running docker containers.
+# TODO make two(or 3) arrays with container names and images (container id)
 function stop {
 	runningContainers="$(docker ps -q)"
+	if [[ $DRY_RUN == true ]]; then
+		echo Dry Run:
+		if [[ ! $runningContainers ]]; then
+			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
+			echo
+		else
+			# {{json .Config.Image}} for Image, .Name for name
+		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
+		echo Running without -n or --dry-run flag will stop the listed containers:
+		echo $running_container_names
+		echo
+		#docker ps
+	fi # End Dry Run
+else
 	if [ ! "$runningContainers" ]; then
 		echo No running containers!
 	else
 		echo Stopping running containers...
 		docker stop --time=10 $runningContainers
 	fi
+fi
 }
 
 # @info:	Removes all stopped docker containers.
+# TODO add dry run for created containers
 function cleanContainers {
     stoppedContainers="$(docker ps -qf STATUS=exited )"
 		createdContainers="$(docker ps -qf STATUS=created)"
 		stopped_count=$(count "$stoppedContainers")
 		created_count=$(count "$createdContainers")
+
+		if [[ $DRY_RUN == true ]]; then
+
+			echo Dry run on removal of stopped containers:
+			if [[ ! $stoppedContainers ]]; then
+				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
+				echo
+			fi
+			if [[ $stoppedContainers ]]; then
+				stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
+				echo Running without -n or --dry-run flag will stop these $stopped_count containers:
+				echo $stopped_container_names
+				echo
+			fi
+
+			if [[ $createdContainers ]]; then
+				created_container_names=$(docker inspect -f '{{json .Name}}' $createdContainers)
+				echo These $created_count created containers would be cleaned:
+				echo $created_container_names
+				echo
+			fi
+		else
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
@@ -156,12 +208,27 @@ function cleanContainers {
 			docker rm $createdContainers 2>&1 | log
 			echo Created containers cleaned: $created_count
 		fi
+	fi
 }
 
 # @info:	Removes all containers (including running) with force.
 function cleanAllContainers {
 	allContainers="$(docker ps -a -q)"
 	container_count=$(count "$allContainers")
+
+	if [[ $DRY_RUN == true ]]; then
+
+		echo Dry run on removal of all containers:
+		if [[ ! $allContainers ]]; then
+			echo "No containers. Running without -n or --dry-run flag won't remove any containers."
+			echo
+		else
+			stopped_container_names=$(docker inspect -f '{{json .Name}}' $allContainers)
+			echo Running without -n or --dry-run flag will stop these $container_count containers:
+			echo $stopped_container_names
+			echo
+		fi
+	else
 	if [ ! "$allContainers" ]; then
 		echo No Containers To Clean!
 	else
@@ -169,6 +236,7 @@ function cleanAllContainers {
 		docker rm -f $allContainers 2>&1 | log
 		echo Containers cleaned: $container_count
 	fi
+fi
 }
 
 # @info:	Removes all untagged docker images.
@@ -179,6 +247,20 @@ function cleanImages {
     #untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
 		untaggedImages="$(docker images -aq --filter "dangling=true")"
 		image_count=$(count "$untaggedImages")
+
+		if [[ $DRY_RUN == true ]]; then
+
+			echo Dry run on removal of untagged Images:
+			if [[ ! $untaggedImages ]]; then
+				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
+				echo
+			else
+				stopped_container_names=$(docker inspect -f '{{json .Name}}' $untaggedImages)
+				echo Running without -n or --dry-run flag will remove these $image_count untagged images:
+				echo $stopped_container_names
+				echo
+			fi # End dry run
+		else
 		if [ ! "$untaggedImages" ]; then
         echo No Untagged Images!
     else
@@ -186,12 +268,29 @@ function cleanImages {
 				docker rmi -f $untaggedImages 2>&1 | log
 				echo Images cleaned: $image_count
     fi
+	fi
 }
 
 # @info:	Deletes all Images including tagged
+# TODO strip images into an array and remove brackets and add newline
 function cleanAllImages {
 	listedImages="$(docker images -a -q)"
 	image_count=$(count "$listedImages")
+
+	if [[ $DRY_RUN == true ]]; then
+
+		echo Dry run on removal of untagged Images:
+		if [[ ! $listedImages ]]; then
+			echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
+			echo
+		else
+			stopped_container_names=$(docker inspect -f '{{json .RepoTags}}' $listedImages)
+			echo Running without -n or --dry-run flag will remove these $image_count untagged images:
+			echo $stopped_container_names
+			echo
+		fi # End dry run
+	else
+
 	if [ ! "$listedImages" ]; then
 		echo No Images to Delete!
 	else
@@ -204,12 +303,26 @@ function cleanAllImages {
 		done
 		echo Images cleaned: $image_count
 	fi
+fi
 }
 
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
     danglingVolumes="$(docker volume ls -qf dangling=true)"
-		volume_count=$(count "$danglingVolumes")
+		volume_count=$(count "$danglingVolumes" volume)
+
+		if [[ $DRY_RUN == true ]]; then
+			echo Dry run on removal of untagged Images:
+			if [[ ! $danglingVolumes ]]; then
+				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
+				echo
+			else
+				stopped_container_names=$(docker volume inspect -f '{{json .Mountpoint}}' $danglingVolumes)
+				echo Running without -n or --dry-run flag will remove $volume_count dangling volume\(s\) at the listed mount point\(s\):
+				echo $stopped_container_names
+				echo
+			fi # End dry run
+		else
     if [ ! "$danglingVolumes" ]; then
         echo No Dangling Volumes!
     else
@@ -217,29 +330,34 @@ function cleanVolumes {
         docker volume rm $danglingVolumes 2>&1 | log
 				echo Volumes cleaned: $volume_count
     fi
+	fi
 }
 
 
 
 # @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
-	operating_system=$(testOS)
-	if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
-		active="$(docker-machine active)"
-		docker-machine restart $active
-		eval $(docker-machine env $active)
-		echo Running docker-machine env $active...
-		echo "New IP Address for" $active ":" $(docker-machine ip)
-	elif [[ $operating_system =~ "linux" ]]; then
-		echo Restarting Docker...
-		echo Restarting this service requires sudo privileges
-		sudo service docker restart
+	if [[ $DRY_RUN == false ]]; then
+		operating_system=$(testOS)
+		if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
+			active="$(docker-machine active)"
+			docker-machine restart $active
+			eval $(docker-machine env $active)
+			echo Running docker-machine env $active...
+			echo "New IP Address for" $active ":" $(docker-machine ip)
+		elif [[ $operating_system =~ "linux" ]]; then
+			echo Restarting Docker...
+			echo Restarting this service requires sudo privileges
+			sudo service docker restart
+		else
+			echo It appears your OS is not compatible with our docker engine restart
+			echo Windows compatibility work in progress
+			echo It you feel you are seeing this as an error please visit
+			echo "https://github.com/ZZROTDesign/docker-clean and open an issue."
+			exit 2
+		fi
 	else
-		echo It appears your OS is not compatible with our docker engine restart
-		echo Windows compatibility work in progress
-		echo It you feel you are seeing this as an error please visit
-		echo "https://github.com/ZZROTDesign/docker-clean and open an issue."
-		exit 2
+		echo Docker daemon would now restart if docker-clean is run without -n or -dry-run
 	fi
 }
 
@@ -280,14 +398,22 @@ function dockerClean {
 }
 
 # @info: counts length of string passed in
+# Second argument passed in is optional to count the 64 character length of volumes
 function count {
 		toCount="$1"
+		divisor=12
+		if [[ $2 ]]; then
+			if [[ $2 =~ volume ]]; then
+				divisor=64
+			fi
+			divisor=64
+		fi
     length=${#toCount}
 		## Works on OSX, Linux, but not Travis CI
 		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
 
     if [[ $length != 0 ]]; then
-      number_of_occurrences=$(($length % 12 + 1))
+      number_of_occurrences=$(($length % $divisor + 1))
 		fi
 		echo $number_of_occurrences
 }

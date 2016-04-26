@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v1.3.1)](https://travis-ci.org/ZZROTDesign/docker-clean)
-[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
+[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=dry-run)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
 # Docker-Clean
 
 A simple Shell script to clean up the Docker Daemon.
@@ -9,13 +8,13 @@ A simple Shell script to clean up the Docker Daemon.
 In order to use the volume capabilities, it is required that the Docker Daemon is at least version 1.9+
 
 
-## Install
+## Install (will install pre-release with dry run)
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.3.2.R0/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 
-## Homebrew Install
+## Homebrew Install (will install v1.3.1 without dry run)
 
     brew tap zzrotdesign/tap
     brew install docker-clean
@@ -40,6 +39,10 @@ For a more in depth look at the usage and commands run without browsing the scri
 
     -l or --log         Adding this as an additional flag will list all
                         image, volume, and container deleting output
+
+    -n or --dry-run     Dry run, added at the end to run each command and see
+                        the results without removing or stopping anything.
+For a full walk through of dry-run for this branch check out the [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/dry-run/USAGE.md)
 
 
 
