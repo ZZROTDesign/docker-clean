@@ -109,7 +109,6 @@ function printVersion {
      else
          echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
          echo "Please upgrade your Docker daemon. Until then, the Volume processing will not work."
-				 exit 1
      fi
  }
 
