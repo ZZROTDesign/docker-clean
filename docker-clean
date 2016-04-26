@@ -163,6 +163,7 @@ fi
 }
 
 # @info:	Removes all stopped docker containers.
+# TODO add dry run for created containers
 function cleanContainers {
     stoppedContainers="$(docker ps -qf STATUS=exited )"
 		createdContainers="$(docker ps -qf STATUS=created)"
@@ -174,12 +175,17 @@ function cleanContainers {
 			echo Dry run on removal of stopped containers:
 			if [[ ! $stoppedContainers ]]; then
 				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
-			else
-			stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
-			echo Running without -n or --dry-run flag will stop the listed containers:
-			echo $stopped_container_names
-		fi # End dry run
-
+			fi
+			if [[ $stoppedContainers ]]; then
+				stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
+				echo Running without -n or --dry-run flag will stop the listed containers:
+				echo $stopped_container_names
+			fi
+			if [[ $createdContainers ]]; then
+				created_container_names=$(docker inspect -f '{{json .Name}}' $createdContainers)
+				echo Created containers that would be cleaned:
+				echo $created_container_names
+			fi
 		else
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
