@@ -143,13 +143,11 @@ function printVersion {
 # @info: Stops all running docker containers.
 # TODO make two(or 3) arrays with container names and images (container id)
 function stop {
-	declare local runningContainers
 	IFS=$'\n' read -rd '' -a runningContainers <<<"$(docker ps -q)"
 	if [[ $DRY_RUN == true ]]; then
-		echo Dry Run:
+		echo "Dry run on stoppage of running containers:"
 		if [[ ! $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
-			echo
 		else
 			# {{json .Config.Image}} for Image, .Name for name
 		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
@@ -158,16 +156,15 @@ function stop {
 		echo
 		#docker ps
 	fi # End Dry Run
-else
-	if [ ! "$runningContainers" ]; then
-		echo No running containers!
 	else
-		echo Stopping running containers...
-		for i in "${runningContainers[@]}"; do
-			docker stop "$i"
-		done
-		#docker stop --time=10 $runningContainers
-	fi
+		if [ ! "$runningContainers" ]; then
+			echo No running containers!
+		else
+			echo Stopping running containers...
+			for i in "${runningContainers[@]}"; do
+				docker stop "$i"
+			done
+		fi
 fi
 }
 
