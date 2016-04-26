@@ -318,7 +318,7 @@ function cleanAllImages {
 			done
 			echo "Images cleaned: $count"
 		fi
-fi
+	fi
 }
 
 # @info:	Removes all Dangling Docker Volumes.
