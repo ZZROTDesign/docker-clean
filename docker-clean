@@ -76,6 +76,7 @@ function flagOptions() {
 								VERBOSE=true
 		 						dockerClean ;;
 		-s | --stop) stop ;;
+		-net | --networks) cleanNetworks;;
 		-v | --version) version ;;
 		-c | --containers) dockerClean 1 ;;
 		-i | --images) dockerClean 2 ;;
