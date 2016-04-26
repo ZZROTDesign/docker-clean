@@ -8,7 +8,7 @@ A simple Shell script to clean up the Docker Daemon.
 In order to use the volume capabilities, it is required that the Docker Daemon is at least version 1.9+
 
 
-## Install (will install pre-release with dry run)
+## Install
 
     curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.4.0/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
@@ -18,7 +18,14 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
     brew tap zzrotdesign/tap
     brew install docker-clean
+    
+#### Upgrade (for new versions)
 
+    brew update && brew upgrade docker-clean
+   
+For curl installs, re-running the script above will install the newest version.
+    
+    
 ## Usage
 
 For a more in depth look at the usage and commands run without browsing the script itself check out our [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/master/USAGE.md).
