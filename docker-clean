@@ -161,10 +161,13 @@ function stop {
 		if [ ! "$runningContainers" ]; then
 			echo No running containers!
 		else
+			local count=0
 			echo Stopping running containers...
 			for i in "${runningContainers[@]}"; do
-				docker stop "$i"
+				docker stop "$i" 2>&1 | log
+				count=$((count+1))
 			done
+			echo "Containers stopped: $count"
 		fi
 	fi
 }
