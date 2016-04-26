@@ -328,7 +328,7 @@ function cleanAllImages {
 			while [[ "$images" ]] && [[ $tryCount -lt 5 ]]; do
 				((tryCount+=1))
 				for i in "${images[@]}"; do
-					if docker rmi -f $i 2>&1 | log ; then
+					if docker rmi -f $i &>/dev/null ; then
 						count=$((count+1))
 					fi
 				done
@@ -428,7 +428,7 @@ function restartMachine {
 			exit 2
 		fi
 	else
-		echo Docker daemon would now restart if docker-clean is run without -n or -dry-run
+		echo "Docker daemon would now restart if docker-clean is run without -n or -dry-run."
 	fi
 }
 
@@ -496,7 +496,6 @@ function log {
 	read IN
 	if [[ $VERBOSE == true ]]; then
 		echo $IN
-	fi
 }
 
 ## ** Script for testing os **

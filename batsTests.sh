@@ -151,7 +151,7 @@
   [[ ${lines[0]} =~ "Cleaning containers..." ]]
   [[ ${lines[1]} =~ "1" ]]
   run ./docker-clean -i
-  [[ ${lines[1]} =~ "Cleaning Images..."  ]]
+  [[ ${lines[1]} =~ "Cleaning images..."  ]]
   [[ ${lines[2]} =~ "4" ]]
 
   clean
