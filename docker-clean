@@ -148,7 +148,7 @@ function stop {
 	IFS=$'\n' read -rd '' -a runningContainers <<<"$(docker ps -q)"
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on stoppage of running containers:"
-		if [[ ! $runningContainers ]]; then
+		if [[ -n $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop any containers."
 		else
 			echo "Running without -n or --dry-run flag will stop the listed containers:"
@@ -160,7 +160,7 @@ function stop {
 			done
 		fi # End Dry Run
 	else
-		if [ ! "$runningContainers" ]; then
+		if [ -n "$runningContainers" ]; then
 			echo "No running containers!"
 		else
 			local count=0
@@ -288,13 +288,10 @@ function cleanImages {
 # @info:	Deletes all Images including tagged
 # TODO strip images into an array and remove brackets and add newline
 function cleanAllImages {
-	listedImages="$(docker images -a -q)"
-	image_count=$(count "$listedImages")
-
+	IFS=$'\n' read -rd '' -a images <<<'$(docker images -a -q)'
 	if [[ $DRY_RUN == true ]]; then
-
-		echo Dry run on removal of untagged Images:
-		if [[ ! $listedImages ]]; then
+		echo "Dry run on removal of images:"
+		if [[ -n $listedImages ]]; then
 			echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
 			echo
 		else
