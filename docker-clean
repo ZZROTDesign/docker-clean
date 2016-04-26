@@ -147,7 +147,7 @@ function stop {
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on stoppage of running containers:"
 		if [[ ! $runningContainers ]]; then
-			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
+			echo "No running containers. Running without -n or --dry-run flag won't stop any containers."
 		else
 			echo "Running without -n or --dry-run flag will stop the listed containers:"
 			for i in "${runningContainers[@]}"; do
@@ -339,18 +339,17 @@ function cleanVolumes {
 }
 
 function cleanNetworks {
-	IFS=$'\n' read -rd '' -a emptyNetworks <<<"$(docker ps -q)"
+	IFS=$'\n' read -rd '' -a emptyNetworks <<<"$(docker network ls -q)"
 	if [[ $DRY_RUN == true ]]; then
-		echo "Dry run on stoppage of running containers:"
-		if [[ ! $runningContainers ]]; then
-			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
+		echo "Dry run on removal of networks:"
+		if [[ ! $emptyNetworks ]]; then
+			echo "No empty networks. Running without -n or --dry-run flag won't remove any networks."
 		else
-			echo "Running without -n or --dry-run flag will stop the listed containers:"
-			for i in "${runningContainers[@]}"; do
+			echo "Running without -n or --dry-run flag will remove the listed networks:"
+			for i in "${emptyNetworks[@]}"; do
 				local name="$(docker inspect -f '{{json .Name}}' $i)"
-				local path="$(docker inspect -f '{{json .Path}}' $i)"
-				local args="$(docker inspect -f '{{json .Args}}' $i)"
-				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+				local driver="$(docker inspect -f '{{json .Driver}}' $i)"
+				echo "Network ID: $i NAME: $name DRIVER: $driver"
 			done
 		fi # End Dry Run
 	else
