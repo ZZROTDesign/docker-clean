@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=dry-run)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
+[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?v1.4.0)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
 # Docker-Clean
 
 A simple Shell script to clean up the Docker Daemon.
@@ -10,11 +10,11 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 ## Install (will install pre-release with dry run)
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.3.2.R0/docker-clean |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.4.0/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 
-## Homebrew Install (will install v1.3.1 without dry run)
+## Homebrew Install
 
     brew tap zzrotdesign/tap
     brew install docker-clean
@@ -42,9 +42,6 @@ For a more in depth look at the usage and commands run without browsing the scri
 
     -n or --dry-run     Dry run, added at the end to run each command and see
                         the results without removing or stopping anything.
-For a full walk through of dry-run for this branch check out the [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/dry-run/USAGE.md)
-
-
 
 
 ## Contributing to Docker-Clean
@@ -67,6 +64,8 @@ Check out our [blog post](https://blog.zzrot.com/docker-clean-utility/) on why w
 * Push to the branch: git push origin my-new-feature
 * Submit a pull request :D
 
+For any new features you hope to see, you can also edit the REQUESTS.md file.
+https://github.com/ZZROTDesign/docker-clean/blob/master/REQUESTS.md
 
 Don’t get discouraged! We estimate that the response time from the
 maintainers is around: 24 hours.
