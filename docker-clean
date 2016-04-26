@@ -188,8 +188,7 @@ function cleanContainers {
 				echo
 			fi
 			if [[ $stoppedContainers ]]; then
-				stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
-				echo Running without -n or --dry-run flag will remove these $stopped_count containers:
+				echo "Running without -n or --dry-run flag will remove the listed containers:"
 				for i in "${stoppedContainers[@]}"; do
 					local name="$(docker inspect -f '{{json .Name}}' $i)"
 					local path="$(docker inspect -f '{{json .Path}}' $i)"
@@ -199,8 +198,7 @@ function cleanContainers {
 				echo
 			fi
 			if [[ $createdContainers ]]; then
-				created_container_names=$(docker inspect -f '{{json .Name}}' $createdContainers)
-				echo These $created_count created containers would be cleaned:
+				echo "Cleaning created containers..."
 				for i in "${createdContainers[@]}"; do
 					local name="$(docker inspect -f '{{json .Name}}' $i)"
 					local path="$(docker inspect -f '{{json .Path}}' $i)"
@@ -208,28 +206,30 @@ function cleanContainers {
 					echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
 				echo
-			fi
+			fi # end dry run
+
 		else
     if [ ! "$stoppedContainers" ]; then
-        echo No Containers To Clean!
+        echo "No Containers To Clean!"
     else
 				local count=0
-				echo Cleaning containers...
+				echo "Cleaning containers..."
 				for i in "${stoppedContainers[@]}"; do
-					docker rm "$i" 2>&1 | log
-					count=$((count+1))
+					if docker rm "$i" 2>&1 | log ; then
+						count=$((count+1))
+					fi
 				done
-				echo Stopped containers cleaned: $count
+				echo "Stopped containers cleaned: $count"
     fi
 
 		if [ "$createdContainers" ]; then
 			local count=0
-			for i in "${stoppedContainers[@]}"; do
-				docker rm "$i" 2>&1 | log
-				count=$((count+1))
+			for i in "${createdContainers[@]}"; do
+				if docker rm "$i" 2>&1 | log ; then
+					count=$((count+1))
+				fi
 			done
-			docker rm $createdContainers 2>&1 | log
-			echo Created containers cleaned: $count
+			echo "Created containers cleaned: $count"
 		fi
 	fi
 }
