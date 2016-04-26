@@ -220,7 +220,7 @@ function cleanContainers {
 				count=$((count+1))
 			done
 			docker rm $createdContainers 2>&1 | log
-			echo Created containers cleaned: ${#createdContainers[@]}
+			echo Created containers cleaned: $count
 		fi
 	fi
 }
