@@ -76,6 +76,7 @@ function flagOptions() {
 								VERBOSE=true
 		 						dockerClean ;;
 		-s | --stop) stop ;;
+		-net | --networks) cleanNetworks;;
 		-v | --version) version ;;
 		-c | --containers) dockerClean 1 ;;
 		-i | --images) dockerClean 2 ;;
@@ -99,6 +100,7 @@ function usage {
   echo "-a or --all         Stops and removes all Containers, Images, and Restarts docker"
   echo "-c or --containers  Stops and removes Stopped and Running Containers"
   echo "-i or --images      Stops and removes all Containers and Images"
+  echo "-net or --networks  Removes all empty Networks"
 	echo "-s or --stop        Stops all running Containers"
 	echo
 	echo "--dry-run           Adding this additional flag at the end will list items to be"
@@ -143,32 +145,33 @@ function printVersion {
 # @info: Stops all running docker containers.
 # TODO make two(or 3) arrays with container names and images (container id)
 function stop {
-	declare local runningContainers
 	IFS=$'\n' read -rd '' -a runningContainers <<<"$(docker ps -q)"
 	if [[ $DRY_RUN == true ]]; then
-		echo Dry Run:
+		echo "Dry run on stoppage of running containers:"
 		if [[ ! $runningContainers ]]; then
-			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
-			echo
+			echo "No running containers. Running without -n or --dry-run flag won't stop any containers."
 		else
-			# {{json .Config.Image}} for Image, .Name for name
-		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
-		echo Running without -n or --dry-run flag will stop the listed containers:
-		echo $running_container_names
-		echo
-		#docker ps
-	fi # End Dry Run
-else
-	if [ ! "$runningContainers" ]; then
-		echo No running containers!
+			echo "Running without -n or --dry-run flag will stop the listed containers:"
+			for i in "${runningContainers[@]}"; do
+				local name="$(docker inspect -f '{{json .Name}}' $i)"
+				local path="$(docker inspect -f '{{json .Path}}' $i)"
+				local args="$(docker inspect -f '{{json .Args}}' $i)"
+				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+			done
+		fi # End Dry Run
 	else
-		echo Stopping running containers...
-		for i in "${runningContainers[@]}"; do
-			docker stop "$i"
-		done
-		#docker stop --time=10 $runningContainers
+		if [ ! "$runningContainers" ]; then
+			echo "No running containers!"
+		else
+			local count=0
+			echo "Stopping running containers..."
+			for i in "${runningContainers[@]}"; do
+				docker stop "$i" 2>&1 | log
+				count=$((count+1))
+			done
+			echo "Containers stopped: $count"
+		fi
 	fi
-fi
 }
 
 # @info:	Removes all stopped docker containers.
@@ -344,7 +347,40 @@ function cleanVolumes {
 }
 
 function cleanNetworks {
-	emptyNetworks="$(docker network)"
+	IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
+	declare -a emptyNetworks
+	for i in "${networks[@]}"; do
+		containers="$(docker network inspect -f '{{json .Containers}}' $i)"
+		name="$(docker network inspect -f '{{json .Name}}' $i)"
+		if [[ -n "$containers" ]] && [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
+			emptyNetworks+=($i)
+		fi
+	done
+	if [[ $DRY_RUN == true ]]; then
+		echo "Dry run on removal of networks:"
+		if [[ ! $emptyNetworks ]]; then
+			echo "No empty networks. Running without -n or --dry-run flag won't remove any networks."
+		else
+			echo "Running without -n or --dry-run flag will remove the listed networks:"
+			for i in "${emptyNetworks[@]}"; do
+				local name="$(docker inspect -f '{{json .Name}}' $i)"
+				local driver="$(docker inspect -f '{{json .Driver}}' $i)"
+				echo "Network ID: $i NAME: $name DRIVER: $driver"
+			done
+		fi # End Dry Run
+	else
+		if [ ! "$emptyNetworks" ]; then
+			echo "No empty networks!"
+		else
+			local count=0
+			echo "Removing empty networks..."
+			for i in "${emptyNetworks[@]}"; do
+				docker network rm $i 2>&1 | log
+				count=$((count+1))
+			done
+			echo "Networks removed: $count"
+		fi
+	fi
 }
 
 # @info:	Reads an string, and returns an array constructed from each newline character.
@@ -414,6 +450,9 @@ function dockerClean {
 	if [ "$1" == 3 ]; then
 		restartMachine
 	fi
+
+	#Always Clean Empty Networks
+	cleanNetworks
 
 }
 
