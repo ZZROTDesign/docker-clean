@@ -254,8 +254,7 @@ function cleanImages {
 		# Commented is for older version docker, has a few bugs
 		# with parent/child images
     #untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
-		untaggedImages="$(docker images -aq --filter "dangling=true")"
-		image_count=$(count "$untaggedImages")
+		IFS=$'\n' read -rd '' -a untaggedImages <<<'$(docker images -aq --filter "dangling=true")'
 
 		if [[ $DRY_RUN == true ]]; then
 
@@ -270,12 +269,14 @@ function cleanImages {
 				echo
 			fi # End dry run
 		else
-		if [ ! "$untaggedImages" ]; then
+		if [ -n "$untaggedImages" ]; then
         echo No Untagged Images!
     else
 				echo Cleaning Images...
-				docker rmi -f $untaggedImages 2>&1 | log
-				echo Images cleaned: $image_count
+				for i in "${untaggedImages[@]}"; do
+					docker rm "$i" 2>&1 | log
+				done
+				echo Images cleaned: ${#untaggedImages[@]}
     fi
 	fi
 }
