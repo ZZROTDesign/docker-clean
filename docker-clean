@@ -302,36 +302,37 @@ function cleanImages {
 # @info:	Deletes all Images including tagged
 # TODO strip images into an array and remove brackets and add newline
 function cleanAllImages {
-	listedImages="$(docker images -a -q)"
-	image_count=$(count "$listedImages")
-
+	IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
 	if [[ $DRY_RUN == true ]]; then
-
-		echo Dry run on removal of untagged Images:
-		if [[ ! $listedImages ]]; then
-			echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
+		echo "Dry run on removal of images:"
+		if [[ ! $images ]]; then
+			echo "No images. Running without -n or --dry-run flag won't remove any images."
 			echo
 		else
-			stopped_container_names=$(docker inspect -f '{{json .RepoTags}}' $listedImages)
-			echo Running without -n or --dry-run flag will remove these $image_count untagged images:
-			echo $stopped_container_names
-			echo
+			echo "Running without -n or --dry-run flag will stop the listed containers:"
+			for i in "${images[@]}"; do
+				local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
+				echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
+			done
 		fi # End dry run
 	else
-
-	if [ ! "$listedImages" ]; then
-		echo No Images to Delete!
-	else
-		echo Cleaning Images...
-		tryCount=0
-		while [[ "$listedImages" && $tryCount -lt 5 ]]; do
-			((tryCount+=1))
-			docker rmi -f $listedImages 2>&1 | log
-			listedImages="$(docker images -a -q)"
-		done
-		echo Images cleaned: $image_count
+		if [ ! "$images" ]; then
+			echo "No images to delete!"
+		else
+			echo "Cleaning images..."
+			local tryCount=0
+			local count=0
+			while [[ "$images" ]] && [[ $tryCount -lt 5 ]]; do
+				((tryCount+=1))
+				for i in "${images[@]}"; do
+					if docker rmi -f $i 2>&1 | log ; then
+						count=$((count+1))
+					fi
+				done
+			done
+			echo "Images cleaned: $count"
+		fi
 	fi
-fi
 }
 
 # @info:	Removes all Dangling Docker Volumes.
