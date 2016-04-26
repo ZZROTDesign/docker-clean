@@ -22,6 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+# TODO: List array separations
+# TODO: Revamp for multiple flags together
+# TODO: flag containers with mounted volumes (after array todo complete)
+
 
 #ENVIRONMENT VARIABLES
 
@@ -306,7 +310,20 @@ fi
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
     danglingVolumes="$(docker volume ls -qf dangling=true)"
-		volume_count=$(count "$danglingVolumes")
+		volume_count=$(count "$danglingVolumes" volume)
+
+		if [[ $DRY_RUN == true ]]; then
+			echo Dry run on removal of untagged Images:
+			if [[ ! $danglingVolumes ]]; then
+				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
+				echo
+			else
+				stopped_container_names=$(docker volume inspect -f '{{json .Mountpoint}}' $danglingVolumes)
+				echo Running without -n or --dry-run flag will remove these $volume_count untagged images:
+				echo $stopped_container_names
+				echo
+			fi # End dry run
+		else
     if [ ! "$danglingVolumes" ]; then
         echo No Dangling Volumes!
     else
@@ -314,6 +331,7 @@ function cleanVolumes {
         docker volume rm $danglingVolumes 2>&1 | log
 				echo Volumes cleaned: $volume_count
     fi
+	fi
 }
 
 # @info:	Restarts and reRuns docker-machine env active machine
@@ -379,14 +397,22 @@ function dockerClean {
 }
 
 # @info: counts length of string passed in
+# Second argument passed in is optional to count the 64 character length of volumes
 function count {
 		toCount="$1"
+		divisor=12
+		if [[ $2 ]]; then
+			if [[ $2 =~ volume ]]; then
+				divisor=64
+			fi
+			divisor=64
+		fi
     length=${#toCount}
 		## Works on OSX, Linux, but not Travis CI
 		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
 
     if [[ $length != 0 ]]; then
-      number_of_occurrences=$(($length % 12 + 1))
+      number_of_occurrences=$(($length % $divisor + 1))
 		fi
 		echo $number_of_occurrences
 }
