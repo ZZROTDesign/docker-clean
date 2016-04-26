@@ -166,8 +166,9 @@ function stop {
 			local count=0
 			echo "Stopping running containers..."
 			for i in "${runningContainers[@]}"; do
-				docker stop "$i" 2>&1 | log
+				if docker stop "$i" 2>&1 | log ; then
 				count=$((count+1))
+				fi
 			done
 			echo "Containers stopped: $count"
 		fi
@@ -383,21 +384,14 @@ function cleanNetworks {
 			local count=0
 			echo "Removing empty networks..."
 			for i in "${emptyNetworks[@]}"; do
-				docker network rm $i 2>&1 | log
-				count=$((count+1))
+				if docker network rm $i 2>&1 | log ; then
+					count=$((count+1))
+				fi
 			done
 			echo "Networks removed: $count"
 		fi
 	fi
 }
-
-# @info:	Reads an string, and returns an array constructed from each newline character.
-# @args:	$1 = A string
-function intoArray {
-	IFS='\n' read -r -a array <<< "$1"
-	return array
-}
-
 
 # @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
