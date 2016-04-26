@@ -496,6 +496,7 @@ function log {
 	read IN
 	if [[ $VERBOSE == true ]]; then
 		echo $IN
+	fi
 }
 
 ## ** Script for testing os **
