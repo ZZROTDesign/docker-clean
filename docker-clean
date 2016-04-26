@@ -183,7 +183,7 @@ function cleanContainers {
 
 		if [[ $DRY_RUN == true ]]; then
 			echo "Dry run on removal of stopped containers:"
-			if [[ -n $stoppedContainers ]]; then
+			if [[ ! $stoppedContainers ]]; then
 				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
 				echo
 			fi
@@ -239,8 +239,7 @@ function cleanAllContainers {
 	IFS=$'\n' read -rd '' -a allContainers <<<"$(docker ps -aq)"
 
 	if [[ $DRY_RUN == true ]]; then
-
-		echo "Dry run on removal of all containers:"
+		echo "Dry run on stoppage and removal of all containers:"
 		if [[ ! $allContainers ]]; then
 			echo "No containers. Running without -n or --dry-run flag won't remove any containers."
 			echo
@@ -272,11 +271,10 @@ function cleanImages {
 		# Commented is for older version docker, has a few bugs
 		# with parent/child images
     #untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
-		IFS=$'\n' read -rd '' -a untaggedImages <<<'$(docker images -aq --filter "dangling=true")'
+		IFS=$'\n' read -rd '' -a untaggedImages <<<"$(docker images -aq --filter "dangling=true")"
 
 		if [[ $DRY_RUN == true ]]; then
-
-			echo Dry run on removal of untagged Images:
+			echo "Dry run on removal of untagged Images:"
 			if [[ ! $untaggedImages ]]; then
 				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
 				echo
@@ -342,13 +340,13 @@ function cleanVolumes {
 		volume_count=$(count "$danglingVolumes" volume)
 
 		if [[ $DRY_RUN == true ]]; then
-			echo Dry run on removal of untagged Images:
+			echo Dry run on removal of dangling Volumes:
 			if [[ ! $danglingVolumes ]]; then
-				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
+				echo "No dangling volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
 				echo
 			else
 				stopped_container_names=$(docker volume inspect -f '{{json .Mountpoint}}' $danglingVolumes)
-				echo Running without -n or --dry-run flag will remove $volume_count dangling volume\(s\) at the listed mount point\(s\):
+				echo "Running without -n or --dry-run flag will remove $volume_count dangling volume\(s\) at the listed mount point\(s\):"
 				echo $stopped_container_names
 				echo
 			fi # End dry run
