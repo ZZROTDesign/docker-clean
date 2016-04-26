@@ -136,8 +136,24 @@ function printVersion {
  }
 
 # @info: Stops all running docker containers.
+# TODO Parse json in docker ispect <Container ID> for container names
 function stop {
 	runningContainers="$(docker ps -q)"
+
+	if [[ DRY_RUN ]]; then
+		running_container_names=$(docker inspect -f '{{json .Config.Image}}' $runningContainers)
+
+		echo Dry Run:
+		if [[ ! runningContainers ]]; then
+			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
+		else
+
+		echo Running without -n or --dry-run flag will stop the listed containers:
+		echo $running_container_names
+		#docker ps
+	fi
+	fi
+	exit 2
 	if [ ! "$runningContainers" ]; then
 		echo No running containers!
 	else
