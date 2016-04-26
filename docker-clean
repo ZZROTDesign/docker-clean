@@ -37,6 +37,9 @@ declare HAS_VERSION=false
 # @info: Boolean for verbose mode
 declare VERBOSE=false
 
+# @info: Boolean for dry run to see before removing
+declare DRY_RUN=false
+
 #FUNCTIONS
 
 # @info:    Parses and validates the CLI arguments
@@ -49,10 +52,10 @@ parseCli(){
 
 		case $2 in
 			-l | --log) VERBOSE=true ;;
+			-n | --dry-run) DRY_RUN=true ;;
 		esac
 		flagOptions $1;
 
-		#statements
 	elif [[ $# -eq 1 ]]; then
 		flagOptions $1
 	else
@@ -62,6 +65,7 @@ parseCli(){
 
 function flagOptions() {
 	case $1 in
+		-n | --dry-run) DRY_RUN=true ;;
 		-l | --log)
 								VERBOSE=true
 		 						dockerClean ;;
@@ -90,6 +94,9 @@ function usage {
   echo "-c or --containers  Stops and removes Stopped and Running Containers"
   echo "-i or --images      Stops and removes all Containers and Images"
 	echo "-s or --stop        Stops all running Containers"
+	echo
+	echo "--dry-run           Adding this additional flag at the end will list items to be"
+	echo "                    removed without running the remove or stop commands"
 	echo
 	echo "-l or --log         Adding this as an additional flag will list all"
 	echo "                    image, volume, and container deleting output"
