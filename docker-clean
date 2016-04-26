@@ -339,7 +339,33 @@ function cleanVolumes {
 }
 
 function cleanNetworks {
-	emptyNetworks="$(docker network)"
+	IFS=$'\n' read -rd '' -a emptyNetworks <<<"$(docker ps -q)"
+	if [[ $DRY_RUN == true ]]; then
+		echo "Dry run on stoppage of running containers:"
+		if [[ ! $runningContainers ]]; then
+			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
+		else
+			echo "Running without -n or --dry-run flag will stop the listed containers:"
+			for i in "${runningContainers[@]}"; do
+				local name="$(docker inspect -f '{{json .Name}}' $i)"
+				local path="$(docker inspect -f '{{json .Path}}' $i)"
+				local args="$(docker inspect -f '{{json .Args}}' $i)"
+				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+			done
+		fi # End Dry Run
+	else
+		if [ ! "$runningContainers" ]; then
+			echo No running containers!
+		else
+			local count=0
+			echo Stopping running containers...
+			for i in "${runningContainers[@]}"; do
+				docker stop "$i" 2>&1 | log
+				count=$((count+1))
+			done
+			echo "Containers stopped: $count"
+		fi
+	fi
 }
 
 # @info:	Reads an string, and returns an array constructed from each newline character.
