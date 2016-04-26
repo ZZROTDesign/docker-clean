@@ -1,6 +1,52 @@
 # Usage
 This guide walks through proper usage and briefly explains the command(s) behind the usage for those that are familiar with some of the commands Docker provides.  The commands listed run after sanity checks to confirm the command will run properly.
 
+## Dry Run
+Before going and trying the default usage, if you have sensitive material you wouldn't like cleared and would like to see
+the results of a run, here is a walk through of how to use the dry run option with a demonstration.
+
+Usage for dry-run options:
+
+`docker-clean [flags below, excluding -l and --log] -n` or `--dry-run`
+
+This will print out the result of each command run in a wrapper that doesn't execute the command.
+
+Below is a run through of commands run one after another.
+
+```
+$ docker ps -a
+CONTAINER ID        IMAGE                COMMAND                  CREATED             STATUS              PORTS                     NAMES
+0aaf10d8391d        training/webapp      "python app.py"          55 seconds ago      Up 54 seconds       0.0.0.0:32770->5000/tcp   web
+e6f41b54faa5        zzrot/alpine-caddy   "tini caddy --conf /e"   55 seconds ago      Up 54 seconds                                 berserk_perlman
+```
+```
+$ ./docker-clean -s --dry-run
+Dry Run:
+Running without -n or --dry-run flag will stop the listed containers:
+"/web" "/berserk_perlman"
+
+$ ./docker-clean --all -n
+Dry run on removal of all containers:
+Running without -n or --dry-run flag will stop these 2 containers:
+"/web" "/berserk_perlman"
+
+Dry run on removal of untagged Images:
+Running without -n or --dry-run flag will remove these 4 untagged images:
+["zzrot/alpine-caddy:latest"] ["zzrot/alpine-node:latest"] ["zzrot/whale-awkward:latest"] ["training/webapp:latest"]
+
+Dry run on removal of untagged Images:
+Running without -n or --dry-run flag will remove 1 dangling volume(s) at the listed mount point(s):
+"/mnt/sda1/var/lib/docker/volumes/5b2289bf6860286c3e2dffd57695223e45f1a943e8274259714d071424f8762a/_data"
+
+Docker daemon would now restart if docker-clean is run without -n or -dry-run
+```
+```
+$ docker ps -a
+CONTAINER ID        IMAGE                COMMAND                  CREATED             STATUS              PORTS                     NAMES
+0aaf10d8391d        training/webapp      "python app.py"          2 minutes ago       Up 2 minutes        0.0.0.0:32770->5000/tcp   web
+e6f41b54faa5        zzrot/alpine-caddy   "tini caddy --conf /e"   2 minutes ago       Up 2 minutes                                  berserk_perlman
+```
+
 ## Default Usage
 After the very quick installation docker-clean will be ready to go out of the box.  Assuming the Docker daemon is running, trying
 

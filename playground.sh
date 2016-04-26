@@ -89,13 +89,14 @@ function cleanContainers {
 }
 
 function build() {
-    if [ $(docker ps -a -q) ]; then
+    if [ "$(docker ps -a -q)" ]; then
       docker rm -f $(docker ps -a -q)
     fi
      docker pull zzrot/whale-awkward
      docker pull zzrot/alpine-caddy
      docker pull zzrot/alpine-node
      docker run -d zzrot/alpine-caddy
+     docker run -d -P --name web -v /webapp training/webapp python app.py
     #run docker run -d ghost
     #run docker run -d alpine-caddy
     #run docker kill ghost
