@@ -177,11 +177,6 @@ function cleanContainers {
 		IFS=$'\n' read -rd '' -a stoppedContainers <<<"$(docker ps -qf STATUS=exited)"
 		IFS=$'\n' read -rd '' -a createdContainers <<<"$(docker ps -qf STATUS=created)"
 
-    #stoppedContainers="$(docker ps -qf STATUS=exited )"
-		#createdContainers="$(docker ps -qf STATUS=created)"
-		#stopped_count=$(count "$stoppedContainers")
-		#created_count=$(count "$createdContainers")
-
 		if [[ $DRY_RUN == true ]]; then
 
 			echo "Dry run on removal of stopped containers:"
@@ -214,36 +209,41 @@ function cleanContainers {
     fi
 
 		if [ "$createdContainers" ]; then
+			for i in "${stoppedContainers[@]}"; do
+				docker rm "$i" 2>&1 | log
+			done
 			docker rm $createdContainers 2>&1 | log
-			echo Created containers cleaned: $created_count
+			echo Created containers cleaned: ${#createdContainers[@]}
 		fi
 	fi
 }
 
 # @info:	Removes all containers (including running) with force.
 function cleanAllContainers {
-	allContainers="$(docker ps -a -q)"
-	container_count=$(count "$allContainers")
+	IFS=$'\n' read -rd '' -a allContainers <<<"$(docker ps -aq)"
 
 	if [[ $DRY_RUN == true ]]; then
 
-		echo Dry run on removal of all containers:
+		echo "Dry run on removal of all containers:"
 		if [[ ! $allContainers ]]; then
 			echo "No containers. Running without -n or --dry-run flag won't remove any containers."
 			echo
 		else
 			stopped_container_names=$(docker inspect -f '{{json .Name}}' $allContainers)
-			echo Running without -n or --dry-run flag will stop these $container_count containers:
+			echo "Running without -n or --dry-run flag will stop and remove these" $container_count "containers":
 			echo $stopped_container_names
 			echo
-		fi
+		fi # End dry run
 	else
+
 	if [ ! "$allContainers" ]; then
 		echo No Containers To Clean!
 	else
-		echo Cleaning containers...
-		docker rm -f $allContainers 2>&1 | log
-		echo Containers cleaned: $container_count
+		echo "Cleaning containers..."
+		for i in "${allContainers[@]}"; do
+			docker rm -f "$i" 2>&1 | log
+		done
+		echo Containers cleaned: ${#allContainers[@]}
 	fi
 fi
 }
