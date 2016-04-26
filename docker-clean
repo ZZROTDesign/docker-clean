@@ -143,7 +143,8 @@ function printVersion {
 # @info: Stops all running docker containers.
 # TODO make two(or 3) arrays with container names and images (container id)
 function stop {
-	runningContainers="$(docker ps -q)"
+	declare local runningContainers
+	IFS=$'\n' read -rd '' -a runningContainers <<<"$(docker ps -q)"
 	if [[ $DRY_RUN == true ]]; then
 		echo Dry Run:
 		if [[ ! $runningContainers ]]; then
@@ -162,7 +163,10 @@ else
 		echo No running containers!
 	else
 		echo Stopping running containers...
-		docker stop --time=10 $runningContainers
+		for i in "${runningContainers[@]}"; do
+			docker stop "$i"
+		done
+		#docker stop --time=10 $runningContainers
 	fi
 fi
 }
@@ -333,6 +337,16 @@ function cleanVolumes {
 	fi
 }
 
+function cleanNetworks {
+	emptyNetworks="$(docker network)"
+}
+
+# @info:	Reads an string, and returns an array constructed from each newline character.
+# @args:	$1 = A string
+function intoArray {
+	IFS='\n' read -r -a array <<< "$1"
+	return array
+}
 
 
 # @info:	Restarts and reRuns docker-machine env active machine
