@@ -339,7 +339,14 @@ function cleanVolumes {
 }
 
 function cleanNetworks {
-	IFS=$'\n' read -rd '' -a emptyNetworks <<<"$(docker network ls -q)"
+	IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
+	declare -a emptyNetworks
+	for i in "${networks[@]}"; do
+		local containers = "($docker network inspect -f '{{json .Containers}}' $i)"
+		if [[ $containers -eq "{}" ]]; then
+			emptyNetworks+=($i)
+		fi
+	done
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on removal of networks:"
 		if [[ ! $emptyNetworks ]]; then
@@ -357,12 +364,12 @@ function cleanNetworks {
 			echo "No empty networks!"
 		else
 			local count=0
-			echo Stopping running containers...
-			for i in "${runningContainers[@]}"; do
-				docker stop "$i" 2>&1 | log
+			echo "Removing empty networks..."
+			for i in "${emptyNetworks[@]}"; do
+				docker network rm $i 2>&1 | log
 				count=$((count+1))
 			done
-			echo "Containers stopped: $count"
+			echo "Networks removed: $count"
 		fi
 	fi
 }
