@@ -319,7 +319,7 @@ function cleanVolumes {
 				echo
 			else
 				stopped_container_names=$(docker volume inspect -f '{{json .Mountpoint}}' $danglingVolumes)
-				echo Running without -n or --dry-run flag will remove these $volume_count untagged images:
+				echo Running without -n or --dry-run flag will remove $volume_count dangling volume\(s\) at the listed mount point\(s\):
 				echo $stopped_container_names
 				echo
 			fi # End dry run
