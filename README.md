@@ -8,13 +8,13 @@ A simple Shell script to clean up the Docker Daemon.
 In order to use the volume capabilities, it is required that the Docker Daemon is at least version 1.9+
 
 
-## Install
+## Install (will install pre-release with dry run)
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/master/docker-clean |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.3.2.R0/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 
-## Homebrew Install
+## Homebrew Install (will install v1.3.1 without dry run)
 
     brew tap zzrotdesign/tap
     brew install docker-clean
