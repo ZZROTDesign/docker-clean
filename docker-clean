@@ -149,13 +149,14 @@ function stop {
 		if [[ ! $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
 		else
-			# {{json .Config.Image}} for Image, .Name for name
-		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
-		echo Running without -n or --dry-run flag will stop the listed containers:
-		echo $running_container_names
-		echo
-		#docker ps
-	fi # End Dry Run
+			echo "Running without -n or --dry-run flag will stop the listed containers:"
+			for i in "${runningContainers[@]}"; do
+				local name="$(docker inspect -f '{{json .Name}}' $i)"
+				local path="$(docker inspect -f '{{json .Path}}' $i)"
+				local args="$(docker inspect -f '{{json .Args}}' $i)"
+				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+			done
+		fi # End Dry Run
 	else
 		if [ ! "$runningContainers" ]; then
 			echo No running containers!
@@ -165,7 +166,7 @@ function stop {
 				docker stop "$i"
 			done
 		fi
-fi
+	fi
 }
 
 # @info:	Removes all stopped docker containers.
