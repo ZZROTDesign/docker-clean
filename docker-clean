@@ -65,7 +65,9 @@ parseCli(){
 
 function flagOptions() {
 	case $1 in
-		-n | --dry-run) DRY_RUN=true ;;
+		-n | --dry-run)
+								DRY_RUN=true
+								dockerClean ;;
 		-l | --log)
 								VERBOSE=true
 		 						dockerClean ;;
@@ -140,13 +142,14 @@ function printVersion {
 function stop {
 	runningContainers="$(docker ps -q)"
 
-	if [[ DRY_RUN ]]; then
+	if [[ DRY_RUN == true ]]; then
 		# {{json .Config.Image}} for Image, .Name for name
 		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
 
 		echo Dry Run:
 		if [[ ! runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop and containers."
+			echo list
 		else
 		echo Running without -n or --dry-run flag will stop the listed containers:
 		echo $running_container_names
