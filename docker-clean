@@ -269,6 +269,7 @@ function cleanImages {
 }
 
 # @info:	Deletes all Images including tagged
+# TODO strip images into an array and remove brackets and add newline
 function cleanAllImages {
 	listedImages="$(docker images -a -q)"
 	image_count=$(count "$listedImages")
@@ -280,7 +281,7 @@ function cleanAllImages {
 			echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
 			echo
 		else
-			stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
+			stopped_container_names=$(docker inspect -f '{{json .RepoTags}}' $listedImages)
 			echo Running without -n or --dry-run flag will remove these $image_count untagged images:
 			echo $stopped_container_names
 			echo
