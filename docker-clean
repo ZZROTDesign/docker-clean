@@ -151,6 +151,7 @@ function stop {
 		running_container_names=$(docker inspect -f '{{json .Name}}' $runningContainers)
 		echo Running without -n or --dry-run flag will stop the listed containers:
 		echo $running_container_names
+		echo
 		#docker ps
 	fi # End Dry Run
 else
@@ -220,7 +221,7 @@ function cleanAllContainers {
 			echo
 		else
 			stopped_container_names=$(docker inspect -f '{{json .Name}}' $allContainers)
-			echo Running without -n or --dry-run flag will stop the listed containers:
+			echo Running without -n or --dry-run flag will stop these $container_count containers:
 			echo $stopped_container_names
 			echo
 		fi
@@ -248,14 +249,15 @@ function cleanImages {
 
 			echo Dry run on removal of untagged Images:
 			if [[ ! $untaggedImages ]]; then
-				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
-			fi
-			if [[ $stoppedContainers ]]; then
+				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
+				echo
+			else
 				stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
-				echo Running without -n or --dry-run flag will stop the listed containers:
+				echo Running without -n or --dry-run flag will remove these $image_count untagged images:
 				echo $stopped_container_names
-			fi
-
+				echo
+			fi # End dry run
+		else
 		if [ ! "$untaggedImages" ]; then
         echo No Untagged Images!
     else
