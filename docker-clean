@@ -182,42 +182,54 @@ function cleanContainers {
 		IFS=$'\n' read -rd '' -a createdContainers <<<"$(docker ps -qf STATUS=created)"
 
 		if [[ $DRY_RUN == true ]]; then
-
 			echo "Dry run on removal of stopped containers:"
-			if [[ ! $stoppedContainers ]]; then
+			if [[ -n $stoppedContainers ]]; then
 				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
 				echo
 			fi
 			if [[ $stoppedContainers ]]; then
 				stopped_container_names=$(docker inspect -f '{{json .Name}}' $stoppedContainers)
 				echo Running without -n or --dry-run flag will remove these $stopped_count containers:
-				echo $stopped_container_names
+				for i in "${stoppedContainers[@]}"; do
+					local name="$(docker inspect -f '{{json .Name}}' $i)"
+					local path="$(docker inspect -f '{{json .Path}}' $i)"
+					local args="$(docker inspect -f '{{json .Args}}' $i)"
+					echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+			done
 				echo
 			fi
-
 			if [[ $createdContainers ]]; then
 				created_container_names=$(docker inspect -f '{{json .Name}}' $createdContainers)
 				echo These $created_count created containers would be cleaned:
-				echo $created_container_names
+				for i in "${createdContainers[@]}"; do
+					local name="$(docker inspect -f '{{json .Name}}' $i)"
+					local path="$(docker inspect -f '{{json .Path}}' $i)"
+					local args="$(docker inspect -f '{{json .Args}}' $i)"
+					echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+			done
 				echo
 			fi
 		else
     if [ ! "$stoppedContainers" ]; then
         echo No Containers To Clean!
     else
+				local count=0
 				echo Cleaning containers...
 				for i in "${stoppedContainers[@]}"; do
 					docker rm "$i" 2>&1 | log
+					count=$((count+1))
 				done
-				echo Stopped containers cleaned: ${#stoppedContainers[@]}
+				echo Stopped containers cleaned: $count
     fi
 
 		if [ "$createdContainers" ]; then
+			local count=0
 			for i in "${stoppedContainers[@]}"; do
 				docker rm "$i" 2>&1 | log
+				count=$((count+1))
 			done
 			docker rm $createdContainers 2>&1 | log
-			echo Created containers cleaned: ${#createdContainers[@]}
+			echo Created containers cleaned: $count
 		fi
 	fi
 }
@@ -243,11 +255,13 @@ function cleanAllContainers {
 	if [ ! "$allContainers" ]; then
 		echo No Containers To Clean!
 	else
+		local count=0
 		echo "Cleaning containers..."
 		for i in "${allContainers[@]}"; do
 			docker rm -f "$i" 2>&1 | log
+			count=$((count+1))
 		done
-		echo Containers cleaned: ${#allContainers[@]}
+		echo Containers cleaned: $count
 	fi
 fi
 }
@@ -273,15 +287,17 @@ function cleanImages {
 				echo
 			fi # End dry run
 		else
-		if [ -n "$untaggedImages" ]; then
-        echo No Untagged Images!
-    else
-				echo Cleaning Images...
-				for i in "${untaggedImages[@]}"; do
-					docker rm "$i" 2>&1 | log
-				done
-				echo Images cleaned: ${#untaggedImages[@]}
-    fi
+			if [ -n "$untaggedImages" ]; then
+	        echo No Untagged Images!
+	    else
+					local count=0
+					echo Cleaning Images...
+					for i in "${untaggedImages[@]}"; do
+						docker rm "$i" 2>&1 | log
+						count=$((count+1))
+					done
+					echo Images cleaned: ${#untaggedImages[@]}
+	    fi
 	fi
 }
 
