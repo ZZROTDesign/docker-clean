@@ -31,7 +31,7 @@
 # @info:	Docker-clean current version
 declare VERSION="1.4.1"
 
-# @info:	Required Docker version for Volume functionality
+# @info:	Required Docker version for Volume and Network functionality
 declare REQUIRED_VERSION="1.9.0"
 
 # @info:	Boolean for storing Docker version info
@@ -47,7 +47,7 @@ declare DRY_RUN=false
 
 # @info:    Parses and validates the CLI arguments
 # @args:	Global Arguments $@
-parseCli(){
+function parseCli(){
 	if [ "$#" -eq 0 ]; then
 		dockerClean
 	elif [[ $# -eq 2 ]]; then
@@ -120,7 +120,7 @@ function checkVersion  {
 		HAS_VERSION=true
     else
         echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
-        echo "Please upgrade your Docker daemon. Until then, the Volume processing will not work."
+        echo "Please upgrade your Docker daemon. Until then, the Volume and Network processing will not work."
     fi
 }
 
@@ -499,10 +499,8 @@ function dockerClean {
 	#Check if Has Version
 	if [ $HAS_VERSION == true ]; then
 	    cleanVolumes
+		cleanNetworks
 	fi
-
-	#Always Clean Empty Networks
-	cleanNetworks
 
 	#This should be after cleaning the Volumes hence the seperation.
 	if [ "$1" == 3 ]; then
