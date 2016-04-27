@@ -22,7 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# TODO: List array separations
 # TODO: Revamp for multiple flags together
 # TODO: flag containers with mounted volumes (after array todo complete)
 
@@ -408,17 +407,22 @@ function cleanNetworks {
 
 # @info:	Restarts and reRuns docker-machine env active machine
 function restartMachine {
-	if [[ $DRY_RUN == false ]]; then
-		operating_system=$(testOS)
+	operating_system=$(testOS)
+	#if [[ $DRY_RUN == false ]]; then
 		if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
 			active="$(docker-machine active)"
-			docker-machine restart $active
+			if [[ $DRY_RUN == false ]]; then
+				docker-machine restart $active
+			else
+				echo "Dry run on Daemon restart. Command used if run without -n or --dry-run:"
+				echo "docker-machine restart $active"
+			fi
 			eval $(docker-machine env $active)
-			echo Running docker-machine env $active...
+			echo "Running docker-machine env $active..."
 			echo "New IP Address for" $active ":" $(docker-machine ip)
 		elif [[ $operating_system =~ "linux" ]]; then
-			echo Restarting Docker...
-			echo Restarting this service requires sudo privileges
+			echo "Restarting Docker..."
+			echo "Restarting this service requires sudo privileges"
 			init_system=$(linuxInitSystem)
 			# Upstart covers SysV and OpenRC as well.
 			if [[ $init_system =~ 'upstart'  ]]; then
@@ -435,9 +439,16 @@ function restartMachine {
 			echo "https://github.com/ZZROTDesign/docker-clean and open an issue."
 			exit 2
 		fi
-	else
-		echo "Docker daemon would now restart if docker-clean is run without -n or -dry-run."
-	fi
+	#else
+		#echo "Docker daemon would now restart if docker-clean is run without -n or -dry-run."
+		#if [[ $operating_system =~ "linux" ]]; then
+	#		init_system=$(linuxInitSystem)
+	#		echo "Command that would be used to restart:"
+	#		if [[ $init_system =~ 'upstart'  ]]; then
+	#			echo "Command that would be used to restart:sudo service docker restart"
+#fi
+		#fi
+	#fi
 }
 
 # @info:	Runs the checks before the main code can be run.
