@@ -392,6 +392,7 @@ function cleanNetworks {
 	else
 		if [ ! "$emptyNetworks" ]; then
 			echo "No empty networks!"
+			echo
 		else
 			local count=0
 			echo "Removing empty networks..."
@@ -401,6 +402,7 @@ function cleanNetworks {
 				fi
 			done
 			echo "Networks removed: $count"
+			echo
 		fi
 	fi
 }
@@ -496,13 +498,13 @@ function dockerClean {
 	    cleanVolumes
 	fi
 
+	#Always Clean Empty Networks
+	cleanNetworks
+
 	#This should be after cleaning the Volumes hence the seperation.
 	if [ "$1" == 3 ]; then
 		restartMachine
 	fi
-
-	#Always Clean Empty Networks
-	cleanNetworks
 
 }
 
