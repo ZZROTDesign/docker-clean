@@ -306,7 +306,7 @@ function cleanImages {
 function cleanAllImages {
 	IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
 	if [[ $DRY_RUN == true ]]; then
-		echo "Dry run on removal of images:"
+		echo "Dry run on removal of all images:"
 		if [[ ! $images ]]; then
 			echo "No images. Running without -n or --dry-run flag won't remove any images."
 			echo
@@ -316,6 +316,7 @@ function cleanAllImages {
 				local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
 				echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
 			done
+			echo
 		fi # End dry run
 	else
 		if [ ! "$images" ]; then
