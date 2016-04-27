@@ -159,10 +159,10 @@ function stop {
 		echo "Dry run on stoppage of running containers:"
 		if [[ ! $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop any containers."
-            echo
+            echo #Spacing
 		else
 			echo "Running without -n or --dry-run flag will stop the listed containers:"
-            echo
+            echo #Spacing
 			for i in "${runningContainers[@]}"; do
 				local name
 				local path
@@ -172,6 +172,7 @@ function stop {
 				args="$(docker inspect -f '{{json .Args}}' $i)"
 				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
+            echo #Spacing
 		fi # End Dry Run
 	else
 		if [ ! "$runningContainers" ]; then
@@ -213,10 +214,11 @@ function cleanContainers {
 		echo "Dry run on removal of stopped containers:"
 		if [[ ! $stoppedContainers ]]; then
 			echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
-			echo
+			echo #Spacing
 		fi
 		if [[ $stoppedContainers ]]; then
 			echo "Running without -n or --dry-run flag will remove the listed containers:"
+            echo #Spacing
 			for i in "${stoppedContainers[@]}"; do
 				local name
 				local path
@@ -226,7 +228,7 @@ function cleanContainers {
 				args="$(docker inspect -f '{{json .Args}}' $i)"
 				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
-			echo
+			echo # Spacing
 		fi
 		if [[ $createdContainers ]]; then
 			echo "Cleaning created containers..."
