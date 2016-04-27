@@ -43,6 +43,17 @@ declare VERBOSE=false
 # @info:	Boolean for dry run to see before removing
 declare DRY_RUN=false
 
+# @info:    Boolean to flag if Containers with status Created will be deleted or not.
+declare DELETE_CREATED=true
+
+# @info:    Boolean to flag if Containers should be stopped.
+declare STOP_CONTAINERS=false
+
+# @info:    Boolean to flag if tagged images are to be deleted.
+declare DELETE_TAGGED=false
+
+
+
 #FUNCTIONS
 
 # @info:    Parses and validates the CLI arguments
