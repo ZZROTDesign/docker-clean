@@ -419,7 +419,7 @@ function restartMachine {
 		elif [[ $operating_system =~ "linux" ]]; then
 			echo Restarting Docker...
 			init_system=$(linuxInitSystem)
-			if [[ $init_system =~ 'upstart'  ]]; then
+			if [[ $init_system == upstart  ]]; then
 				sudo service docker restart
 			fi
 			echo Restarting this service requires sudo privileges
@@ -516,6 +516,9 @@ function testOS {
       echo linux
 			#!/bin/bash
 
+check $1
+
+
   elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
       # Do something under Windows NT platform
       echo windows
@@ -528,10 +531,6 @@ function linuxInitSystem {
 	shopt -s nullglob dotglob     # To include hidden files
 	# Directories to check
 	# Upstart covers SysV and OpenRC as well.
-	if [ $EUID != 0 ]; then
-    sudo "$0" "$@" &>/dev/null
-    #exit $?
-fi
 	upstart=(/etc/init.d/docker)
 	systemd=(/etc/systemd/docker)
 	rc=(/etc/rc.d/docker)
@@ -539,14 +538,12 @@ fi
 	#files=(/some/dir/*)
 	if [ ${#upstart[@]} -gt 0 ]; then
 		initSystem=upstart
-		echo $initSystem
 	elif [ ${#systemd[@]} -gt 0 ]; then
 		initSystem=systemd
-		echo $initSystem
 	elif [ ${#rc[@]} -gt 0 ]; then
 		initSystem=rc
-		echo $initSystem
 	fi
+	echo initSystem
 	}
 
 
