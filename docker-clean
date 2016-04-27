@@ -414,23 +414,39 @@ function restartMachine {
 			if [[ $DRY_RUN == false ]]; then
 				docker-machine restart $active
 			else
-				echo "Dry run on Daemon restart. Command used if run without -n or --dry-run:"
-				echo "docker-machine restart $active"
+				echo "Dry run on Daemon restart:"
+				echo "Command that would be used: docker-machine restart $active"
 			fi
 			eval $(docker-machine env $active)
 			echo "Running docker-machine env $active..."
 			echo "New IP Address for" $active ":" $(docker-machine ip)
 		elif [[ $operating_system =~ "linux" ]]; then
 			echo "Restarting Docker..."
-			echo "Restarting this service requires sudo privileges"
+			if [[ $DRY_RUN == false ]]; then
+				echo "Restarting this service requires sudo privileges"
+			else
+				echo "Dry run on Daemon restart, requires sudo to check platform:"
+			fi
 			init_system=$(linuxInitSystem)
 			# Upstart covers SysV and OpenRC as well.
 			if [[ $init_system =~ 'upstart'  ]]; then
-				sudo service docker restart
+				if [ ! $DRY_RUN ]; then
+					sudo service docker restart
+				else
+					echo "Restart command that would be run: sudo service docker restart"
+				fi
 			elif [[ $init_system =~ 'systemd' ]]; then
-				sudo systemctl restart docker.service
+				if [ ! $DRY_RUN ]; then
+					sudo systemctl restart docker.service
+				else
+					echo "Restart command that would be run: sudo systemctl restart docker.service"
+				fi
 			elif [[ $init_system =~ 'rc' ]]; then
-				sudo launchctl restart docker
+				if [ ! $DRY_RUN ]; then
+					sudo launchctl restart docker
+				else
+					echo "Restart command that would be run: sudo launchctl restart docker"
+				fi
 			fi
 		else
 			echo It appears your OS is not compatible with our docker engine restart
