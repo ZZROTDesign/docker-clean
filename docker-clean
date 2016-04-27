@@ -74,29 +74,39 @@ declare DELETE_CREATED=true
 # @args:	Global Arguments $@
 function parseCli(){
 	if [ "$#" -eq 0 ]; then
+		CLEAN_CONTAINERS=true
+		CLEAN_IMAGES=true
+		CLEAN_VOLUMES=true
+		CLEAN_NETWORKS=true
 		dockerClean
-	elif [[ $# -eq 2 ]]; then
-		case $2 in
-			-l | --log) VERBOSE=true ;;
-			-n | --dry-run) DRY_RUN=true ;;
-		esac
-		flagOptions $1;
-	elif [[ $# -eq 1 ]]; then
-		flagOptions $1
-	else
-		usage
 	fi
+	while [[ $# > 0 ]]; do
+		key="$1"
+		case $key in
+			-s | --stop) STOP_CONTAINERS=true ;;
+			-n | --dry-run) DRY_RUN=true ;;
+			-l | --log) VERBOSE=true ;;
+			-c | --containers) CLEAN_CONTAINERS=true ;;
+			-i | --images) dockerClean 2 ;;
+			-net | --networks) CLEAN_NETWORKS=true ;;
+			-a | --all) dockerClean 3 ;;
+			-v | --version) version; exit 0 ;;
+			-h | --help | *) usage; exit 0 ;;
+		esac
+		shift
+	done
 }
 
 function flagOptions() {
 	case $1 in
+		-s | --stop) stop ;;
 		-n | --dry-run)
 						DRY_RUN=true
 						dockerClean ;;
 		-l | --log)
 						VERBOSE=true
 		 				dockerClean ;;
-		-s | --stop) stop ;;
+
 		-net | --networks) cleanNetworks;;
 		-v | --version) version ;;
 		-c | --containers) dockerClean 1 ;;
