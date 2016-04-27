@@ -8,3 +8,5 @@
 
 
 - Description for the changelog
+
+- Does it pass a ShellCheck? (excluding changes to .bats files see our CONTRIBUTING.md)

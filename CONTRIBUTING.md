@@ -19,9 +19,10 @@ Don't hesitate to get in contact with either one of us with problems, questions,
 ## ShellCheck
 
 We use ShellCheck to keep our code consistent and readable. Any feature pushed that does not pass a ShellCheck will fail on Travis build, and thus we cannot accept the pull request. Please lint your code before submitting it! :).
-(Keep in mind that bats does not have to be shellChecked, and thus if you are adding tests to .bats don't worry about linting.)
 
-You can either download the ShellCheck program here: https://github.com/koalaman/shellcheck or use the ShellCheck website: http://www.shellcheck.net/
+(Keep in mind that bats does not have to be ShellChecked, and thus if you are adding tests to .bats don't worry about linting.)
+
+You can either download the ShellCheck program: https://github.com/koalaman/shellcheck or use the ShellCheck website: http://www.shellcheck.net/
 
 
 Don’t get discouraged! We estimate that the response time from the
