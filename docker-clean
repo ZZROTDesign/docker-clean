@@ -418,11 +418,16 @@ function restartMachine {
 			echo "New IP Address for" $active ":" $(docker-machine ip)
 		elif [[ $operating_system =~ "linux" ]]; then
 			echo Restarting Docker...
+			echo Restarting this service requires sudo privileges
 			init_system=$(linuxInitSystem)
 			if [[ $init_system =~ 'upstart'  ]]; then
 				sudo service docker restart
+			elif [[ $init_system =~ 'systemd' ]]; then
+				sudo systemctl restart docker.service
+			elif [[ $init_system =~ 'rc' ]]; then
+				sudo launchctl restart docker
 			fi
-			echo Restarting this service requires sudo privileges
+
 			#sudo service docker restart
 		else
 			echo It appears your OS is not compatible with our docker engine restart
