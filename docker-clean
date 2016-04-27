@@ -239,7 +239,6 @@ function cleanContainers {
 # @info:	Removes all containers (including running) with force.
 function cleanAllContainers {
 	IFS=$'\n' read -rd '' -a allContainers <<<"$(docker ps -aq)"
-
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on stoppage and removal of all containers:"
 		if [[ ! $allContainers ]]; then
@@ -248,7 +247,7 @@ function cleanAllContainers {
 		else
 			stopped_container_names=$(docker inspect -f '{{json .Name}}' $allContainers)
 			echo "Running without -n or --dry-run flag will stop and remove these" $container_count "containers":
-			echo $stopped_container_names
+			echo "$stopped_container_names"
 			echo
 		fi # End dry run
 	else
