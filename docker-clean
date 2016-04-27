@@ -420,6 +420,7 @@ function restartMachine {
 			echo Restarting Docker...
 			echo Restarting this service requires sudo privileges
 			init_system=$(linuxInitSystem)
+			# Upstart covers SysV and OpenRC as well.
 			if [[ $init_system =~ 'upstart'  ]]; then
 				sudo service docker restart
 			elif [[ $init_system =~ 'systemd' ]]; then
@@ -427,8 +428,6 @@ function restartMachine {
 			elif [[ $init_system =~ 'rc' ]]; then
 				sudo launchctl restart docker
 			fi
-
-			#sudo service docker restart
 		else
 			echo It appears your OS is not compatible with our docker engine restart
 			echo Windows compatibility work in progress
@@ -530,13 +529,16 @@ function testOS {
 
 # Function for testing linux initSystem
 function linuxInitSystem {
-	shopt -s nullglob dotglob     # To include hidden files
-	# Directories to check
-	# Upstart covers SysV and OpenRC as well.
+	# To include hidden files
+	shopt -s nullglob dotglob
+
+	# Get sudo privileges
 	if [ $EUID != 0 ]; then
     sudo "$0" "$@" &>/dev/null
     #exit $?
 fi
+# Directories to check
+# Upstart covers SysV and OpenRC as well.
 	upstart=(/etc/init.d/docker)
 	systemd=(/etc/systemd/docker)
 	rc=(/etc/rc.d/docker)
@@ -544,17 +546,13 @@ fi
 	#files=(/some/dir/*)
 	if [ ${#upstart[@]} -gt 0 ]; then
 		initSystem=upstart
-		echo $initSystem
 	elif [ ${#systemd[@]} -gt 0 ]; then
 		initSystem=systemd
-		echo $initSystem
 	elif [ ${#rc[@]} -gt 0 ]; then
 		initSystem=rc
-		echo $initSystem
 	fi
+	echo $initSystem
 	}
-
-
 
 # @info:	Main function
 Check
