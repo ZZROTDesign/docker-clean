@@ -49,8 +49,20 @@ declare DELETE_CREATED=true
 # @info:    Boolean to flag if Containers should be stopped.
 declare STOP_CONTAINERS=false
 
+# @info:	Boolean to flag if containers should be deleted.
+declare CLEAN_CONTAINERS=false
+
+# @info:	Boolean to flag if images should be deleted.
+declare CLEAN_IMAGES=false
+
+# @info:	Boolean to flag if volumes should be deleted.
+declare CLEAN_VOLUMES=false
+
+# @info:	Boolean to flag if networks should be deleted.
+declare CLEAN_NETWORKS=false
+
 # @info:    Boolean to flag if tagged images are to be deleted.
-#declare DELETE_TAGGED=false
+declare DELETE_TAGGED=false
 
 # TODO: add variables for every possible input so that we can cycle through all flag options and allow multiple flags
 
@@ -593,7 +605,6 @@ fi
 	}
 
 # @info:	Default run option, cleans stopped containers and images
-# @args:	1 = Force Clean all Containers, 2 = Force Clean Containers and Images. 3 = Force Clean Containers, Images, and Restart
 function dockerClean {
 
 	if [[ $STOP_CONTAINERS ]]; then
@@ -602,10 +613,10 @@ function dockerClean {
 	if [[ $CLEAN_CONTAINERS ]]; then
 		cleanContainers
 	fi
-	if [[ $CLEAN_IMAGES ]] && [[ ! $UNTAGGED_IMAGES ]]; then
+	if [[ $CLEAN_IMAGES ]] && [[ ! $DELETE_TAGGED ]]; then
 		cleanImages
 	fi
-	if [[ $CLEAN_IMAGES ]] && [[ $UNTAGGED_IMAGES ]]; then
+	if [[ $CLEAN_IMAGES ]] && [[ $DELETE_TAGGED ]]; then
 		cleanAllImages
 	fi
 	if [[ $CLEAN_VOLUMES ]] && [[ $HAS_VERSION ]]; then
@@ -618,7 +629,6 @@ function dockerClean {
 		restartMachine
 	fi
 }
-
 
 # @info:	Main function
 Check
