@@ -167,11 +167,21 @@ function stop {
 			for i in "${runningContainers[@]}"; do
 				local output
 				local status
-				output="$(docker stop "$i" 2>&1)"
+				local name
+				local path
+				local args
+				name="$(docker inspect -f '{{json .Name}}' $i)"
+				path="$(docker inspect -f '{{json .Path}}' $i)"
+				args="$(docker inspect -f '{{json .Args}}' $i)"
+				docker stop "$i" &>/dev/null
 				status=$?
-				echo $output | log
 				if [[ $status -eq 0 ]] ; then
 					count=$((count+1))
+					output="STOPPED: ID: $i IMAGE: $path/$args NAME: $name"
+					echo $output | log
+				else
+					output="COULD NOT STOP: ID: $i IMAGE: $path/$args NAME: $name"
+					echo $output | log
 				fi
 			done
 			echo "Containers stopped: $count"
