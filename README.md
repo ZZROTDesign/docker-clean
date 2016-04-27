@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v1.4.0)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
+[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v1.4.1)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
 # Docker-Clean
 
 A simple Shell script to clean up the Docker Daemon.
@@ -10,7 +10,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 ## Install
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.4.0/docker-clean |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.4.1/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 
