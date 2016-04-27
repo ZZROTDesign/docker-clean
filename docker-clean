@@ -421,8 +421,8 @@ function restartMachine {
 			echo "Running docker-machine env $active..."
 			echo "New IP Address for" $active ":" $(docker-machine ip)
 		elif [[ $operating_system =~ "linux" ]]; then
-			echo "Restarting Docker..."
 			if [[ $DRY_RUN == false ]]; then
+				echo "Restarting Docker..."
 				echo "Restarting this service requires sudo privileges"
 			else
 				echo "Dry run on Daemon restart, requires sudo to check platform:"
@@ -430,19 +430,19 @@ function restartMachine {
 			init_system=$(linuxInitSystem)
 			# Upstart covers SysV and OpenRC as well.
 			if [[ $init_system =~ 'upstart'  ]]; then
-				if [ ! $DRY_RUN ]; then
+				if [[ $DRY_RUN == false ]]; then
 					sudo service docker restart
 				else
 					echo "Restart command that would be run: sudo service docker restart"
 				fi
 			elif [[ $init_system =~ 'systemd' ]]; then
-				if [ ! $DRY_RUN ]; then
+				if [[ $DRY_RUN == false ]]; then
 					sudo systemctl restart docker.service
 				else
 					echo "Restart command that would be run: sudo systemctl restart docker.service"
 				fi
 			elif [[ $init_system =~ 'rc' ]]; then
-				if [ ! $DRY_RUN ]; then
+				if [[ $DRY_RUN == false ]]; then
 					sudo launchctl restart docker
 				else
 					echo "Restart command that would be run: sudo launchctl restart docker"
