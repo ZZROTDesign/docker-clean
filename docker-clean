@@ -159,8 +159,10 @@ function stop {
 		echo "Dry run on stoppage of running containers:"
 		if [[ ! $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop any containers."
+            echo
 		else
 			echo "Running without -n or --dry-run flag will stop the listed containers:"
+            echo
 			for i in "${runningContainers[@]}"; do
 				local name
 				local path
