@@ -43,9 +43,6 @@ declare VERBOSE=false
 # @info:	Boolean for dry run to see before removing
 declare DRY_RUN=false
 
-# @info:    Boolean to flag if Containers with status Created will be deleted or not.
-declare DELETE_CREATED=true
-
 # @info:    Boolean to flag if Containers should be stopped.
 declare STOP_CONTAINERS=false
 
@@ -63,6 +60,9 @@ declare CLEAN_NETWORKS=false
 
 # @info:    Boolean to flag if tagged images are to be deleted.
 declare DELETE_TAGGED=false
+
+# @info:    Boolean to flag if Containers with status Created will be deleted or not.
+declare DELETE_CREATED=true
 
 # TODO: add variables for every possible input so that we can cycle through all flag options and allow multiple flags
 
