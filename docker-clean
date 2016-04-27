@@ -37,10 +37,10 @@ declare REQUIRED_VERSION="1.9.0"
 # @info:	Boolean for storing Docker version info
 declare HAS_VERSION=false
 
-# @info: Boolean for verbose mode
+# @info:	Boolean for verbose mode
 declare VERBOSE=false
 
-# @info: Boolean for dry run to see before removing
+# @info:	Boolean for dry run to see before removing
 declare DRY_RUN=false
 
 #FUNCTIONS
@@ -48,17 +48,14 @@ declare DRY_RUN=false
 # @info:    Parses and validates the CLI arguments
 # @args:	Global Arguments $@
 parseCli(){
-
 	if [ "$#" -eq 0 ]; then
 		dockerClean
 	elif [[ $# -eq 2 ]]; then
-
 		case $2 in
 			-l | --log) VERBOSE=true ;;
 			-n | --dry-run) DRY_RUN=true ;;
 		esac
 		flagOptions $1;
-
 	elif [[ $# -eq 1 ]]; then
 		flagOptions $1
 	else
@@ -69,11 +66,11 @@ parseCli(){
 function flagOptions() {
 	case $1 in
 		-n | --dry-run)
-								DRY_RUN=true
-								dockerClean ;;
+						DRY_RUN=true
+						dockerClean ;;
 		-l | --log)
-								VERBOSE=true
-		 						dockerClean ;;
+						VERBOSE=true
+		 				dockerClean ;;
 		-s | --stop) stop ;;
 		-net | --networks) cleanNetworks;;
 		-v | --version) version ;;
@@ -91,15 +88,15 @@ function version {
 
 # @info:	Prints out usage
 function usage {
-  echo
+	echo
 	echo "Options:"
-  echo "-h or --help        Opens this help menu"
-  echo "-v or --version     Prints the current docker-clean version"
-  echo
-  echo "-a or --all         Stops and removes all Containers, Images, and Restarts docker"
-  echo "-c or --containers  Stops and removes Stopped and Running Containers"
-  echo "-i or --images      Stops and removes all Containers and Images"
-  echo "-net or --networks  Removes all empty Networks"
+  	echo "-h or --help        Opens this help menu"
+  	echo "-v or --version     Prints the current docker-clean version"
+  	echo
+  	echo "-a or --all         Stops and removes all Containers, Images, and Restarts docker"
+  	echo "-c or --containers  Stops and removes Stopped and Running Containers"
+  	echo "-i or --images      Stops and removes all Containers and Images"
+  	echo "-net or --networks  Removes all empty Networks"
 	echo "-s or --stop        Stops all running Containers"
 	echo
 	echo "--dry-run           Adding this additional flag at the end will list items to be"
@@ -112,37 +109,37 @@ function usage {
 # @info:	Prints out 3-point version (000.000.000) without decimals for comparison
 # @args:	Docker Version of the client
 function printVersion {
-     echo "$@" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
- }
+	echo "$@" | awk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
+}
 
 # @info:	Checks Docker Version and then configures the HAS_VERSION var.
- function checkVersion  {
-     local Docker_Version="$(docker --version | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')"
-     if [ $(printVersion "$Docker_Version") -gt $(printVersion "$REQUIRED_VERSION") ]; then
-         HAS_VERSION=true
-     else
-         echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
-         echo "Please upgrade your Docker daemon. Until then, the Volume processing will not work."
-     fi
- }
+function checkVersion  {
+	local Docker_Version
+	Docker_Version="$(docker --version | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')"
+	if [ "$(printVersion "$Docker_Version")" -gt "$(printVersion "$REQUIRED_VERSION")" ]; then
+		HAS_VERSION=true
+    else
+        echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
+        echo "Please upgrade your Docker daemon. Until then, the Volume processing will not work."
+    fi
+}
 
 # @info:	Checks to see if Docker is installed and connected
- function checkDocker {
-     #Run Docker ps to make sure that docker is installed
-     #As well as that the Daemon is connected.
-     docker ps &>/dev/null
-     DOCKER_CHECK=$?
+function checkDocker {
+    #Run Docker ps to make sure that docker is installed
+    #As well as that the Daemon is connected.
+    docker ps &>/dev/null
+    DOCKER_CHECK=$?
 
-     #If Docker Check returns 1 (Error), send a message and exit.
-     if [ ! "$DOCKER_CHECK" ]; then
-         echo "Docker is either not installed, or the Docker Daemon is not currently connected."
-         echo "Please check your installation and try again."
-         exit 1;
-     fi
- }
+    #If Docker Check returns 1 (Error), send a message and exit.
+	if [ ! "$DOCKER_CHECK" ]; then
+        echo "Docker is either not installed, or the Docker Daemon is not currently connected."
+        echo "Please check your installation and try again."
+        exit 1;
+    fi
+}
 
 # @info: Stops all running docker containers.
-# TODO make two(or 3) arrays with container names and images (container id)
 function stop {
 	IFS=$'\n' read -rd '' -a runningContainers <<<"$(docker ps -q)"
 	if [[ $DRY_RUN == true ]]; then
@@ -152,9 +149,12 @@ function stop {
 		else
 			echo "Running without -n or --dry-run flag will stop the listed containers:"
 			for i in "${runningContainers[@]}"; do
-				local name="$(docker inspect -f '{{json .Name}}' $i)"
-				local path="$(docker inspect -f '{{json .Path}}' $i)"
-				local args="$(docker inspect -f '{{json .Args}}' $i)"
+				local name
+				local path
+				local args
+				name="$(docker inspect -f '{{json .Name}}' $i)"
+				path="$(docker inspect -f '{{json .Path}}' $i)"
+				args="$(docker inspect -f '{{json .Args}}' $i)"
 				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
 		fi # End Dry Run
@@ -177,50 +177,53 @@ function stop {
 # @info:	Removes all stopped docker containers.
 # TODO add dry run for created containers
 function cleanContainers {
-		IFS=$'\n' read -rd '' -a stoppedContainers <<<"$(docker ps -qf STATUS=exited)"
-		IFS=$'\n' read -rd '' -a createdContainers <<<"$(docker ps -qf STATUS=created)"
-
-		if [[ $DRY_RUN == true ]]; then
-			echo "Dry run on removal of stopped containers:"
-			if [[ ! $stoppedContainers ]]; then
-				echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
-				echo
-			fi
-			if [[ $stoppedContainers ]]; then
-				echo "Running without -n or --dry-run flag will remove the listed containers:"
-				for i in "${stoppedContainers[@]}"; do
-					local name="$(docker inspect -f '{{json .Name}}' $i)"
-					local path="$(docker inspect -f '{{json .Path}}' $i)"
-					local args="$(docker inspect -f '{{json .Args}}' $i)"
-					echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+	IFS=$'\n' read -rd '' -a stoppedContainers <<<"$(docker ps -qf STATUS=exited)"
+	IFS=$'\n' read -rd '' -a createdContainers <<<"$(docker ps -qf STATUS=created)"
+	if [[ $DRY_RUN == true ]]; then
+		echo "Dry run on removal of stopped containers:"
+		if [[ ! $stoppedContainers ]]; then
+			echo "No stopped containers. Running without -n or --dry-run flag won't remove any stopped containers."
+			echo
+		fi
+		if [[ $stoppedContainers ]]; then
+			echo "Running without -n or --dry-run flag will remove the listed containers:"
+			for i in "${stoppedContainers[@]}"; do
+				local name
+				local path
+				local args
+				name="$(docker inspect -f '{{json .Name}}' $i)"
+				path="$(docker inspect -f '{{json .Path}}' $i)"
+				args="$(docker inspect -f '{{json .Args}}' $i)"
+				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
-				echo
-			fi
-			if [[ $createdContainers ]]; then
-				echo "Cleaning created containers..."
-				for i in "${createdContainers[@]}"; do
-					local name="$(docker inspect -f '{{json .Name}}' $i)"
-					local path="$(docker inspect -f '{{json .Path}}' $i)"
-					local args="$(docker inspect -f '{{json .Args}}' $i)"
-					echo "Container ID: $i IMAGE: $path/$args NAME: $name"
+			echo
+		fi
+		if [[ $createdContainers ]]; then
+			echo "Cleaning created containers..."
+			for i in "${createdContainers[@]}"; do
+				local name
+				local path
+				local args
+				name="$(docker inspect -f '{{json .Name}}' $i)"
+				path="$(docker inspect -f '{{json .Path}}' $i)"
+				args="$(docker inspect -f '{{json .Args}}' $i)"
+				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
-				echo
-			fi # end dry run
-
-		else
-    if [ ! "$stoppedContainers" ]; then
-        echo "No Containers To Clean!"
-    else
-				local count=0
-				echo "Cleaning containers..."
-				for i in "${stoppedContainers[@]}"; do
-					if docker rm "$i" 2>&1 | log ; then
-						count=$((count+1))
-					fi
-				done
-				echo "Stopped containers cleaned: $count"
-    fi
-
+			echo
+		fi # end dry run
+	else
+	    if [ ! "$stoppedContainers" ]; then
+	        echo "No Containers To Clean!"
+	    else
+			local count=0
+			echo "Cleaning containers..."
+			for i in "${stoppedContainers[@]}"; do
+				if docker rm "$i" 2>&1 | log ; then
+					count=$((count+1))
+				fi
+			done
+			echo "Stopped containers cleaned: $count"
+	    fi
 		if [ "$createdContainers" ]; then
 			local count=0
 			for i in "${createdContainers[@]}"; do
