@@ -99,12 +99,13 @@ function parseCli(){
 			-r | --restart) RESTART=true ;;
 			-d | --created) DELETE_CREATED=false ;;
 			-t | --tagged) DELETE_TAGGED=true ;;
-			-a | --all) dockerClean 3 ;;
+			-a | --all) STOP_CONTAINERS=true; DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true; RESTART=true ;;
 			-v | --version) version; exit 0 ;;
 			-h | --help | *) usage; exit 0 ;;
 		esac
 		shift
 	done
+	dockerClean
 }
 
 function flagOptions() {
