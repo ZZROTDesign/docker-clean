@@ -252,7 +252,7 @@ function cleanContainers {
 			echo #Spacing
 		fi # end dry run
 	else
-		if [[ $DELETE_CREATED ]]; then
+		if $DELETE_CREATED; then
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
 		else
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited)"
@@ -289,7 +289,7 @@ function cleanContainers {
 
 # @info:	Removes all untagged docker images.
 function cleanImages {
-	if [[ $DELETE_TAGGED ]]; then
+	if $DELETE_TAGGED; then
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
 	else
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
