@@ -102,6 +102,9 @@ function parseCli(){
 		esac
 		shift
 	done
+	echo $STOP_CONTAINERS
+	echo $CLEAN_CONTAINERS
+	echo $CLEAN_IMAGES
 	dockerClean
 }
 
@@ -551,22 +554,22 @@ fi
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
 
-	if [[ $STOP_CONTAINERS ]]; then
+	if $STOP_CONTAINERS; then
 		stop
 	fi
-	if [[ $CLEAN_CONTAINERS ]]; then
+	if $CLEAN_CONTAINERS; then
 		cleanContainers
 	fi
-	if [[ $CLEAN_IMAGES ]]; then
+	if $CLEAN_IMAGES; then
 		cleanImages
 	fi
-	if [[ $CLEAN_VOLUMES ]] && [[ $HAS_VERSION ]]; then
+	if $CLEAN_VOLUMES && $HAS_VERSION; then
 		cleanVolumes
 	fi
-	if [[ $CLEAN_NETWORKS ]] && [[ $HAS_VERSION ]]; then
+	if $CLEAN_NETWORKS && $HAS_VERSION; then
 		cleanNetworks
 	fi
-	if [[ $RESTART ]];  then
+	if $RESTART;  then
 		restartMachine
 	fi
 }
