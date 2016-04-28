@@ -312,37 +312,37 @@ function stop {
 
 # @info:	Removes all untagged docker images.
 function cleanImages {
-		if [[ $DELETE_TAGGED ]]; then
-			IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	if [[ $DELETE_TAGGED ]]; then
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	else
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
+	fi
+	if [[ $DRY_RUN == true ]]; then
+		echo "Dry run on removal of images:"
+		if [[ ! $images ]]; then
+			echo "No images. Running without -n or --dry-run flag won't remove any images."
+			echo #Spacing
 		else
-			IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
-		fi
-		if [[ $DRY_RUN == true ]]; then
-			echo "Dry run on removal of images:"
-			if [[ ! $untaggedImages ]]; then
-				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
-				echo #Spacing
-			else
-				echo "Running without -n or --dry-run flag will remove the listed untagged images:"
-				echo #Spacing
-				for i in "${images[@]}"; do
-					local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
-					echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
-				done
-				echo #Spacing
-			fi # End dry run
-		else
-			if [ ! "$untaggedImages" ]; then
+			echo "Running without -n or --dry-run flag will remove the listed images:"
+			echo #Spacing
+			for i in "${images[@]}"; do
+				local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
+				echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
+			done
+			echo #Spacing
+		fi # End dry run
+	else
+		if [ ! "$images" ]; then
 	        echo "No Untagged Images!"
 	    else
-					local count=0
-					echo "Cleaning Images..."
-					for i in "${untaggedImages[@]}"; do
-						if docker rmi -f $i 2>&1 | log ; then
-							count=$((count+1))
-						fi
-					done
-					echo "Images cleaned: $count"
+			local count=0
+			echo "Cleaning Images..."
+			for i in "${untaggedImages[@]}"; do
+				if docker rmi -f $i 2>&1 | log ; then
+					count=$((count+1))
+				fi
+			done
+			echo "Images cleaned: $count"
 	    fi
 	fi
 }
