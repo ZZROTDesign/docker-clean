@@ -58,6 +58,9 @@ declare CLEAN_VOLUMES=false
 # @info:	Boolean to flag if networks should be deleted.
 declare CLEAN_NETWORKS=false
 
+# @info:	Boolean to flag if machine/daemon should be reset.
+declare RESTART
+
 # @info:    Boolean to flag if tagged images are to be deleted.
 declare DELETE_TAGGED=false
 
@@ -83,13 +86,20 @@ function parseCli(){
 	while [[ $# > 0 ]]; do
 		key="$1"
 		case $key in
+			stop ) STOP_CONTAINERS=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+			images ) DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+			all ) STOP_CONTAINERS=true; DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			-s | --stop) STOP_CONTAINERS=true ;;
 			-n | --dry-run) DRY_RUN=true ;;
 			-l | --log) VERBOSE=true ;;
 			-c | --containers) CLEAN_CONTAINERS=true ;;
-			-i | --images) dockerClean 2 ;;
+			-i | --images) CLEAN_IMAGES=true ;;
+			-m | --volumes) CLEAN_VOLUMES=true ;;
 			-net | --networks) CLEAN_NETWORKS=true ;;
-			-a | --all) dockerClean 3 ;;
+			-r | --restart) RESTART=true ;;
+			-d | --created) DELETE_CREATED=false ;;
+			-t | --tagged) DELETE_TAGGED=true ;;
+			-a | --all) dockerClean 3 ;;	
 			-v | --version) version; exit 0 ;;
 			-h | --help | *) usage; exit 0 ;;
 		esac
