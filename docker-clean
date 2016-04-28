@@ -358,45 +358,6 @@ function cleanImages {
 	fi
 }
 
-# @info:	Deletes all Images including tagged
-# TODO strip images into an array and remove brackets and add newline
-function cleanAllImages {
-	IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
-	if [[ $DELETE_TAGGED ]]; then
-
-	if [[ $DRY_RUN == true ]]; then
-		echo "Dry run on removal of all images:"
-		if [[ ! $images ]]; then
-			echo "No images. Running without -n or --dry-run flag won't remove any images."
-			echo
-		else
-			echo "Running without -n or --dry-run flag will stop the listed containers:"
-			for i in "${images[@]}"; do
-				local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
-				echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
-			done
-			echo
-		fi # End dry run
-	else
-		if [ ! "$images" ]; then
-			echo "No images to delete!"
-		else
-			echo "Cleaning images..."
-			local tryCount=0
-			local count=0
-			while [[ "$images" ]] && [[ $tryCount -lt 5 ]]; do
-				((tryCount+=1))
-				for i in "${images[@]}"; do
-					if docker rmi -f $i &>/dev/null ; then
-						count=$((count+1))
-					fi
-				done
-			done
-			echo "Images cleaned: $count"
-		fi
-	fi
-}
-
 # @info:	Removes all Dangling Docker Volumes.
 function cleanVolumes {
 	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
