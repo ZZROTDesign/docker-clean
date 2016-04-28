@@ -326,21 +326,32 @@ function cleanImages {
 			echo "Running without -n or --dry-run flag will remove the listed images:"
 			echo #Spacing
 			for i in "${images[@]}"; do
-				local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
+				local repotag
+				repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
 				echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
 			done
 			echo #Spacing
 		fi # End dry run
 	else
 		if [ ! "$images" ]; then
-	        echo "No Untagged Images!"
+	        echo "No images to delete!"
 	    else
 			local count=0
-			echo "Cleaning Images..."
-			for i in "${untaggedImages[@]}"; do
-				if docker rmi -f $i 2>&1 | log ; then
-					count=$((count+1))
-				fi
+			echo "Cleaning images..."
+			while [[ $images ]] ; do
+				for i in "${images[@]}"; do
+					local output
+					local status
+					local repotag
+					repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
+					docker rmi -f $i &>/dev/null
+					status=$?
+					if [[ $status -eq 0 ]] ; then
+						count=$((count+1))
+						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $i"
+						echo $output | log
+					fi
+				done
 			done
 			echo "Images cleaned: $count"
 	    fi
