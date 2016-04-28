@@ -222,7 +222,6 @@ function stop {
 }
 
 # @info:	Removes all stopped docker containers.
-# TODO add dry run for created containers
 function cleanContainers {
 	if $DRY_RUN; then
 		if $STOP_CONTAINERS && $DELETE_CREATED; then
@@ -287,7 +286,7 @@ function cleanContainers {
 	fi
 }
 
-# @info:	Removes all untagged docker images.
+# @info:	Removes all untagged/tagged docker images.
 function cleanImages {
 	if $DELETE_TAGGED; then
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
@@ -345,7 +344,7 @@ function cleanImages {
 	fi
 }
 
-# @info:	Removes all Dangling Docker Volumes.
+# @info:	Removes all dangling Docker Volumes.
 function cleanVolumes {
 	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
 	if [[ $DRY_RUN == true ]]; then
@@ -483,30 +482,10 @@ function Check {
 	checkVersion
 }
 
-# @info: counts length of string passed in
-# Second argument passed in is optional to count the 64 character length of volumes
-function count {
-		toCount="$1"
-		divisor=12
-		if [[ $2 ]]; then
-			if [[ $2 =~ volume ]]; then
-				divisor=64
-			fi
-			divisor=64
-		fi
-    length=${#toCount}
-		## Works on OSX, Linux, but not Travis CI
-		#number_of_occurrences=$(grep -o "" <<< "$toCount" | wc -l)
-
-    if [[ $length != 0 ]]; then
-      number_of_occurrences=$(($length % $divisor + 1))
-		fi
-		echo $number_of_occurrences
-}
-
+# @info:	Accepts input to output if verbose mode is flagged.
 function log {
 	read IN
-	if [[ $VERBOSE == true ]]; then
+	if $VERBOSE; then
 		echo $IN
 	fi
 }
