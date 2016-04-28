@@ -83,7 +83,7 @@ function parseCli(){
 		CLEAN_NETWORKS=true
 		dockerClean
 	fi
-	while [[ $# > 0 ]]; do
+	while [[ $# -gt 0 ]]; do
 		key="$1"
 		case $key in
 			stop ) STOP_CONTAINERS=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
@@ -240,7 +240,7 @@ function stop {
 
 # @info:	Removes all stopped docker containers.
 # TODO add dry run for created containers
-function cleanContainers {
+#function cleanContainers {
 	# IFS=$'\n' read -rd '' -a stoppedContainers <<<"$(docker ps -qf STATUS=exited)"
 	# IFS=$'\n' read -rd '' -a createdContainers <<<"$(docker ps -qf STATUS=created)"
 	# if [[ $DRY_RUN == true ]]; then
@@ -308,28 +308,28 @@ function cleanContainers {
 	# 		echo "Created containers cleaned: $count"
 	# 	fi
 	# fi
-}
+#}
 
 # @info:	Removes all untagged docker images.
-#Credit goes to http://jimhoskins.com/2013/07/27/remove-untagged-docker-images.html
 function cleanImages {
-		# Commented is for older version docker, has a few bugs
-		# with parent/child images
-    #untaggedImages="$(docker images -a | grep "^<none>" | awk '{print $3}')"
-		IFS=$'\n' read -rd '' -a untaggedImages <<<"$(docker images -aq --filter "dangling=true")"
-
+		if [[ $DELETE_TAGGED ]]; then
+			IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+		else
+			IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
+		fi
 		if [[ $DRY_RUN == true ]]; then
-			echo "Dry run on removal of untagged Images:"
+			echo "Dry run on removal of images:"
 			if [[ ! $untaggedImages ]]; then
 				echo "No untagged images. Running without -n or --dry-run flag won't remove any untagged images."
-				echo
+				echo #Spacing
 			else
 				echo "Running without -n or --dry-run flag will remove the listed untagged images:"
+				echo #Spacing
 				for i in "${images[@]}"; do
 					local repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
 					echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
 				done
-				echo
+				echo #Spacing
 			fi # End dry run
 		else
 			if [ ! "$untaggedImages" ]; then
@@ -351,6 +351,8 @@ function cleanImages {
 # TODO strip images into an array and remove brackets and add newline
 function cleanAllImages {
 	IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	if [[ $DELETE_TAGGED ]]; then
+
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on removal of all images:"
 		if [[ ! $images ]]; then
