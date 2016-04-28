@@ -64,21 +64,25 @@ declare DELETE_TAGGED=false
 # @info:    Boolean to flag if Containers with status Created will be deleted or not.
 declare DELETE_CREATED=true
 
-# TODO: add variables for every possible input so that we can cycle through all flag options and allow multiple flags
-
-
-
 #FUNCTIONS
 
 # @info:    Parses and validates the CLI arguments
 # @args:	Global Arguments $@
+# TODO: handle use case where just -n or just -l flag is given
 function parseCli(){
-	if [ "$#" -eq 0 ]; then
+	if [[ "$#" -eq 0 ]]; then
 		CLEAN_CONTAINERS=true
 		CLEAN_IMAGES=true
 		CLEAN_VOLUMES=true
 		CLEAN_NETWORKS=true
 		dockerClean
+	fi
+	if [[ "$#" -eq 1 ]]; then
+		key="$1"
+		case $key in
+			-n | --dry-run) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+			-l | --log) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+		esac
 	fi
 	while [[ $# -gt 0 ]]; do
 		key="$1"
@@ -102,9 +106,6 @@ function parseCli(){
 		esac
 		shift
 	done
-	echo $STOP_CONTAINERS
-	echo $CLEAN_CONTAINERS
-	echo $CLEAN_IMAGES
 	dockerClean
 }
 
@@ -169,7 +170,7 @@ function checkDocker {
 # @info: Stops all running docker containers.
 function stop {
 	IFS=$'\n' read -rd '' -a runningContainers <<<"$(docker ps -q)"
-	if [[ $DRY_RUN == true ]]; then
+	if $DRY_RUN; then
 		echo "Dry run on stoppage of running containers:"
 		if [[ ! $runningContainers ]]; then
 			echo "No running containers. Running without -n or --dry-run flag won't stop any containers."
@@ -222,12 +223,12 @@ function stop {
 # @info:	Removes all stopped docker containers.
 # TODO add dry run for created containers
 function cleanContainers {
-	if [[ $DRY_RUN == true ]]; then
-		if [[ $STOP_CONTAINERS ]] && [[  $DELETE_CREATED ]] ; then
+	if $DRY_RUN; then
+		if $STOP_CONTAINERS && $DELETE_CREATED; then
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
-		elif [[ $STOP_CONTAINERS ]] && [[ ! $DELETE_CREATED ]] ; then
+		elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
-		elif [[ ! $STOP_CONTAINERS ]] && [[ $DELETE_CREATED ]] ; then
+		elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
 		fi
 		echo "Dry run on removal of stopped containers:"
