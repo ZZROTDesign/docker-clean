@@ -78,6 +78,7 @@ function parseCli(){
 		dockerClean
 	fi
 	if [[ "$#" -eq 1 ]]; then
+		#If there is only one flag, and it is dry run or log, set defaults
 		key="$1"
 		case $key in
 			-n | --dry-run) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
