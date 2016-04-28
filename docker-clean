@@ -309,23 +309,28 @@ function cleanImages {
 	        echo "No images to delete!"
 	    else
 			local count=0
+			local totalSize=0
 			echo "Cleaning images..."
 			while [[ $images ]] ; do
 				for i in "${images[@]}"; do
 					local output
 					local status
 					local repotag
+					local size
 					repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
+					size="$(docker inspect -f '{{json .Size}}' $i)"
 					docker rmi -f $i &>/dev/null
 					status=$?
 					if [[ $status -eq 0 ]] ; then
 						count=$((count+1))
+						totalSize=$((totalSize+size))
 						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $i"
 						echo $output | log
 					fi
 				done
 			done
 			echo "Images cleaned: $count"
+			echo "Total space freed:"
 	    fi
 	fi
 }
