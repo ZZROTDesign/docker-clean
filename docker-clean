@@ -59,7 +59,7 @@ declare CLEAN_VOLUMES=false
 declare CLEAN_NETWORKS=false
 
 # @info:	Boolean to flag if machine/daemon should be reset.
-declare RESTART
+declare RESTART=false
 
 # @info:    Boolean to flag if tagged images are to be deleted.
 declare DELETE_TAGGED=false
@@ -99,7 +99,7 @@ function parseCli(){
 			-r | --restart) RESTART=true ;;
 			-d | --created) DELETE_CREATED=false ;;
 			-t | --tagged) DELETE_TAGGED=true ;;
-			-a | --all) dockerClean 3 ;;	
+			-a | --all) dockerClean 3 ;;
 			-v | --version) version; exit 0 ;;
 			-h | --help | *) usage; exit 0 ;;
 		esac
