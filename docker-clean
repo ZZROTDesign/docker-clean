@@ -22,9 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# TODO: Revamp for multiple flags together
-# TODO: flag containers with mounted volumes (after array todo complete)
-
 
 #ENVIRONMENT VARIABLES
 
@@ -106,25 +103,6 @@ function parseCli(){
 		shift
 	done
 	dockerClean
-}
-
-function flagOptions() {
-	case $1 in
-		-s | --stop) stop ;;
-		-n | --dry-run)
-						DRY_RUN=true
-						dockerClean ;;
-		-l | --log)
-						VERBOSE=true
-		 				dockerClean ;;
-
-		-net | --networks) cleanNetworks;;
-		-v | --version) version ;;
-		-c | --containers) dockerClean 1 ;;
-		-i | --images) dockerClean 2 ;;
-		-a | --all) dockerClean 3 ;;
-		-h | --help | *) usage ;;
-	esac
 }
 
 # @info:	Prints out Docker-clean current version
@@ -580,11 +558,8 @@ function dockerClean {
 	if [[ $CLEAN_CONTAINERS ]]; then
 		cleanContainers
 	fi
-	if [[ $CLEAN_IMAGES ]] && [[ ! $DELETE_TAGGED ]]; then
+	if [[ $CLEAN_IMAGES ]]; then
 		cleanImages
-	fi
-	if [[ $CLEAN_IMAGES ]] && [[ $DELETE_TAGGED ]]; then
-		cleanAllImages
 	fi
 	if [[ $CLEAN_VOLUMES ]] && [[ $HAS_VERSION ]]; then
 		cleanVolumes
