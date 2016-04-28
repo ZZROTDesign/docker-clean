@@ -294,7 +294,7 @@ function cleanImages {
 	else
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
 	fi
-	if [[ $DRY_RUN == true ]]; then
+	if $DRY_RUN; then
 		echo "Dry run on removal of images:"
 		if [[ ! $images ]]; then
 			echo "No images. Running without -n or --dry-run flag won't remove any images."
@@ -551,6 +551,16 @@ fi
 		initSystem=rc
 	fi
 	echo $initSystem
+}
+
+# @info:	Echos the size of images removed in various measurements
+# @args:	The number of bytes moved
+function echoSize {
+	local mega
+	local giga
+	mega=$(($1/1000000))
+	giga=$(($1/1000000000))
+	echo "You've cleared approximately MB: $mega or GB: $giga of space!"
 }
 
 # @info:	Default run option, cleans stopped containers and images
