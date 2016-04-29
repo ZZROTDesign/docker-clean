@@ -18,14 +18,14 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
     brew tap zzrotdesign/tap
     brew install docker-clean
-    
+
 #### Upgrade (for new versions)
 
     brew update && brew upgrade docker-clean
-   
+
 For curl installs, re-running the script above will install the newest version.
-    
-    
+
+
 ## Usage
 
 For a more in depth look at the usage and commands run without browsing the script itself check out our [USAGE.md](https://github.com/ZZROTDesign/docker-clean/blob/master/USAGE.md).
@@ -78,6 +78,19 @@ https://github.com/ZZROTDesign/docker-clean/blob/master/REQUESTS.md
 
 Don’t get discouraged! We estimate that the response time from the
 maintainers is around: 24 hours.
+
+### ShellCheck
+
+We use ShellCheck to keep our code consistent and readable. Any feature pushed that does not pass a ShellCheck will fail on Travis build, and thus we cannot accept the pull request. Please lint your code before submitting it! :).
+
+(Keep in mind that bats does not have to be ShellChecked, and thus if you are adding tests to .bats don't worry about linting.)
+
+You can either download the ShellCheck program: https://github.com/koalaman/shellcheck or use the ShellCheck website: http://www.shellcheck.net/
+
+
+Don’t get discouraged! We estimate that the response time from the
+maintainers is around: 24 hours.
+
 ## License
 
 The code is available under the [MIT License](/LICENSE).
