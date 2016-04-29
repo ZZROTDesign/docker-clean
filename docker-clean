@@ -335,6 +335,7 @@ function cleanImages {
 						totalSize=$((totalSize+size))
 						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $i"
 						echo $output | log
+						unset images[$i]
 					fi
 				done
 			done
