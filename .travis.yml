@@ -19,6 +19,7 @@ before_install:
 - sudo apt-get install -qq bats
 - sudo apt-get -y install shellcheck
 script:
+- shellcheck docker-clean
 - bats batsTests.sh
 notifications:
   slack:
