@@ -347,7 +347,14 @@ function cleanImages {
 # @info:	Removes all dangling Docker Volumes.
 function cleanVolumes {
 	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
-	if [[ $DRY_RUN == true ]]; then
+	if $DRY_RUN; then
+		if $STOP_CONTAINERS && $DELETE_CREATED; then
+			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
+		elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
+			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
+		elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
+			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
+		fi
 		echo "Dry run on removal of dangling volumes:"
 		if [[ ! $danglingVolumes ]]; then
 			echo "No danlging volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
@@ -355,7 +362,8 @@ function cleanVolumes {
 		else
 			echo "Running without -n or --dry-run flag will stop the listed dangling volumes:"
 			for i in "${danglingVolumes[@]}"; do
-				local driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
+				local driver
+				driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
 				echo "DRIVER: $driver NAME: $i"
 			done
 			echo #For spacing
@@ -364,12 +372,24 @@ function cleanVolumes {
 	    if [ ! "$danglingVolumes" ]; then
 	        echo "No dangling volumes!"
 	    else
-					echo "Cleaning volumes..."
-					local count=0
-	        		if docker volume rm $danglingVolumes 2>&1 | log ; then
-						count=$((count+1))
-					fi
-					echo "Volumes cleaned: $count"
+			echo "Cleaning volumes..."
+			local count=0
+			for i in "${danglingVolumes[@]}"; do
+				local status
+				local output
+				local driver
+				driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
+				docker volume rm $i &>/dev/null
+				status=$?
+				if [[ $status -eq 0 ]] ; then
+					count=$((count+1))
+					output="DELETED DRIVER: $driver NAME: $i"
+					echo $output | log
+				else
+					output="COULD NOT DELETE DRIVER: $driver NAME: $i"
+				fi
+				echo "Volumes cleaned: $count"
+			done
 	    fi
 	fi
 }
