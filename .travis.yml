@@ -5,6 +5,12 @@ env:
   global:
   - DOCKER_VERSION=1.11.0-0~trusty
   - DOCKER_COMPOSE_VERSION=1.7.0
+addons:
+  apt:
+    sources:
+    - debian-sid    # Grab shellcheck from the Debian repo (o_O)
+    packages:
+    - shellcheck
 before_install:
 - apt-cache madison docker-engine
 - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
@@ -14,10 +20,8 @@ before_install:
 - chmod +x docker-compose
 - sudo mv docker-compose /usr/local/bin
 - sudo add-apt-repository ppa:duggan/bats --yes
-- sudo add-apt-repository -y "deb http://mirrors.kernel.org/ubuntu utopic main universe"
 - sudo apt-get update -qq
 - sudo apt-get install -qq bats
-- sudo apt-get -y install shellcheck
 script:
 - shellcheck docker-clean
 - bats batsTests.sh
