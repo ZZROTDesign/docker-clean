@@ -112,9 +112,10 @@
   clean
 }
 
+# TODO fully implement this test for this colume test
 @test "Clean Volumes function" {
   skip "Work in progress"
-  build
+  run docker run -d -P --name web -v /webapp training/webapp python app.py
   [ $status = 0 ]
 
   clean
