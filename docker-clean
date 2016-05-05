@@ -196,9 +196,9 @@ function stop {
 				local name
 				local path
 				local args
-				name="$(docker inspect -f '{{json .Name}}' $i)"
-				path="$(docker inspect -f '{{json .Path}}' $i)"
-				args="$(docker inspect -f '{{json .Args}}' $i)"
+				name="$(docker inspect -f '{{json .Name}}' "$i")"
+				path="$(docker inspect -f '{{json .Path}}' "$i")"
+				args="$(docker inspect -f '{{json .Args}}' "$i")"
 				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
             echo #Spacing
@@ -215,18 +215,18 @@ function stop {
 				local name
 				local path
 				local args
-				name="$(docker inspect -f '{{json .Name}}' $i)"
-				path="$(docker inspect -f '{{json .Path}}' $i)"
-				args="$(docker inspect -f '{{json .Args}}' $i)"
+				name="$(docker inspect -f '{{json .Name}}' "$i")"
+				path="$(docker inspect -f '{{json .Path}}' "$i")"
+				args="$(docker inspect -f '{{json .Args}}' "$i")"
 				docker stop "$i" &>/dev/null
 				status=$?
 				if [[ $status -eq 0 ]] ; then
 					count=$((count+1))
 					output="STOPPED: ID: $i IMAGE: $path/$args NAME: $name"
-					echo $output | log
+					echo "$output" | log
 				else
 					output="COULD NOT STOP: ID: $i IMAGE: $path/$args NAME: $name"
-					echo $output | log
+					echo "$output" | log
 				fi
 			done
 			echo "Containers stopped: $count"
@@ -250,9 +250,9 @@ function cleanContainers {
 				local name
 				local path
 				local args
-				name="$(docker inspect -f '{{json .Name}}' $i)"
-				path="$(docker inspect -f '{{json .Path}}' $i)"
-				args="$(docker inspect -f '{{json .Args}}' $i)"
+				name="$(docker inspect -f '{{json .Name}}' "$i")"
+				path="$(docker inspect -f '{{json .Path}}' "$i")"
+				args="$(docker inspect -f '{{json .Args}}' "$i")"
 				echo "Container ID: $i IMAGE: $path/$args NAME: $name"
 			done
 			echo #Spacing
@@ -274,18 +274,18 @@ function cleanContainers {
 				local name
 				local path
 				local args
-				name="$(docker inspect -f '{{json .Name}}' $i)"
-				path="$(docker inspect -f '{{json .Path}}' $i)"
-				args="$(docker inspect -f '{{json .Args}}' $i)"
+				name="$(docker inspect -f '{{json .Name}}' "$i")"
+				path="$(docker inspect -f '{{json .Path}}' "$i")"
+				args="$(docker inspect -f '{{json .Args}}' "$i")"
 				docker rm "$i" &>/dev/null
 				status=$?
 				if [[ $status -eq 0 ]] ; then
 					count=$((count+1))
 					output="DELETED: ID: $i IMAGE: $path/$args NAME: $name"
-					echo $output | log
+					echo "$output" | log
 				else
 					output="COULD NOT DELETE: ID: $i IMAGE: $path/$args NAME: $name"
-					echo $output | log
+					echo "$output" | log
 				fi
 			done
 			echo "Stopped containers cleaned: $count"
@@ -340,13 +340,13 @@ function volumesToDelete {
 
 	for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
 		# IF not used by other containers
-		new="$(docker inspect -f '{{json .Mounts}}' $i)"
+		new="$(docker inspect -f '{{json .Mounts}}' "$i")"
 		#if [[ arrayContains "$new" "${images[@]}" == 0 ]]; then
 		#	echo FOUND!!!!!!!!
 		#else
 		#	echo NOT FOUND!!!!
 		#fi
-		echo NEW VOLUME is $new
+		echo NEW VOLUME is "$new"
 	done
 	return 1
 }
@@ -405,8 +405,8 @@ function cleanImages {
 			for i in "${images[@]}"; do
 				local repotag
 				local size
-				repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
-				size="$(docker inspect -f '{{json .Size}}' $i)"
+				repotag="$(docker inspect -f '{{json .RepoTags}}' "$i")"
+				size="$(docker inspect -f '{{json .Size}}' "$i")"
 				echo "REPOSITORY/TAG: $repotag IMAGE ID: $i"
 				totalSize=$((totalSize+size))
 			done
