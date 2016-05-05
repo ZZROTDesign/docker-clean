@@ -24,7 +24,9 @@
 #
 # TODO Function to check for which images containers are using
 # TODO fully implement the created containers function so that created containers aren't removed by Default
-# TODO maybe add a ratio of the number of containers/images that are being removed (could be confusing, but could clarify as well)
+
+# TODO change default to not remove stopped containers
+# TODO change -all to all but restart, add a -r --restart to restart daemon
 
 
 #ENVIRONMENT VARIABLES
@@ -70,8 +72,9 @@ declare DELETE_CREATED=true
 
 # @info:	Global arrays of objects that would be deleted, used for dry run accuracy.
 declare -a CONTAINTERS_TO_DELETE	# Currently in use
-#declare -a REMAINING_CONTAINERS		# Currently in use
-#declare -a IMAGES_TO_DELETE			# Work in progress
+declare -a REMAINING_CONTAINERS		# Currently in use
+declare -a IMAGES_IN_USE			# Work in progress
+declare -a UNUSED_IMAGES			# Work in progress
 #declare -a VOLUMES_TO_DELETE		# Not in use
 #declare -a NETWORKS_TO_DELETE		# Not in use
 
@@ -291,99 +294,6 @@ function cleanContainers {
 			echo "Stopped containers cleaned: $count"
 	    fi
 	fi
-}
-
-# @info:	Returns 0 if array contains string, 1 if it does not.
-# @info:	NOTE: Must run status check after calling to check result.
-# @args:	Arg 1 is string, arg2 is array
-function arrayContains {
-		for i in "${@:2}"; do
-			[[ "$i" == "$1" ]] && return 0;
-		done
-		return 1
-}
-
-# @info: sets global container variable arrays
-# @args: delete --> returns containers to be deleted, remaining --> returns non-deleted containers
-function containersToDelete {
-	local -a remainingContainers
-	if $STOP_CONTAINERS && $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
-	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
-		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=created)"
-	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
-		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=running)"
-	fi
-
-	if [[ $1 =~ delete ]]; then
-		for value in "${containers[@]}" ; do
-			echo "$value"
-		done
-	elif [[ $1 =~ remaining ]]; then
-		for value in "${remainingContainers[@]}" ; do
-			echo "$value"
-		done
-	fi
-}
-
-# @info sets global array variable for volumes to delete. CURRENTLY NOT IN USE
-function volumesToDelete {
-	if $STOP_CONTAINERS && $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
-	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
-	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
-	fi
-
-	for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
-		# IF not used by other containers
-		new="$(docker inspect -f '{{json .Mounts}}' "$i")"
-		#if [[ arrayContains "$new" "${images[@]}" == 0 ]]; then
-		#	echo FOUND!!!!!!!!
-		#else
-		#	echo NOT FOUND!!!!
-		#fi
-		echo NEW VOLUME is "$new"
-	done
-	return 1
-}
-
-# TODO implement this to check containers for ones using the images still
-#@ info sets global images to delete for dry run. CURRENTLY NOT IN USE
-function imagesToDelete {
-	if $DELETE_TAGGED; then
-		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
-	else
-		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
-	fi
-
-	# For loop goes through appending to array of images with images used in containers queued to remove
-	#for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
-		# IF not used by other containers
-	#	new="$(docker inspect -f '{{json .Image}}' $i)"
-	#	new=${new##*:} # Cuts inspect output off before the colon -- "sha:"
-	#	new=${new:0:12} # Take only first 12 characters from image sha
-		#if [[ arrayContains "$new" "${images[@]}" == 0 ]]; then
-		#	echo FOUND!!!!!!!!
-		#else
-		#	echo NOT FOUND!!!!
-		#fi
-	#	declare -a lol
-		#echo $new
-	#	arrayContains "$new" "${images[@]}"
-	#	found=$?
-
-	#done
-	#images+=$new
-	#echo $new
-
-}
-
-function networksToDelete {
-	return 1
 }
 
 # @info:	Removes all untagged/tagged docker images.
@@ -681,11 +591,102 @@ function echoSize {
 	fi
 }
 
+# @info:	Returns 0 if array contains string, 1 if it does not.
+# @info:	NOTE: Must run status check after calling to check result.
+# @args:	Arg 1 is string, arg2 is array
+function arrayContains {
+		for i in "${@:2}"; do
+			[[ "$i" == "$1" ]] && return 0;
+		done
+		return 1
+}
+
+# @info: sets global container variable arrays
+# @args: delete --> returns containers to be deleted, remaining --> returns non-deleted containers
+function containersToDelete {
+	local -a remainingContainers
+	if $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
+	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
+		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=created)"
+	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
+		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=running)"
+	fi
+
+	if [[ $1 =~ delete ]]; then
+		for value in "${containers[@]}" ; do
+			echo "$value"
+		done
+	elif [[ $1 =~ remaining ]]; then
+		for value in "${remainingContainers[@]}" ; do
+			echo "$value"
+		done
+	fi
+}
+
+# CURRENTLY NOT IN USE
+# @info sets global array variable for volumes to delete.
+function volumesToDelete {
+	if $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
+	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
+	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
+	fi
+
+	for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
+		# IF not used by other containers
+		new="$(docker inspect -f '{{json .Mounts}}' "$i")"
+		#if [[ arrayContains "$new" "${images[@]}" == 0 ]]; then
+		#	echo FOUND!!!!!!!!
+		#else
+		#	echo NOT FOUND!!!!
+		#fi
+		echo NEW VOLUME is "$new"
+	done
+	return 1
+}
+
+# TODO implement this to check containers for ones using the images still
+#@ info sets global images to delete for dry run. CURRENTLY NOT IN USE
+function imagesToDelete {
+	if $DELETE_TAGGED; then
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	else
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
+	fi
+
+	# For loop goes through appending to array of images with images used in containers queued to remove
+	declare -a used
+	for i in "${REMAINING_CONTAINERS[@]}" ; do
+		# IF not used by other containers
+
+		new="$(docker inspect -f '{{json .Image}}' $i)"
+		new=${new##*:} 		# Cuts inspect output off before the colon -- "sha:"
+		new=${new:0:12} 	# Take only first 12 characters from image sha
+		arrayContains "$new" "${images[@]}"
+		contained=$?
+		#if [[ contained -eq 0 ]]; then
+			echo $new
+	done
+	for j in
+
+}
+
+function networksToDelete {
+	return 1
+}
+
+
 # @info:	sets global variables for a dry run
 function setDryRunGlobal {
 	IFS=$'\n'
 	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
-	#REMAINING_CONTAINERS=($(containersToDelete remaining))
+	REMAINING_CONTAINERS=($(containersToDelete remaining))
+	IMAGES_IN_USE=($(imagesToDelete))
 	#VOLUMES_TO_DELETE=($(volumesToDelete))
 }
 # @info:	Default run option, cleans stopped containers and images
@@ -717,4 +718,8 @@ function dockerClean {
 # @info:	Main function
 Check
 parseCli "$@"
+echo USED IMAGES
+for i in "${IMAGES_IN_USE[@]}"; do
+	echo $i
+done
 exit 0
