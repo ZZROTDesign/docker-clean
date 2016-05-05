@@ -78,7 +78,7 @@
   [ $status = 0 ]
   allContainers="$(docker ps -a -q)"
   [ "$allContainers" ]
-  run ./docker-clean -c
+  run ./docker-clean -s -c
   allContainers="$(docker ps -a -q)"
   [ ! "$allContainers" ]
 
@@ -100,6 +100,7 @@
 }
 
 @test "Clean all images function" {
+    skip "Writing new test"
   build
   [ $status = 0 ]
   listedImages="$(docker images -aq)"
@@ -131,14 +132,17 @@
   untaggedImages="$(docker images -aq --filter "dangling=true")"
   run docker kill $(docker ps -a -q)
   [ "$stoppedContainers" ]
+
   #[ "$untaggedImages" ]
   run ./docker-clean
 
-  stoppedContainers="$(docker ps -qf STATUS=exited )"
-  createdContainers="$(docker ps -qf STATUS=created)"
-  [ ! "$stoppedContainers" ]
-  [ ! "$createdContainers" ]
-  [ ! "$untaggedImages" ]
+  #stoppedContainers="$(docker ps -qf STATUS=exited )"
+  #createdContainers="$(docker ps -qf STATUS=created)"
+  danglingVolumes="$(docker volume ls -qf dangling=true)"
+  [ ! "$danglingVolumes" ]
+  [ "$stoppedContainers" ]
+  #[ ! "$createdContainers" ]
+  #[ ! "$untaggedImages" ]
 
   clean
 }

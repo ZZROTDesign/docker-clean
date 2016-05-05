@@ -83,13 +83,13 @@ declare -a REMAINING_CONTAINERS		# Currently in use
 # TODO: handle use case where just -n or just -l flag is given
 function parseCli(){
 	if [[ "$#" -eq 0 ]]; then
-		CLEAN_CONTAINERS=false # changed to false so doesn't exit containers
+		CLEAN_CONTAINERS=true # changed to false so doesn't exit containers
 		CLEAN_IMAGES=true
 		CLEAN_VOLUMES=true
 		CLEAN_NETWORKS=true
 		dockerClean
 	fi
-	if [[ "$#" -eq 1 ]]; then
+	if [[ "$#" -gt 0 ]]; then
 		#If there is only one flag, and it is dry run or log, set defaults
 		key="$1"
 		case $key in
@@ -263,7 +263,7 @@ function cleanContainers {
 		else
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited)"
 		fi
-	    if [ ! "$containers" ]; then
+	    if [ ! "${CONTAINTERS_TO_DELETE}" ]; then
 	        echo "No containers To clean!"
 	    else
 			local count=0
@@ -698,9 +698,9 @@ function setDryRunGlobal {
 }
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
-	if [[ $DRY_RUN == true ]]; then
-		setDryRunGlobal
-	fi
+	#if [[ $DRY_RUN == true ]]; then
+	setDryRunGlobal
+	#fi
 
 	if $STOP_CONTAINERS; then
 		stop
