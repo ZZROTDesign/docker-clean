@@ -68,6 +68,10 @@ declare DELETE_TAGGED=false
 # @info:    Boolean to flag if Containers with status Created will be deleted or not.
 declare DELETE_CREATED=true
 
+# @info:	Global array of Containers that would be deleted, used for dry run accuracy.
+declare -a CONTAINTERS_TO_DELETE
+
+
 #FUNCTIONS
 
 # @info:    Parses and validates the CLI arguments
@@ -225,6 +229,7 @@ function stop {
 	fi
 }
 
+
 # @info:	Removes all stopped docker containers.
 function cleanContainers {
 	if $DRY_RUN; then
@@ -235,6 +240,8 @@ function cleanContainers {
 		elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
 		fi
+		# Set global Dry run variable for containers to delete for image, network, and volume removal accuracy
+		CONTAINTERS_TO_DELETE=("${containers[@]}")
 		echo "Dry run on removal of stopped containers:"
 		if [[ ! $containers ]]; then
 			echo "No removable containers. Running without -n or --dry-run flag won't remove any containers."
@@ -288,6 +295,20 @@ function cleanContainers {
 			echo "Stopped containers cleaned: $count"
 	    fi
 	fi
+}
+
+function inCleanedContainer {
+	if $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
+	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
+	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
+	fi
+
+	for value in "${containers[@]}" ; do
+		echo "$value"
+	done
 }
 
 # @info:	Removes all untagged/tagged docker images.
@@ -347,6 +368,10 @@ function cleanImages {
 	    fi
 	fi
 }
+
+#function isDeleted {
+
+#}
 
 # @info:	Removes all dangling Docker Volumes.
 function cleanVolumes {
@@ -592,9 +617,20 @@ function dockerClean {
 	if $RESTART;  then
 		restartMachine
 	fi
+	inCleanedContainer
 }
 
 # @info:	Main function
 Check
 parseCli "$@"
+echo
+echo TO DELETE
+IFS=$'\n'
+#IFS=$'\n' read -rd '' -a CONTAINTERS_TO_DELETE <<<"$(inCleanedContainer)"
+CONTAINTERS_TO_DELETE=($(inCleanedContainer))
+#CONTAINTERS_TO_DELETE=("${CONTAINTERS_TO_DELETE[@]%%:*}")
+for value in "${CONTAINTERS_TO_DELETE[@]}" ; do
+	echo $value
+done
+#inCleanedContainer
 exit 0
