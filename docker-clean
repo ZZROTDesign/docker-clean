@@ -520,7 +520,7 @@ function cleanNetworks {
 		# Add Stopped containers' empty networks if they would exist
 		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
 			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
-				id="$(docker inpect -f '{{json .NetworkSettings.Networks.NetworkID}}')"
+				id="$(docker inspect -f '{{json .NetworkSettings.Networks.NetworkID}}')"
 				arrayContains "$id" "${emptyNetworks[@]}"
 				inNetworkArray=$?
 				if [[ $id != null && $inNetworkArray == false ]]; then
