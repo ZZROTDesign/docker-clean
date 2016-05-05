@@ -463,13 +463,13 @@ function cleanImages {
 function cleanVolumes {
 	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
 	if $DRY_RUN; then
-		if $STOP_CONTAINERS && $DELETE_CREATED; then
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
-		elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
-		elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
-		fi
+		#if $STOP_CONTAINERS && $DELETE_CREATED; then
+		#	IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
+		#elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
+		#	IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
+		#elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
+		#	IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
+		#fi
 
 		echo "Dry run on removal of dangling volumes:"
 		if [[ ! $danglingVolumes ]]; then
@@ -481,15 +481,27 @@ function cleanVolumes {
 				local driver
 				driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
 				echo "DRIVER: $driver NAME: $i"
+				echo # for spacing
 			done
-			echo #For spacing
+			if [[ $CONTAINTERS_TO_DELETE ]]; then
+				echo "Cleaning dangling volumes from new containers to be deleted..."
+				for j in "$CONTAINTERS_TO_DELETE"; do
+					local status
+					local output
+					local driver
+					name="$(docker inspect -f '{{json .Mounts}}' $j)"
+					echo VOLUME: $name
+				done
+				echo #For spacing
+			fi
 		fi # End dry run
 	else
 	    if [ ! "$danglingVolumes" ]; then
 	        echo "No dangling volumes!"
 	    else
-			echo "Cleaning volumes..."
+			echo "Cleaning volumes existing..."
 			local count=0
+			# dry run removal of danlging volumes
 			for i in "${danglingVolumes[@]}"; do
 				local status
 				local output
