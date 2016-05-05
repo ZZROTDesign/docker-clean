@@ -71,9 +71,9 @@ declare DELETE_CREATED=true
 # @info:	Global arrays of objects that would be deleted, used for dry run accuracy.
 declare -a CONTAINTERS_TO_DELETE	# Currently in use
 declare -a REMAINING_CONTAINERS		# Currently in use
-declare -a IMAGES_TO_DELETE			# Work in progress
-declare -a VOLUMES_TO_DELETE		# Not in use
-declare -a NETWORKS_TO_DELETE		# Not in use
+#declare -a IMAGES_TO_DELETE			# Work in progress
+#declare -a VOLUMES_TO_DELETE		# Not in use
+#declare -a NETWORKS_TO_DELETE		# Not in use
 
 
 #FUNCTIONS
@@ -239,7 +239,7 @@ function stop {
 function cleanContainers {
 	if $DRY_RUN; then
 		echo "Dry run on removal of stopped containers:"
-		if [[ ! $CONTAINTERS_TO_DELETE ]]; then
+		if [[ ! ${CONTAINTERS_TO_DELETE[@]} ]]; then
 			echo "No removable containers. Running without -n or --dry-run flag won't remove any containers."
 			echo #Spacing
 		fi
@@ -268,7 +268,7 @@ function cleanContainers {
 	    else
 			local count=0
 			echo "Cleaning containers..."
-			for i in "${containers[@]}"; do
+			for i in "${CONTAINTERS_TO_DELETE[@]}"; do
 				local output
 				local status
 				local name
@@ -317,11 +317,11 @@ function containersToDelete {
 		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=running)"
 	fi
 
-	if [[ $1 =~ "delete" ]]; then
+	if [[ $1 =~ delete ]]; then
 		for value in "${containers[@]}" ; do
 			echo "$value"
 		done
-	elif [[ $1 =~ "remaining" ]]; then
+	elif [[ $1 =~ remaining ]]; then
 		for value in "${remainingContainers[@]}" ; do
 			echo "$value"
 		done
@@ -361,7 +361,6 @@ function imagesToDelete {
 	fi
 
 	# For loop goes through appending to array of images with images used in containers queued to remove
-	declare -a imagesOfStoppedContainers
 	#for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
 		# IF not used by other containers
 	#	new="$(docker inspect -f '{{json .Image}}' $i)"
@@ -520,9 +519,9 @@ function cleanNetworks {
 		echo "Dry run on removal of networks:"
 		# Add Stopped containers' empty networks if they would exist
 		if [[ $CONTAINTERS_TO_DELETE ]]; then
-			for j in "${CONTAINTERS_TO_DELETE}"; do
+			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
 				id="$(docker inpect -f '{{json .NetworkSettings.Networks.NetworkID}}')"
-				arrayContains $id ${emptyNetworks[@]}
+				arrayContains $id "${emptyNetworks[@]}"
 				inNetworkArray=$?
 				if [[ $id != null && $inNetworkArray == false ]]; then
 					emptyNetworks+=$id
@@ -561,7 +560,7 @@ function cleanNetworks {
 function restartMachine {
 	operating_system=$(testOS)
 	#if [[ $DRY_RUN == false ]]; then
-		if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
+		if [[ $operating_system =~ mac || $operating_system =~ windows ]]; then
 			active="$(docker-machine active)"
 			if [[ $DRY_RUN == false ]]; then
 				docker-machine restart $active
@@ -572,7 +571,7 @@ function restartMachine {
 			eval $(docker-machine env $active)
 			echo "Running docker-machine env $active..."
 			echo "New IP Address for" $active ":" $(docker-machine ip)
-		elif [[ $operating_system =~ "linux" ]]; then
+		elif [[ $operating_system =~ linux ]]; then
 			if [[ $DRY_RUN == false ]]; then
 				echo "Restarting Docker..."
 				echo "Restarting this service requires sudo privileges"
@@ -581,19 +580,19 @@ function restartMachine {
 			fi
 			init_system=$(linuxInitSystem)
 			# Upstart covers SysV and OpenRC as well.
-			if [[ $init_system =~ 'upstart'  ]]; then
+			if [[ $init_system =~ upstart  ]]; then
 				if [[ $DRY_RUN == false ]]; then
 					sudo service docker restart
 				else
 					echo "Restart command that would be run: sudo service docker restart"
 				fi
-			elif [[ $init_system =~ 'systemd' ]]; then
+			elif [[ $init_system =~ systemd ]]; then
 				if [[ $DRY_RUN == false ]]; then
 					sudo systemctl restart docker.service
 				else
 					echo "Restart command that would be run: sudo systemctl restart docker.service"
 				fi
-			elif [[ $init_system =~ 'rc' ]]; then
+			elif [[ $init_system =~ rc ]]; then
 				if [[ $DRY_RUN == false ]]; then
 					sudo launchctl restart docker
 				else
