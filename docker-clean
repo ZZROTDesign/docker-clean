@@ -22,6 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
+# TODO Function to check for which images containers are using
+# TODO fully implement the created containers function so that created containers aren't removed by Default
+# TODO maybe add a ratio of the number of containers/images that are being removed (could be confusing, but could clarify as well)
+
 
 #ENVIRONMENT VARIABLES
 
@@ -126,13 +130,13 @@ function usage {
   	echo "-c or --containers  Stops and removes Stopped and Running Containers"
   	echo "-i or --images      Stops and removes all Containers and Images"
   	echo "-net or --networks  Removes all empty Networks"
-	echo "-s or --stop        Stops all running Containers"
-	echo
-	echo "--dry-run           Adding this additional flag at the end will list items to be"
-	echo "                    removed without running the remove or stop commands"
-	echo
-	echo "-l or --log         Adding this as an additional flag will list all"
-	echo "                    image, volume, and container deleting output"
+		echo "-s or --stop        Stops all running Containers"
+		echo
+		echo "--dry-run           Adding this additional flag at the end will list items to be"
+		echo "                    removed without running the remove or stop commands"
+		echo
+		echo "-l or --log         Adding this as an additional flag will list all"
+		echo "                    image, volume, and container deleting output"
 }
 
 # @info:	Prints out 3-point version (000.000.000) without decimals for comparison
