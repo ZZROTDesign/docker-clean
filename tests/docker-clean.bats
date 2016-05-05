@@ -152,12 +152,17 @@
   build
   [ $status = 0 ]
   run docker kill $(docker ps -a -q)
-  run ./docker-clean
-  [[ ${lines[0]} =~ "Cleaning containers..." ]]
-  [[ ${lines[1]} =~ "1" ]]
-  run ./docker-clean -i
-  [[ ${lines[1]} =~ "Cleaning images..."  ]]
-  [[ ${lines[2]} =~ "4" ]]
+  run ./docker-clean -s -c
+  [[ $output =~ "Cleaning containers" ]]
+  [[ $output =~ "1" ]]
+  build
+  run docker run -d -P --name web -v /webapp training/webapp python app.py
+  run ./docker-clean -s -c
+  [[ $output =~ "Cleaning containers" ]]
+  [[ $output =~ "2" ]]
+  #run ./docker-clean -i
+  #[[ $output =~ "Cleaning images..."  ]]
+  #[[ $output =~ "4" ]]
 
   clean
 }
