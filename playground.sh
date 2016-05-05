@@ -88,6 +88,14 @@ function cleanContainers {
 		fi
 }
 
+function arrayContains {
+		for i in "${@:2}"; do
+			[[ "$i" == "$1" ]] && return 0;
+		done
+		return 1
+}
+
+
 function build() {
     if [ "$(docker ps -a -q)" ]; then
       docker rm -f $(docker ps -a -q)
@@ -101,7 +109,15 @@ function build() {
     #run docker run -d alpine-caddy
     #run docker kill ghost
 }
+containsElement () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
 
+array=("something to search for" "a string" "test2000")
+arrayContains "a string" "${array[@]}"
+#echo $?
 build
 #images=$(docker images -a -q)
 #echo ${#images}

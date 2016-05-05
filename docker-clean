@@ -305,15 +305,18 @@ function cleanContainers {
 	fi
 }
 
+# @info:	Returns 0 if array contains string, 1 if it does not.
+# @args:	Arg 1 is string, arg2 is array
 function arrayContains {
 		for i in "${@:2}"; do
 			[[ "$i" == "$1" ]] && return 0;
 		done
 		return 1
-
-		#statements
 }
-function inCleanedContainer {
+
+# @info: sets global container variable arrays
+# @args: delete --> returns containers to be deleted, remaining --> returns non-deleted containers
+function containersToDelete {
 	local -a remainingContainers
 	if $STOP_CONTAINERS && $DELETE_CREATED; then
 		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
@@ -336,7 +339,26 @@ function inCleanedContainer {
 	fi
 }
 
+
 function volumesToDelete {
+	if $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
+	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
+	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
+		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
+	fi
+
+	for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
+		# IF not used by other containers
+		new="$(docker inspect -f '{{json .Mounts}}' $i)"
+		#if [[ arrayContains "$new" "${images[@]}" == 0 ]]; then
+		#	echo FOUND!!!!!!!!
+		#else
+		#	echo NOT FOUND!!!!
+		#fi
+		echo NEW VOLUME is $new
+	done
 	return 1
 }
 
@@ -349,13 +371,26 @@ function imagesToDelete {
 	fi
 
 	# For loop goes through appending to array of images with images used in containers queued to remove
-	for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
+	declare -a imagesOfStoppedContainers
+	#for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
 		# IF not used by other containers
-		new="$(docker inspect -f '{{json .Image}}' $i)"
-		new=${new##*:} # Cuts inspect output off before the colon -- "sha:"
-		images+=$new
-		echo $new
-	done
+	#	new="$(docker inspect -f '{{json .Image}}' $i)"
+	#	new=${new##*:} # Cuts inspect output off before the colon -- "sha:"
+	#	new=${new:0:12} # Take only first 12 characters from image sha
+		#if [[ arrayContains "$new" "${images[@]}" == 0 ]]; then
+		#	echo FOUND!!!!!!!!
+		#else
+		#	echo NOT FOUND!!!!
+		#fi
+	#	declare -a lol
+		#echo $new
+	#	arrayContains "$new" "${images[@]}"
+	#	found=$?
+
+	#done
+	#images+=$new
+	#echo $new
+
 }
 
 function networksToDelete {
@@ -435,6 +470,7 @@ function cleanVolumes {
 		elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
 		fi
+
 		echo "Dry run on removal of dangling volumes:"
 		if [[ ! $danglingVolumes ]]; then
 			echo "No danlging volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
@@ -649,17 +685,17 @@ function echoSize {
 
 function setDryRunGlobal {
 	IFS=$'\n'
-	CONTAINTERS_TO_DELETE=($(inCleanedContainer delete))
-	REMAINING_CONTAINERS=($(inCleanedContainer remaining))
-	images=($(imagesToDelete))
+	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
+	REMAINING_CONTAINERS=($(containersToDelete remaining))
+	images=($(volumesToDelete))
 	echo IMAGESSSSS $images
 }
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
 	if [[ $DRY_RUN == true ]]; then
 		#IFS=$'\n'
-		#CONTAINTERS_TO_DELETE=($(inCleanedContainer delete))
-		#REMAINING_CONTAINERS=($(inCleanedContainer remaining))
+		#CONTAINTERS_TO_DELETE=($(containersToDelete delete))
+		#REMAINING_CONTAINERS=($(containersToDelete remaining))
 		setDryRunGlobal
 	fi
 
@@ -689,12 +725,11 @@ parseCli "$@"
 echo
 echo TO DELETE
 
-#IFS=$'\n' read -rd '' -a CONTAINTERS_TO_DELETE <<<"$(inCleanedContainer)"
-#CONTAINTERS_TO_DELETE=($(inCleanedContainer))
+#IFS=$'\n' read -rd '' -a CONTAINTERS_TO_DELETE <<<"$(containersToDelete)"
+#CONTAINTERS_TO_DELETE=($(containersToDelete))
 #CONTAINTERS_TO_DELETE=("${CONTAINTERS_TO_DELETE[@]%%:*}")
 #for value in "${CONTAINTERS_TO_DELETE[@]}" ; do
 for value in "${REMAINING_CONTAINERS[@]}" ; do
 	echo $value
 done
-inCleanedContainer
 exit 0
