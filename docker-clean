@@ -445,17 +445,13 @@ function cleanImages {
 	fi
 }
 
-#function isDeleted {
-
-#}
-
 # @info:	Removes all dangling Docker Volumes.
 function cleanVolumes {
 	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
 	if $DRY_RUN; then
 		echo "Dry run on removal of dangling volumes:"
 		if [[ ! $danglingVolumes ]]; then
-			echo "No danlging volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
+			echo "No existing dangling volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
 			echo
 		else
 			echo "Running without -n or --dry-run flag will stop the listed dangling volumes:"
@@ -468,7 +464,7 @@ function cleanVolumes {
 
 		fi
 		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
-			echo "Cleaning dangling volumes from new containers to be deleted..."
+			echo "Dangling volumes that would be removed from containers to be deleted..."
 			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
 				local status
 				local output
@@ -608,16 +604,6 @@ function restartMachine {
 			echo "https://github.com/ZZROTDesign/docker-clean and open an issue."
 			exit 2
 		fi
-	#else
-		#echo "Docker daemon would now restart if docker-clean is run without -n or -dry-run."
-		#if [[ $operating_system =~ "linux" ]]; then
-	#		init_system=$(linuxInitSystem)
-	#		echo "Command that would be used to restart:"
-	#		if [[ $init_system =~ 'upstart'  ]]; then
-	#			echo "Command that would be used to restart:sudo service docker restart"
-#fi
-		#fi
-	#fi
 }
 
 # @info:	Runs the checks before the main code can be run.
@@ -657,14 +643,12 @@ function testOS {
 # Function for testing linux initSystem
 function linuxInitSystem {
 	# To include hidden files
-	#shopt -s nullglob dotglob
+	shopt -s nullglob dotglob
 
 	# Get sudo privileges
 	if [ $EUID != 0 ]; then
     sudo "$?" &>/dev/null
-	#sudo "$0" "$@" &>/dev/null
-
-    #exit $?
+	#sudo "$0" "$@" &>/dev/null #Recommended, but doesn't pass shell check
 fi
 # Directories to check
 # Upstart covers SysV and OpenRC as well.
@@ -690,7 +674,11 @@ function echoSize {
 	local giga
 	mega=$(($1/1000000))
 	giga=$(($1/1000000000))
-	echo "You've cleared approximately MB: $mega or GB: $giga of space!"
+	if [[ giga -eq 0 ]]; then
+		echo "You've cleared approximately MB: $mega of space!"
+	else
+		echo "You've cleared approximately MB: $mega or GB: $giga of space!"
+	fi
 }
 
 # @info:	sets global variables for a dry run

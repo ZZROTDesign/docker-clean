@@ -86,6 +86,7 @@
   clean
 }
 
+# TODO: create an untagged image test case
 @test "Clean images (not all)" {
   skip
   build
