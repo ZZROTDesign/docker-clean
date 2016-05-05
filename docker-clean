@@ -71,6 +71,14 @@ declare DELETE_CREATED=true
 # @info:	Global array of Containers that would be deleted, used for dry run accuracy.
 declare -a CONTAINTERS_TO_DELETE
 
+declare -a VOLUMES_TO_DELETE
+
+declare -a IMAGES_TO_DELETE
+
+declare -a NETWORKS_TO_DELETE
+
+declare -a REMAINING_CONTAINERS
+
 
 #FUNCTIONS
 
@@ -298,17 +306,44 @@ function cleanContainers {
 }
 
 function inCleanedContainer {
+	local -a remainingContainers
 	if $STOP_CONTAINERS && $DELETE_CREATED; then
 		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
 	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
 		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
+		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=created)"
 	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
 		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
+		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=running)"
 	fi
 
-	for value in "${containers[@]}" ; do
-		echo "$value"
-	done
+	if [[ $1 =~ "delete" ]]; then
+		for value in "${containers[@]}" ; do
+			echo "$value"
+		done
+	elif [[ $1 =~ "remaining" ]]; then
+		for value in "${remainingContainers[@]}" ; do
+			echo "$value"
+		done
+	fi
+}
+
+function volumesToDelete {
+	return 1
+}
+
+function imagesToDelete {
+	if $DELETE_TAGGED; then
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	else
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
+	fi
+
+	return 1
+}
+
+function networksToDelete {
+	return 1
 }
 
 # @info:	Removes all untagged/tagged docker images.
@@ -598,6 +633,11 @@ function echoSize {
 
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
+	if [[ $DRY_RUN == true ]]; then
+		IFS=$'\n'
+		CONTAINTERS_TO_DELETE=($(inCleanedContainer delete))
+		REMAINING_CONTAINERS=($(inCleanedContainer remaining))
+	fi
 
 	if $STOP_CONTAINERS; then
 		stop
@@ -617,7 +657,6 @@ function dockerClean {
 	if $RESTART;  then
 		restartMachine
 	fi
-	inCleanedContainer
 }
 
 # @info:	Main function
@@ -625,12 +664,13 @@ Check
 parseCli "$@"
 echo
 echo TO DELETE
-IFS=$'\n'
+
 #IFS=$'\n' read -rd '' -a CONTAINTERS_TO_DELETE <<<"$(inCleanedContainer)"
-CONTAINTERS_TO_DELETE=($(inCleanedContainer))
+#CONTAINTERS_TO_DELETE=($(inCleanedContainer))
 #CONTAINTERS_TO_DELETE=("${CONTAINTERS_TO_DELETE[@]%%:*}")
-for value in "${CONTAINTERS_TO_DELETE[@]}" ; do
+#for value in "${CONTAINTERS_TO_DELETE[@]}" ; do
+for value in "${REMAINING_CONTAINERS[@]}" ; do
 	echo $value
 done
-#inCleanedContainer
+inCleanedContainer
 exit 0

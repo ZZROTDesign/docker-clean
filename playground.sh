@@ -95,7 +95,7 @@ function build() {
      docker pull zzrot/whale-awkward
      docker pull zzrot/alpine-caddy
      docker pull zzrot/alpine-node
-     docker run -d zzrot/alpine-caddy
+     docker run -d -P --name extra -v /webapp zzrot/alpine-caddy
      docker run -d -P --name web -v /webapp training/webapp python app.py
     #run docker run -d ghost
     #run docker run -d alpine-caddy
