@@ -464,14 +464,6 @@ function cleanImages {
 function cleanVolumes {
 	IFS=$'\n' read -rd '' -a danglingVolumes <<<"$(docker volume ls -qf dangling=true)"
 	if $DRY_RUN; then
-		#if $STOP_CONTAINERS && $DELETE_CREATED; then
-		#	IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
-		#elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
-		#	IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
-		#elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
-		#	IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
-		#fi
-
 		echo "Dry run on removal of dangling volumes:"
 		if [[ ! $danglingVolumes ]]; then
 			echo "No danlging volumes. Running without -n or --dry-run flag won't remove any dangling volumes."
@@ -537,6 +529,17 @@ function cleanNetworks {
 	done
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on removal of networks:"
+		# Add Stopped containers' empty networks if they would exist
+		if [[ $CONTAINTERS_TO_DELETE ]]; then
+			for j in "${CONTAINTERS_TO_DELETE}"; do
+				id="$(docker inpect -f '{{json .NetworkSettings.Networks.NetworkID}}')"
+				arrayContains $id ${emptyNetworks[@]}
+				inNetworkArray=$?
+				if [[ $id != null && $inNetworkArray == false ]]; then
+					emptyNetworks+=$id
+				fi
+			done
+		fi
 		if [[ ! $emptyNetworks ]]; then
 			echo "No empty networks. Running without -n or --dry-run flag won't remove any networks."
 		else
