@@ -83,7 +83,7 @@ declare -a NETWORKS_TO_DELETE		# Not in use
 # TODO: handle use case where just -n or just -l flag is given
 function parseCli(){
 	if [[ "$#" -eq 0 ]]; then
-		CLEAN_CONTAINERS=true
+		CLEAN_CONTAINERS=false # changed to false so doesn't exit containers
 		CLEAN_IMAGES=true
 		CLEAN_VOLUMES=true
 		CLEAN_NETWORKS=true
@@ -96,8 +96,7 @@ function parseCli(){
 			-n | --dry-run) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			-l | --log) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 		esac
-	fi
-	while [[ $# -gt 0 ]]; do
+	while [[ "$#" -gt 0 ]]; do
 		key="$1"
 		case $key in
 			stop ) STOP_CONTAINERS=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
@@ -113,6 +112,7 @@ function parseCli(){
 			-r | --restart) RESTART=true ;;
 			-d | --created) DELETE_CREATED=false ;;
 			-t | --tagged) DELETE_TAGGED=true ;;
+			-r | --restart) RESTART=TRUE ;;
 			-a | --all) STOP_CONTAINERS=true; DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true; RESTART=true ;;
 			-v | --version) version; exit 0 ;;
 			-h | --help | *) usage; exit 0 ;;
@@ -120,6 +120,7 @@ function parseCli(){
 		shift
 	done
 	dockerClean
+fi
 }
 
 # @info:	Prints out Docker-clean current version
