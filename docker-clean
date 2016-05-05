@@ -426,15 +426,15 @@ function cleanImages {
 					local status
 					local repotag
 					local size
-					repotag="$(docker inspect -f '{{json .RepoTags}}' $i)"
-					size="$(docker inspect -f '{{json .Size}}' $i)"
-					docker rmi -f $i &>/dev/null
+					repotag="$(docker inspect -f '{{json .RepoTags}}' "$i")"
+					size="$(docker inspect -f '{{json .Size}}' "$i")"
+					docker rmi -f "$i" &>/dev/null
 					status=$?
 					if [[ $status -eq 0 ]] ; then
 						count=$((count+1))
 						totalSize=$((totalSize+size))
 						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $i"
-						echo $output | log
+						echo "$output" | log
 						#unset "images[$i]" # ERROR value too great for base
 					fi
 				done
@@ -461,7 +461,7 @@ function cleanVolumes {
 			echo "Running without -n or --dry-run flag will stop the listed dangling volumes:"
 			for i in "${danglingVolumes[@]}"; do
 				local driver
-				driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
+				driver="$(docker volume inspect -f '{{json .Driver}}' "$i")"
 				echo "DRIVER: $driver NAME: $i"
 				echo # for spacing
 			done
@@ -473,8 +473,8 @@ function cleanVolumes {
 				local status
 				local output
 				local driver
-				name="$(docker inspect -f '{{json .Mounts}}' $j)"
-				echo VOLUME: $name
+				name="$(docker inspect -f '{{json .Mounts}}' "$j")"
+				echo VOLUME: "$name"
 				echo # for spacing
 			done
 			echo #For spacing
@@ -489,13 +489,13 @@ function cleanVolumes {
 				local status
 				local output
 				local driver
-				driver="$(docker volume inspect -f '{{json .Driver}}' $i)"
-				docker volume rm $i &>/dev/null
+				driver="$(docker volume inspect -f '{{json .Driver}}' "$i")"
+				docker volume rm "$i" &>/dev/null
 				status=$?
 				if [[ $status -eq 0 ]] ; then
 					count=$((count+1))
 					output="DELETED DRIVER: $driver NAME: $i"
-					echo $output | log
+					echo "$output" | log
 				else
 					output="COULD NOT DELETE DRIVER: $driver NAME: $i"
 				fi
@@ -509,8 +509,8 @@ function cleanNetworks {
 	IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
 	declare -a emptyNetworks
 	for i in "${networks[@]}"; do
-		containers="$(docker network inspect -f '{{json .Containers}}' $i)"
-		name="$(docker network inspect -f '{{json .Name}}' $i)"
+		containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
+		name="$(docker network inspect -f '{{json .Name}}' "$i")"
 		if [[ -n "$containers" ]] && [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
 			emptyNetworks+=($i)
 		fi
@@ -521,7 +521,7 @@ function cleanNetworks {
 		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
 			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
 				id="$(docker inpect -f '{{json .NetworkSettings.Networks.NetworkID}}')"
-				arrayContains $id "${emptyNetworks[@]}"
+				arrayContains "$id" "${emptyNetworks[@]}"
 				inNetworkArray=$?
 				if [[ $id != null && $inNetworkArray == false ]]; then
 					emptyNetworks+=$id
@@ -534,9 +534,9 @@ function cleanNetworks {
 			echo "Running without -n or --dry-run flag will remove the listed networks:"
 			for i in "${emptyNetworks[@]}"; do
 				local name
-				name="$(docker inspect -f '{{json .Name}}' $i)"
+				name="$(docker inspect -f '{{json .Name}}' "$i")"
 				local driver
-				driver="$(docker inspect -f '{{json .Driver}}' $i)"
+				driver="$(docker inspect -f '{{json .Driver}}' "$i")"
 				echo "Network ID: $i NAME: $name DRIVER: $driver"
 			done
 		fi # End Dry Run
@@ -548,7 +548,7 @@ function cleanNetworks {
 			local count=0
 			echo "Removing empty networks..."
 			for i in "${emptyNetworks[@]}"; do
-				if docker network rm $i 2>&1 | log ; then
+				if docker network rm "$i" 2>&1 | log ; then
 					count=$((count+1))
 				fi
 			done
@@ -565,12 +565,12 @@ function restartMachine {
 		if [[ $operating_system =~ mac || $operating_system =~ windows ]]; then
 			active="$(docker-machine active)"
 			if [[ $DRY_RUN == false ]]; then
-				docker-machine restart $active
+				docker-machine restart "$active"
 			else
 				echo "Dry run on Daemon restart:"
 				echo "Command that would be used: docker-machine restart $active"
 			fi
-			eval "$(docker-machine env $active)"
+			eval "$(docker-machine env "$active")"
 			echo "Running docker-machine env $active..."
 			echo "New IP Address for" "$active" ":" "$(docker-machine ip)"
 		elif [[ $operating_system =~ linux ]]; then
@@ -628,9 +628,9 @@ function Check {
 
 # @info:	Accepts input to output if verbose mode is flagged.
 function log {
-	read IN
+	read -r IN
 	if $VERBOSE; then
-		echo $IN
+		echo "$IN"
 	fi
 }
 
@@ -642,12 +642,12 @@ function testOS {
   if [ "$(uname)" == "Darwin" ]; then
       # Do something under Mac OS X platform
       echo mac
-  elif [ "$(expr substr "$(uname -s)" 1 5)" == "Linux" ]; then
+  elif [ "$(uname -s)" == "Linux" ]; then
       # Do something under GNU/Linux platform
       echo linux
 			#!/bin/bash
 
-  elif [ "$(expr substr "$(uname -s)" 1 10)" == "MINGW32_NT" ]; then
+  elif [ "$(uname -s)" == "MINGW32_NT" ]; then
       # Do something under Windows NT platform
       echo windows
   fi
