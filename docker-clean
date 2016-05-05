@@ -495,8 +495,8 @@ function cleanVolumes {
 				else
 					output="COULD NOT DELETE DRIVER: $driver NAME: $i"
 				fi
-				echo "Volumes cleaned: $count"
 			done
+			echo "Volumes cleaned: $count"
 	    fi
 	fi
 }
