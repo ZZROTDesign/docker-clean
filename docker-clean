@@ -70,7 +70,7 @@ declare DELETE_CREATED=true
 
 # @info:	Global arrays of objects that would be deleted, used for dry run accuracy.
 declare -a CONTAINTERS_TO_DELETE	# Currently in use
-declare -a REMAINING_CONTAINERS		# Currently in use
+#declare -a REMAINING_CONTAINERS		# Currently in use
 #declare -a IMAGES_TO_DELETE			# Work in progress
 #declare -a VOLUMES_TO_DELETE		# Not in use
 #declare -a NETWORKS_TO_DELETE		# Not in use
@@ -243,7 +243,7 @@ function cleanContainers {
 			echo "No removable containers. Running without -n or --dry-run flag won't remove any containers."
 			echo #Spacing
 		fi
-		if [[ $CONTAINTERS_TO_DELETE ]]; then
+		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
 			echo "Running without -n or --dry-run flag will remove the listed containers:"
             echo #Spacing
 			for i in "${CONTAINTERS_TO_DELETE[@]}"; do
@@ -263,7 +263,7 @@ function cleanContainers {
 		else
 			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited)"
 		fi
-	    if [ ! "${CONTAINTERS_TO_DELETE}" ]; then
+	    if [ ! "${CONTAINTERS_TO_DELETE[@]}" ]; then
 	        echo "No containers To clean!"
 	    else
 			local count=0
@@ -467,7 +467,7 @@ function cleanVolumes {
 			done
 
 		fi
-		if [[ $CONTAINTERS_TO_DELETE ]]; then
+		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
 			echo "Cleaning dangling volumes from new containers to be deleted..."
 			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
 				local status
@@ -518,7 +518,7 @@ function cleanNetworks {
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on removal of networks:"
 		# Add Stopped containers' empty networks if they would exist
-		if [[ $CONTAINTERS_TO_DELETE ]]; then
+		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
 			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
 				id="$(docker inpect -f '{{json .NetworkSettings.Networks.NetworkID}}')"
 				arrayContains $id "${emptyNetworks[@]}"
@@ -533,8 +533,10 @@ function cleanNetworks {
 		else
 			echo "Running without -n or --dry-run flag will remove the listed networks:"
 			for i in "${emptyNetworks[@]}"; do
-				local name="$(docker inspect -f '{{json .Name}}' $i)"
-				local driver="$(docker inspect -f '{{json .Driver}}' $i)"
+				local name
+				name="$(docker inspect -f '{{json .Name}}' $i)"
+				local driver
+				driver="$(docker inspect -f '{{json .Driver}}' $i)"
 				echo "Network ID: $i NAME: $name DRIVER: $driver"
 			done
 		fi # End Dry Run
@@ -568,9 +570,9 @@ function restartMachine {
 				echo "Dry run on Daemon restart:"
 				echo "Command that would be used: docker-machine restart $active"
 			fi
-			eval $(docker-machine env $active)
+			eval "$(docker-machine env $active)"
 			echo "Running docker-machine env $active..."
-			echo "New IP Address for" $active ":" $(docker-machine ip)
+			echo "New IP Address for" "$active" ":" "$(docker-machine ip)"
 		elif [[ $operating_system =~ linux ]]; then
 			if [[ $DRY_RUN == false ]]; then
 				echo "Restarting Docker..."
@@ -640,12 +642,12 @@ function testOS {
   if [ "$(uname)" == "Darwin" ]; then
       # Do something under Mac OS X platform
       echo mac
-  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  elif [ "$(expr substr "$(uname -s)" 1 5)" == "Linux" ]; then
       # Do something under GNU/Linux platform
       echo linux
 			#!/bin/bash
 
-  elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+  elif [ "$(expr substr "$(uname -s)" 1 10)" == "MINGW32_NT" ]; then
       # Do something under Windows NT platform
       echo windows
   fi
@@ -655,7 +657,7 @@ function testOS {
 # Function for testing linux initSystem
 function linuxInitSystem {
 	# To include hidden files
-	shopt -s nullglob dotglob
+	#shopt -s nullglob dotglob
 
 	# Get sudo privileges
 	if [ $EUID != 0 ]; then
