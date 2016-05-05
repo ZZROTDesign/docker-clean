@@ -12,6 +12,7 @@
 
 @test "Check that docker client is available" {
   command -v docker
+  #[ $status = 0 ]
 }
 
 @test "Run docker ps (check daemon connectivity)" {
@@ -115,10 +116,14 @@
 
 # TODO fully implement this test for this colume test
 @test "Clean Volumes function" {
-  skip "Work in progress"
-  run docker run -d -P --name web -v /webapp training/webapp python app.py
+  #skip "Work in progress"
+  #run docker run -d -P --name web -v /webapp training/webapp python app.py
+  buildWithVolumes
   [ $status = 0 ]
-
+  run docker stop extra
+  volumes="$(docker volume ls -q)"
+  [ "$volumes" ]
+  run docker rm -f extra
   clean
 }
 
@@ -206,6 +211,15 @@ function build() {
     run docker pull zzrot/alpine-ghost
     run docker pull zzrot/alpine-node
     run docker run -d zzrot/alpine-caddy
+}
+
+function buildWithVolumes {
+    if [ $(docker ps -a -q) ]; then
+        docker rm -f $(docker ps -a -q)
+    fi
+    run docker pull zzrot/whale-awkward
+    run docker pull zzrot/alpine-ghost
+    run docker run -d -P --name extra -v /webapp zzrot/alpine-caddy
 }
 
 function clean() {
