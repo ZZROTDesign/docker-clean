@@ -68,16 +68,12 @@ declare DELETE_TAGGED=false
 # @info:    Boolean to flag if Containers with status Created will be deleted or not.
 declare DELETE_CREATED=true
 
-# @info:	Global array of Containers that would be deleted, used for dry run accuracy.
-declare -a CONTAINTERS_TO_DELETE
-
-declare -a VOLUMES_TO_DELETE
-
-declare -a IMAGES_TO_DELETE
-
-declare -a NETWORKS_TO_DELETE
-
-declare -a REMAINING_CONTAINERS
+# @info:	Global arrays of objects that would be deleted, used for dry run accuracy.
+declare -a CONTAINTERS_TO_DELETE	# Currently in use
+declare -a REMAINING_CONTAINERS		# Currently in use
+declare -a IMAGES_TO_DELETE			# Work in progress
+declare -a VOLUMES_TO_DELETE		# Not in use
+declare -a NETWORKS_TO_DELETE		# Not in use
 
 
 #FUNCTIONS
@@ -241,24 +237,15 @@ function stop {
 # @info:	Removes all stopped docker containers.
 function cleanContainers {
 	if $DRY_RUN; then
-		if $STOP_CONTAINERS && $DELETE_CREATED; then
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
-		elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
-		elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
-		fi
-		# Set global Dry run variable for containers to delete for image, network, and volume removal accuracy
-		CONTAINTERS_TO_DELETE=("${containers[@]}")
 		echo "Dry run on removal of stopped containers:"
-		if [[ ! $containers ]]; then
+		if [[ ! $CONTAINTERS_TO_DELETE ]]; then
 			echo "No removable containers. Running without -n or --dry-run flag won't remove any containers."
 			echo #Spacing
 		fi
-		if [[ $containers ]]; then
+		if [[ $CONTAINTERS_TO_DELETE ]]; then
 			echo "Running without -n or --dry-run flag will remove the listed containers:"
             echo #Spacing
-			for i in "${containers[@]}"; do
+			for i in "${CONTAINTERS_TO_DELETE[@]}"; do
 				local name
 				local path
 				local args
@@ -306,6 +293,7 @@ function cleanContainers {
 }
 
 # @info:	Returns 0 if array contains string, 1 if it does not.
+# @info:	NOTE: Must run status check after calling to check result.
 # @args:	Arg 1 is string, arg2 is array
 function arrayContains {
 		for i in "${@:2}"; do
@@ -339,7 +327,7 @@ function containersToDelete {
 	fi
 }
 
-
+# @info sets global array variable for volumes to delete. CURRENTLY NOT IN USE
 function volumesToDelete {
 	if $STOP_CONTAINERS && $DELETE_CREATED; then
 		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
@@ -363,6 +351,7 @@ function volumesToDelete {
 }
 
 # TODO implement this to check containers for ones using the images still
+#@ info sets global images to delete for dry run. CURRENTLY NOT IN USE
 function imagesToDelete {
 	if $DELETE_TAGGED; then
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
@@ -446,7 +435,7 @@ function cleanImages {
 						totalSize=$((totalSize+size))
 						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $i"
 						echo $output | log
-						unset images[$i]
+						#unset "images[$i]" # ERROR value too great for base
 					fi
 				done
 			done
@@ -496,7 +485,6 @@ function cleanVolumes {
 	    else
 			echo "Cleaning volumes existing..."
 			local count=0
-			# dry run removal of danlging volumes
 			for i in "${danglingVolumes[@]}"; do
 				local status
 				local output
@@ -701,19 +689,16 @@ function echoSize {
 	echo "You've cleared approximately MB: $mega or GB: $giga of space!"
 }
 
+# @info:	sets global variables for a dry run
 function setDryRunGlobal {
 	IFS=$'\n'
 	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
 	REMAINING_CONTAINERS=($(containersToDelete remaining))
-	images=($(volumesToDelete))
-	#echo IMAGESSSSS $images
+	VOLUMES_TO_DELETE=($(volumesToDelete))
 }
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
 	if [[ $DRY_RUN == true ]]; then
-		#IFS=$'\n'
-		#CONTAINTERS_TO_DELETE=($(containersToDelete delete))
-		#REMAINING_CONTAINERS=($(containersToDelete remaining))
 		setDryRunGlobal
 	fi
 
@@ -740,14 +725,4 @@ function dockerClean {
 # @info:	Main function
 Check
 parseCli "$@"
-echo
-echo TO DELETE
-
-#IFS=$'\n' read -rd '' -a CONTAINTERS_TO_DELETE <<<"$(containersToDelete)"
-#CONTAINTERS_TO_DELETE=($(containersToDelete))
-#CONTAINTERS_TO_DELETE=("${CONTAINTERS_TO_DELETE[@]%%:*}")
-#for value in "${CONTAINTERS_TO_DELETE[@]}" ; do
-for value in "${REMAINING_CONTAINERS[@]}" ; do
-	echo $value
-done
 exit 0
