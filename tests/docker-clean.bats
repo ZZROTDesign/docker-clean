@@ -163,7 +163,6 @@
   #run ./docker-clean -i
   #[[ $output =~ "Cleaning images..."  ]]
   #[[ $output =~ "4" ]]
-
   clean
 }
 

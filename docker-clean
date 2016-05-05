@@ -659,7 +659,9 @@ function linuxInitSystem {
 
 	# Get sudo privileges
 	if [ $EUID != 0 ]; then
-    sudo "$0" "$@" &>/dev/null
+    sudo "$?" &>/dev/null
+	#sudo "$0" "$@" &>/dev/null
+
     #exit $?
 fi
 # Directories to check
@@ -693,8 +695,8 @@ function echoSize {
 function setDryRunGlobal {
 	IFS=$'\n'
 	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
-	REMAINING_CONTAINERS=($(containersToDelete remaining))
-	VOLUMES_TO_DELETE=($(volumesToDelete))
+	#REMAINING_CONTAINERS=($(containersToDelete remaining))
+	#VOLUMES_TO_DELETE=($(volumesToDelete))
 }
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
