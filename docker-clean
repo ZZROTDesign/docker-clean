@@ -305,6 +305,14 @@ function cleanContainers {
 	fi
 }
 
+function arrayContains {
+		for i in "${@:2}"; do
+			[[ "$i" == "$1" ]] && return 0;
+		done
+		return 1
+
+		#statements
+}
 function inCleanedContainer {
 	local -a remainingContainers
 	if $STOP_CONTAINERS && $DELETE_CREATED; then
@@ -332,6 +340,7 @@ function volumesToDelete {
 	return 1
 }
 
+# TODO implement this to check containers for ones using the images still
 function imagesToDelete {
 	if $DELETE_TAGGED; then
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
@@ -339,7 +348,14 @@ function imagesToDelete {
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
 	fi
 
-	return 1
+	# For loop goes through appending to array of images with images used in containers queued to remove
+	for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
+		# IF not used by other containers
+		new="$(docker inspect -f '{{json .Image}}' $i)"
+		new=${new##*:} # Cuts inspect output off before the colon -- "sha:"
+		images+=$new
+		echo $new
+	done
 }
 
 function networksToDelete {
@@ -631,12 +647,20 @@ function echoSize {
 	echo "You've cleared approximately MB: $mega or GB: $giga of space!"
 }
 
+function setDryRunGlobal {
+	IFS=$'\n'
+	CONTAINTERS_TO_DELETE=($(inCleanedContainer delete))
+	REMAINING_CONTAINERS=($(inCleanedContainer remaining))
+	images=($(imagesToDelete))
+	echo IMAGESSSSS $images
+}
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
 	if [[ $DRY_RUN == true ]]; then
-		IFS=$'\n'
-		CONTAINTERS_TO_DELETE=($(inCleanedContainer delete))
-		REMAINING_CONTAINERS=($(inCleanedContainer remaining))
+		#IFS=$'\n'
+		#CONTAINTERS_TO_DELETE=($(inCleanedContainer delete))
+		#REMAINING_CONTAINERS=($(inCleanedContainer remaining))
+		setDryRunGlobal
 	fi
 
 	if $STOP_CONTAINERS; then
