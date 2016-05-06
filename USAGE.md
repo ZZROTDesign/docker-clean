@@ -1,4 +1,4 @@
-# Usage
+# Usage for Docker Clean v2.0.0
 This guide walks through proper usage and briefly explains the command(s) behind the usage for those that are familiar with some of the commands Docker provides.  The commands listed run after sanity checks to confirm the command will run properly.
 
     docker-clean [optional flags below]
@@ -161,51 +161,62 @@ $ docker-clean -s -l
 ## Dry Run Example
 
 Below is a dry run example output.
+Containers:
 ```
     $ docker ps -a
     CONTAINER ID        IMAGE                COMMAND                  CREATED             STATUS              PORTS                     NAMES
     8da973093341        training/webapp      "python app.py"          3 seconds ago       Up 3 seconds        0.0.0.0:32769->5000/tcp   web
     3424ffbb418d        zzrot/alpine-caddy   "tini caddy --conf /e"   3 seconds ago       Up 3 seconds                                  extra
+```
 
-    $ docker images -a
+Images:
+```
+$ docker images -a
 REPOSITORY            TAG                 IMAGE ID            CREATED             SIZE
 zzrot/alpine-caddy    latest              5dac1ba1d438        2 days ago          48.16 MB
 zzrot/alpine-node     latest              ab87df339f32        3 weeks ago         25.48 MB
 zzrot/whale-awkward   latest              08e0a241de0d        4 weeks ago         516 B
 training/webapp       latest              6fae60ef3446        11 months ago       348.8 MB
+```
 
-    ```
+```
+$ docker-clean all --dry-run
+Dry run on stoppage of running containers:
+Running without -n or --dry-run flag will stop the listed containers:
 
+Container ID: 8da973093341 IMAGE: "python"/["app.py"] NAME: "/web"
+Container ID: 3424ffbb418d IMAGE: "tini"/["caddy","--conf","/etc/Caddyfile"] NAME: "/extra"
+
+Dry run on removal of stopped containers:
+Running without -n or --dry-run flag will remove the listed containers:
+
+Container ID: 8da973093341 IMAGE: "python"/["app.py"] NAME: "/web"
+Container ID: 3424ffbb418d IMAGE: "tini"/["caddy","--conf","/etc/Caddyfile"] NAME: "/extra"
+
+Dry run on removal of images:
+Running without -n or --dry-run flag will remove the listed images:
+
+REPOSITORY/TAG: ["zzrot/alpine-caddy:latest"] IMAGE ID: 5dac1ba1d438
+REPOSITORY/TAG: ["zzrot/alpine-node:latest"] IMAGE ID: ab87df339f32
+REPOSITORY/TAG: ["zzrot/whale-awkward:latest"] IMAGE ID: 08e0a241de0d
+REPOSITORY/TAG: ["training/webapp:latest"] IMAGE ID: 6fae60ef3446
+You've cleared approximately MB: 422 of space!
+
+Dry run on removal of dangling volumes:
+Running without -n or --dry-run flag will stop the listed dangling volumes:
+DRIVER: "local" NAME: 45bc5fb98fc95e67512e75fcc56fd52b0f443c17010850517f97a30340e45249
+
+DRIVER: "local" NAME: 75e24a294862504426e2e4c4aa83bf69c5f8a5ebc9586518e7f1dd26b7202333
+
+Dangling volumes that would be removed from containers to be deleted...
+VOLUME: [{"Name":"a7a4020d3739b4306e16a6ddd776b852ed08b4d0cdf4387e048ea123b756941f","Source":"/mnt/sda1/var/lib/docker/volumes/a7a4020d3739b4306e16a6ddd776b852ed08b4d0cdf4387e048ea123b756941f/_data","Destination":"/webapp","Driver":"local","Mode":"","RW":true,"Propagation":""}]
+
+VOLUME: [{"Name":"71c6e02b11056d2b379063314b0826773167d8cb11058752821aa6375737805b","Source":"/mnt/sda1/var/lib/docker/volumes/71c6e02b11056d2b379063314b0826773167d8cb11058752821aa6375737805b/_data","Destination":"/webapp","Driver":"local","Mode":"","RW":true,"Propagation":""}]
+
+
+Dry run on removal of networks:
+No empty networks. Running without -n or --dry-run flag won't remove any networks.
+
+```
 ## Issues
 If you find any issues with these commands, it would be great if you opened an issue, or forked and submitted a pull request!
-
-    Options:
-
-    -h or --help        Opens this help menu
-    -v or --version     Prints the current docker-clean version
-
-    -a or --all         Stops and removes all Containers, Images, and Restarts docker
-    -c or --containers  Stops and removes Stopped and Running Containers
-    -net or --networks  Removes all empty Networks
-
-    -i or --images      Stops and removes all Containers and Images
-    -s or --stop        Stops all running Containers
-
-    -l or --log         Adding this as an additional flag will list all
-                        image, volume, and container deleting output
-
-    -n or --dry-run     Dry run, added at the end to run each command and see
-                        the results without removing or stopping anything.
-
-Running without any options will remove dangling volumes and untagged images only.
- All of the options are option, and while they overlap they can all be run concurrently.
-
- NOTE: By default, created containers will always be included, see -d, --created.
-
- stop         Stops and removes all containers, cleans dangling volumes, and networks
-
- images       Removes all tagged and untagged images, stopped containers, dangling volumes, and networks
-
- run          Removes all stopped containers, untagged  images, dangling volumes, and networks
-
- all          Stops and removes all containers, images, volumes and networks

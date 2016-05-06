@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v1.4.1)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
+[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v2.0.0)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
 # Docker-Clean
 
 [![Join the chat at https://gitter.im/ZZROTDesign/docker-clean](https://badges.gitter.im/ZZROTDesign/docker-clean.svg)](https://gitter.im/ZZROTDesign/docker-clean?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -12,7 +12,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 ## Install
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v1.4.1/docker-clean |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v2.0.0/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 
@@ -35,6 +35,15 @@ For a more in depth look at the usage and commands run without browsing the scri
     docker-clean [optional flags below]
 
   Default without arguments deletes stopped containers, dangling volumes, and untagged images.
+
+      stop         Stops and removes all containers, cleans dangling volumes, and networks
+
+      images       Removes all tagged and untagged images, stopped containers, dangling volumes, and networks
+
+      run          Removes all stopped containers, untagged images, dangling volumes, and networks
+
+      all          Stops and removes all containers, images, volumes and networks
+
 
      "Additional Flag options:"
 
