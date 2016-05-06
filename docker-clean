@@ -71,11 +71,10 @@ declare DELETE_CREATED=true
 
 # @info:	Global arrays of objects that would be deleted, used for dry run accuracy.
 declare -a CONTAINTERS_TO_DELETE	# Currently in use
-declare -a REMAINING_CONTAINERS		# Currently in use
 declare -a IMAGES_IN_USE			# Currently in use
 declare -a UNUSED_IMAGES			# Currently in use
 declare -a CONTAINERS				# Currently in use
-
+#declare -a REMAINING_CONTAINERS	# Work in progress -- use for exited time delta
 #declare -a VOLUMES_TO_DELETE		# Not in use
 #declare -a NETWORKS_TO_DELETE		# Not in use
 
@@ -702,7 +701,7 @@ function setDryRunGlobal {
 	IFS=$'\n'
 	CONTAINERS=($(containersToDelete all))
 	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
-	REMAINING_CONTAINERS=($(containersToDelete remaining))
+	#REMAINING_CONTAINERS=($(containersToDelete remaining))	# Add time delta
 	IMAGES_IN_USE=($(usedImages))
 	UNUSED_IMAGES=($(globalImagesToDelete))
 	#VOLUMES_TO_DELETE=($(volumesToDelete))
