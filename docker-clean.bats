@@ -14,49 +14,21 @@
   command -v docker
   #[ $status = 0 ]
 }
+@test "Clean all function for images" {
+  build
+  [ $status = 0 ]
+  listedImages="$(docker images -aq)"
+  [ "$listedImages" ]
 
+  run ./docker-clean -a
+  listedImages="$(docker images -aq)"
+  [ ! "$listedImages" ]
+
+  clean
+}
 @test "Run docker ps (check daemon connectivity)" {
   run docker ps
   [ $status = 0 ]
-}
-# Tests logging outputs properly
-@test "Verbose log function (-l --log)" {
-    skip
-    build
-    [ $status = 0 ]
-    docker stop "$(docker ps -q)"
-    stoppedContainers="$(docker ps -a -q)"
-    run ./docker-clean -c -l 2>&1
-    [[ $output =~ "$stoppedContainers" ]]
-
-    clean
-}
-
-# Runs most powerful command and confirms nothing cleaned
-@test "Test Dry Run" {
-    buildWithVolumes
-    [ $status = 0 ]
-    runningContainers="$(docker ps -aq)"
-    stoppedContainers="$(docker ps -qf STATUS=exited )"
-    untaggedImages="$(docker images -aq --filter "dangling=true")"
-    listedImages="$(docker images -aq)"
-    volumes="$(docker volume ls -q)"
-
-    # Run command with most power
-    run ./docker-clean all --dry-run
-    [ $status = 0 ]
-
-    afterRunningContainers="$(docker ps -aq)"
-    afterStoppedContainers="$(docker ps -qf STATUS=exited )"
-    afterUntaggedImages="$(docker images -aq --filter "dangling=true")"
-    afterListedImages="$(docker images -aq)"
-    afterVolumes="$(docker volume ls -q)"
-    [[ $runningContainers == $afterRunningContainers ]]
-    [[ $stoppedContainers == $afterStoppedContainers ]]
-    [[ $untaggedImages == $afterUntaggedImages ]]
-    [[ $listedImages == $afterListedImages ]]
-    [[ $volumes == $afterVolumes ]]
-    clean
 }
 
 @test "Docker Clean Version echoes" {
@@ -84,6 +56,33 @@
   run ./docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
   #clean
+}
+
+# Runs most powerful command and confirms nothing cleaned
+@test "Test Dry Run (runs most powerful removal command in dry run)" {
+    buildWithVolumes
+    [ $status = 0 ]
+    runningContainers="$(docker ps -aq)"
+    stoppedContainers="$(docker ps -qf STATUS=exited )"
+    untaggedImages="$(docker images -aq --filter "dangling=true")"
+    listedImages="$(docker images -aq)"
+    volumes="$(docker volume ls -q)"
+
+    # Run command with most power
+    run ./docker-clean all --dry-run
+    [ $status = 0 ]
+
+    afterRunningContainers="$(docker ps -aq)"
+    afterStoppedContainers="$(docker ps -qf STATUS=exited )"
+    afterUntaggedImages="$(docker images -aq --filter "dangling=true")"
+    afterListedImages="$(docker images -aq)"
+    afterVolumes="$(docker volume ls -q)"
+    [[ $runningContainers == $afterRunningContainers ]]
+    [[ $stoppedContainers == $afterStoppedContainers ]]
+    [[ $untaggedImages == $afterUntaggedImages ]]
+    [[ $listedImages == $afterListedImages ]]
+    [[ $volumes == $afterVolumes ]]
+    clean
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -140,24 +139,9 @@
   clean
 }
 
-@test "Clean all images function" {
-    skip "Writing new test"
-  build
-  [ $status = 0 ]
-  listedImages="$(docker images -aq)"
-  [ "$listedImages" ]
 
-  run ./docker-clean --images
-  listedImages="$(docker images -aq)"
-  [ ! "$listedImages" ]
 
-  clean
-}
-
-# TODO fully implement this test for this colume test
 @test "Clean Volumes function" {
-  #skip "Work in progress"
-  #run docker run -d -P --name web -v /webapp training/webapp python app.py
   buildWithVolumes
   [ $status = 0 ]
   run docker stop extra
@@ -168,7 +152,7 @@
 }
 
 
-# TODO figure out the -qf STATUS exited
+# TODO test case for the -qf STATUS exited
 # TODO Write test with an untagged image
 @test "Default run through -- docker-clean (without arguments)" {
   build
@@ -211,7 +195,18 @@
   clean
 }
 
+# Tests logging outputs properly
+@test "Verbose log function (-l --log)" {
+    build
+    [ $status = 0 ]
+    docker stop "$(docker ps -q)"
+    stoppedContainers="$(docker ps -a -q)"
+    run ./docker-clean -c -l 2>&1
+    [[ $output =~ "$stoppedContainers" ]]
 
+    clean
+}
+# Testing for successful restart
 @test "Restart function" {
     operating_system=$(testOS)
     if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then

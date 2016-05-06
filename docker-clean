@@ -127,8 +127,7 @@ function version {
 
 # @info:	Prints out usage
 function usage {
-	echo
-	echo "Options:"
+	echo "Docker Clean Usage Options:"
   	echo "-h or --help        Opens this help menu"
   	echo "-v or --version     Prints the current docker-clean version"
   	echo

@@ -128,24 +128,20 @@
   clean
 }
 
-@test "Clean all images function" {
-    skip "Writing new test"
+@test "Clean all function for images" {
   build
   [ $status = 0 ]
   listedImages="$(docker images -aq)"
   [ "$listedImages" ]
 
-  run ./docker-clean --images
+  run ./docker-clean -a
   listedImages="$(docker images -aq)"
   [ ! "$listedImages" ]
 
   clean
 }
 
-# TODO fully implement this test for this colume test
 @test "Clean Volumes function" {
-  #skip "Work in progress"
-  #run docker run -d -P --name web -v /webapp training/webapp python app.py
   buildWithVolumes
   [ $status = 0 ]
   run docker stop extra
@@ -156,7 +152,7 @@
 }
 
 
-# TODO figure out the -qf STATUS exited
+# TODO test case for the -qf STATUS exited
 # TODO Write test with an untagged image
 @test "Default run through -- docker-clean (without arguments)" {
   build
