@@ -86,7 +86,7 @@ declare -a CONTAINERS				# Currently in use
 # TODO: handle use case where just -n or just -l flag is given
 function parseCli(){
 	if [[ "$#" -eq 0 ]]; then
-		CLEAN_CONTAINERS=true # changed to false so doesn't exit containers
+		#CLEAN_CONTAINERS=false 		# changed to false so doesn't exit containers
 		CLEAN_IMAGES=true
 		CLEAN_VOLUMES=true
 		CLEAN_NETWORKS=true
@@ -96,14 +96,15 @@ function parseCli(){
 		#If there is only one flag, and it is dry run or log, set defaults
 		key="$1"
 		case $key in
-			-n | --dry-run) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
-			-l | --log) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+			-n | --dry-run) CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+			-l | --log) CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 		esac
 	while [[ "$#" -gt 0 ]]; do
 		key="$1"
 		case $key in
 			stop ) STOP_CONTAINERS=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			images ) DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+			run ) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			all ) STOP_CONTAINERS=true; DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			-s | --stop) STOP_CONTAINERS=true ;;
 			-n | --dry-run) DRY_RUN=true ;;
@@ -115,7 +116,6 @@ function parseCli(){
 			-r | --restart) RESTART=true ;;
 			-d | --created) DELETE_CREATED=false ;;
 			-t | --tagged) DELETE_TAGGED=true ;;
-			-r | --restart) RESTART=TRUE ;;
 			-a | --all) STOP_CONTAINERS=true; DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true; RESTART=true ;;
 			-v | --version) version; exit 0 ;;
 			-h | --help | *) usage; exit 0 ;;
@@ -142,13 +142,15 @@ function usage {
   	echo "-c or --containers  Stops and removes Stopped and Running Containers"
   	echo "-i or --images      Stops and removes all Containers and Images"
   	echo "-net or --networks  Removes all empty Networks"
-		echo "-s or --stop        Stops all running Containers"
-		echo
-		echo "--dry-run           Adding this additional flag at the end will list items to be"
-		echo "                    removed without running the remove or stop commands"
-		echo
-		echo "-l or --log         Adding this as an additional flag will list all"
-		echo "                    image, volume, and container deleting output"
+	echo "-s or --stop        Stops all running Containers"
+	echo
+	echo "--dry-run           Adding this additional flag at the end will list items to be"
+	echo "                    removed without running the remove or stop commands"
+	echo
+	echo "-l or --log         Adding this as an additional flag will list all"
+	echo "                    image, volume, and container deleting output"
+
+
 }
 
 # @info:	Prints out 3-point version (000.000.000) without decimals for comparison
@@ -340,7 +342,7 @@ function cleanImages {
 						totalSize=$((totalSize+size))
 						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $i"
 						echo "$output" | log
-						#unset "images[$i]" # ERROR value too great for base
+						unset "images[$i]" # ERROR value too great for base
 					fi
 				done
 			done
