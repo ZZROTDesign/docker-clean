@@ -388,7 +388,7 @@ function cleanVolumes {
 	    if [ ! "$danglingVolumes" ]; then
 	        echo "No dangling volumes!"
 	    else
-			echo "Cleaning volumes existing..."
+			echo "Cleaning existing dangling volumes..."
 			local count=0
 			for i in "${danglingVolumes[@]}"; do
 				local status
@@ -429,11 +429,11 @@ function cleanNetworks {
 				arrayContains "$id" "${emptyNetworks[@]}"
 				inNetworkArray=$?
 				if [[ $id != null && $inNetworkArray == false ]]; then
-					emptyNetworks+=$id
+					emptyNetworks+=($id)
 				fi
 			done
 		fi
-		if [[ ! $emptyNetworks ]]; then
+		if [[ ! ${emptyNetworks[@]} ]]; then
 			echo "No empty networks. Running without -n or --dry-run flag won't remove any networks."
 		else
 			echo "Running without -n or --dry-run flag will remove the listed networks:"
@@ -446,7 +446,7 @@ function cleanNetworks {
 			done
 		fi # End Dry Run
 	else
-		if [ ! "$emptyNetworks" ]; then
+		if [ ! "${emptyNetworks[@]}" ]; then
 			echo "No empty networks!"
 			echo
 		else
