@@ -36,23 +36,31 @@ For a more in depth look at the usage and commands run without browsing the scri
 
   Default without arguments deletes stopped containers, dangling volumes, and untagged images.
 
-    Options:
+     "Additional Flag options:"
 
-    -h or --help        Opens this help menu
-    -v or --version     Prints the current docker-clean version
+     -n   or --dry-run    Adding this additional flag will list items to be
+                          removed without executing any stopping or removing commands"
 
-    -a or --all         Stops and removes all Containers, Images, and Restarts docker
-    -c or --containers  Stops and removes Stopped and Running Containers
-    -net or --networks  Removes all empty Networks
+     -s   or --stop       Stops all running containers
 
-    -i or --images      Stops and removes all Containers and Images
-    -s or --stop        Stops all running Containers
+    -c   or --containers  Removes all stopped containers
 
-    -l or --log         Adding this as an additional flag will list all
-                        image, volume, and container deleting output
+    -i   or --images      Removes all untagged images
 
-    -n or --dry-run     Dry run, added at the end to run each command and see
-                        the results without removing or stopping anything.
+    -net or --networks    Removes all empty Networks (all network cleans are only empty)
+
+     -r   or --restart     Restarts the docker machine/daemon
+
+     -d   or --created     By default, CREATED containers are set to be removed.  Adding this
+                           flag will ensure that all created containers are not cleaned
+
+     -t   or --tagged      Removes all tagged images
+
+     -a   or --all         Stops and removes all Containers, Images, AND Restarts docker
+
+     -l   or --log         Adding this as an additional flag will list all
+                           image, volume, and container deleting output
+
 
 
 ## Contributing to Docker-Clean
