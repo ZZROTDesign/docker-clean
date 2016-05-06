@@ -19,6 +19,45 @@
   run docker ps
   [ $status = 0 ]
 }
+# Tests logging outputs properly
+@test "Verbose log function (-l --log)" {
+    skip
+    build
+    [ $status = 0 ]
+    docker stop "$(docker ps -q)"
+    stoppedContainers="$(docker ps -a -q)"
+    run ./docker-clean -c -l 2>&1
+    [[ $output =~ "$stoppedContainers" ]]
+
+    clean
+}
+
+# Runs most powerful command and confirms nothing cleaned
+@test "Test Dry Run" {
+    buildWithVolumes
+    [ $status = 0 ]
+    runningContainers="$(docker ps -aq)"
+    stoppedContainers="$(docker ps -qf STATUS=exited )"
+    untaggedImages="$(docker images -aq --filter "dangling=true")"
+    listedImages="$(docker images -aq)"
+    volumes="$(docker volume ls -q)"
+
+    # Run command with most power
+    run ./docker-clean all --dry-run
+    [ $status = 0 ]
+
+    afterRunningContainers="$(docker ps -aq)"
+    afterStoppedContainers="$(docker ps -qf STATUS=exited )"
+    afterUntaggedImages="$(docker images -aq --filter "dangling=true")"
+    afterListedImages="$(docker images -aq)"
+    afterVolumes="$(docker volume ls -q)"
+    [[ $runningContainers == $afterRunningContainers ]]
+    [[ $stoppedContainers == $afterStoppedContainers ]]
+    [[ $untaggedImages == $afterUntaggedImages ]]
+    [[ $listedImages == $afterListedImages ]]
+    [[ $volumes == $afterVolumes ]]
+    clean
+}
 
 @test "Docker Clean Version echoes" {
   run ./docker-clean -v
@@ -45,33 +84,6 @@
   run ./docker-clean -z
   [[ ${lines[0]} =~ "Options:" ]]
   #clean
-}
-
-# Runs most powerful command and confirms nothing cleaned
-@test "Test Dry Run (runs most powerful removal command in dry run)" {
-    buildWithVolumes
-    [ $status = 0 ]
-    runningContainers="$(docker ps -aq)"
-    stoppedContainers="$(docker ps -qf STATUS=exited )"
-    untaggedImages="$(docker images -aq --filter "dangling=true")"
-    listedImages="$(docker images -aq)"
-    volumes="$(docker volume ls -q)"
-
-    # Run command with most power
-    run ./docker-clean all --dry-run
-    [ $status = 0 ]
-
-    afterRunningContainers="$(docker ps -aq)"
-    afterStoppedContainers="$(docker ps -qf STATUS=exited )"
-    afterUntaggedImages="$(docker images -aq --filter "dangling=true")"
-    afterListedImages="$(docker images -aq)"
-    afterVolumes="$(docker volume ls -q)"
-    [[ $runningContainers == $afterRunningContainers ]]
-    [[ $stoppedContainers == $afterStoppedContainers ]]
-    [[ $untaggedImages == $afterUntaggedImages ]]
-    [[ $listedImages == $afterListedImages ]]
-    [[ $volumes == $afterVolumes ]]
-    clean
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -199,18 +211,7 @@
   clean
 }
 
-# Tests logging outputs properly
-@test "Verbose log function (-l --log)" {
-    build
-    [ $status = 0 ]
-    docker stop "$(docker ps -q)"
-    stoppedContainers="$(docker ps -a -q)"
-    run ./docker-clean -c -l 2>&1
-    [[ $output =~ "$stoppedContainers" ]]
 
-    clean
-}
-# Testing for successful restart
 @test "Restart function" {
     operating_system=$(testOS)
     if [[ $operating_system =~ "mac" || $operating_system =~ 'windows' ]]; then
