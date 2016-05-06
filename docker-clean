@@ -621,13 +621,6 @@ function containersToDelete {
 		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=running)"
 	fi
 
-	if [[ $1 =~ all ]]; then
-		IFS=$'\n' read -rd '' -a allContainers <<<"$(docker ps -aq)"
-		for value in "${allContainers[@]}" ; do
-			echo "$value"
-		done
-	fi
-
 	if [[ $1 =~ delete ]]; then
 		for value in "${containers[@]}" ; do
 			echo "$value"
@@ -668,7 +661,7 @@ function volumesToDelete {
 function usedImages {
 	# For loop goes through appending to array of images with images used in containers queued to remove
 	#declare -a used
-	for i in "${CONTAINERS[@]}" ; do
+	for i in "${REMAINING_CONTAINERS[@]}" ; do
 		# IF not used by other containers
 
 		new="$(docker inspect -f '{{json .Image}}' "$i")"
@@ -681,7 +674,11 @@ function usedImages {
 function globalImagesToDelete {
 	# starts with all images and then pulls just the unused images
 	#if $DELETE_TAGGED; then
-	IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	if $DELETE_TAGGED; then
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	else
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
+	fi
 	#else
 	#	IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
 	#fi
@@ -701,9 +698,8 @@ function networksToDelete {
 # @info:	sets global variables for a dry run
 function setDryRunGlobal {
 	IFS=$'\n'
-	CONTAINERS=($(containersToDelete all))
 	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
-	#REMAINING_CONTAINERS=($(containersToDelete remaining))	# Add time delta
+	REMAINING_CONTAINERS=($(containersToDelete remaining))	# Add time delta
 	IMAGES_IN_USE=($(usedImages))
 	UNUSED_IMAGES=($(globalImagesToDelete))
 	#VOLUMES_TO_DELETE=($(volumesToDelete))
@@ -745,10 +741,5 @@ echo
 echo UNUSED IMAGES
 for j in "${UNUSED_IMAGES[@]}"; do
 	echo "$j"
-done
-echo
-echo All Containers
-for k in "${CONTAINERS[@]}"; do
-	echo "$k"
 done
 exit 0
