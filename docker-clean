@@ -583,7 +583,7 @@ function echoSize {
 	local giga
 	mega=$(($1/1000000))
 	giga=$(($1/1000000000))
-	if [[ giga -eq 0 ]]; then
+	if [[ $giga == 0 ]]; then
 		echo "You've cleared approximately MB: $mega of space!"
 	else
 		echo "You've cleared approximately MB: $mega or GB: $giga of space!"
@@ -676,7 +676,7 @@ function usedImages {
 function globalImagesToDelete {
 	# starts with all images and then pulls just the unused images
 	#if $DELETE_TAGGED; then
-		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
 	#else
 	#	IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
 	#fi
