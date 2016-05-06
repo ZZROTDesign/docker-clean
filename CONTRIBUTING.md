@@ -2,8 +2,8 @@
 
 ## Team members
 
-* [Killian Brackey](https://github.com/killianbrackey) killian@zzrot.com
-* [Sean Kilgarriff](https://github.com/Skilgarriff) sean@zzrot.com
+* [Killian Brackey](https://github.com/killianbrackey) killian@zzrot.com T: [@kmbrackey](https://twitter.com/kmbrackey)
+* [Sean Kilgarriff](https://github.com/Skilgarriff) sean@zzrot.com T: [@seankilgarriff](https://twitter.com/SeanKilgarriff)
 
 Don't hesitate to get in contact with either one of us with problems, questions, etc.
 
