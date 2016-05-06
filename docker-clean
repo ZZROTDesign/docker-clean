@@ -22,11 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# TODO Function to check for which images containers are using
-# TODO fully implement the created containers function so that created containers aren't removed by Default
-
-# TODO change default to not remove stopped containers
-# TODO change -all to all but restart, add a -r --restart to restart daemon
 
 #ENVIRONMENT VARIABLES
 
@@ -70,9 +65,9 @@ declare DELETE_TAGGED=false
 declare DELETE_CREATED=true
 
 # @info:	Global arrays of objects that would be deleted, used for dry run accuracy.
-declare -a CONTAINTERS_TO_DELETE	# Currently in use
+declare -a CONTAINERS_TO_DELETE	# Currently in use
 declare -a IMAGES_IN_USE			# Currently in use
-declare -a UNUSED_IMAGES			# Currently in use
+declare -a IMAGES_TO_DELETE			# Currently in use
 declare -a REMAINING_CONTAINERS		# Work in progress -- use for exited time delta
 #declare -a VOLUMES_TO_DELETE		# Not in use
 #declare -a NETWORKS_TO_DELETE		# Not in use
@@ -243,14 +238,14 @@ function stop {
 function cleanContainers {
 	if $DRY_RUN; then
 		echo "Dry run on removal of stopped containers:"
-		if [[ ! ${CONTAINTERS_TO_DELETE[@]} ]]; then
+		if [[ ! ${CONTAINERS_TO_DELETE[@]} ]]; then
 			echo "No removable containers. Running without -n or --dry-run flag won't remove any containers."
 			echo #Spacing
 		fi
-		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
+		if [[ ${CONTAINERS_TO_DELETE[@]} ]]; then
 			echo "Running without -n or --dry-run flag will remove the listed containers:"
             echo #Spacing
-			for i in "${CONTAINTERS_TO_DELETE[@]}"; do
+			for i in "${CONTAINERS_TO_DELETE[@]}"; do
 				local name
 				local path
 				local args
@@ -262,12 +257,12 @@ function cleanContainers {
 			echo #Spacing
 		fi # end dry run
 	else
-	    if [ ! "${CONTAINTERS_TO_DELETE[@]}" ]; then
+	    if [[ ! "${CONTAINERS_TO_DELETE[@]}" ]]; then
 	        echo "No containers To clean!"
 	    else
 			local count=0
 			echo "Cleaning containers..."
-			for i in "${CONTAINTERS_TO_DELETE[@]}"; do
+			for i in "${CONTAINERS_TO_DELETE[@]}"; do
 				local output
 				local status
 				local name
@@ -294,21 +289,16 @@ function cleanContainers {
 
 # @info:	Removes all untagged/tagged docker images.
 function cleanImages {
-	if $DELETE_TAGGED; then
-		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
-	else
-		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
-	fi
 	if $DRY_RUN; then
 		echo "Dry run on removal of images:"
-		if [[ ! $images ]]; then
+		if [[ ! ${IMAGES_TO_DELETE[@]} ]]; then
 			echo "No images. Running without -n or --dry-run flag won't remove any images."
 			echo #Spacing
 		else
 			echo "Running without -n or --dry-run flag will remove the listed images:"
 			echo #Spacing
 			local totalSize=0
-			for i in "${images[@]}"; do
+			for i in "${IMAGES_TO_DELETE[@]}"; do
 				local repotag
 				local size
 				repotag="$(docker inspect -f '{{json .RepoTags}}' "$i")"
@@ -320,14 +310,14 @@ function cleanImages {
 			echo #Spacing
 		fi # End dry run
 	else
-		if [ ! "$images" ]; then
+		if [[ ! "${IMAGES_TO_DELETE[@]}" ]]; then
 	        echo "No images to delete!"
 	    else
 			local count=0
 			local totalSize=0
 			echo "Cleaning images..."
-			while [[ $images ]] ; do
-				for i in "${images[@]}"; do
+			while [[ ${IMAGES_TO_DELETE[@]} ]] ; do
+				for i in "${IMAGES_TO_DELETE[@]}"; do
 					local output
 					local status
 					local repotag
@@ -341,7 +331,8 @@ function cleanImages {
 						totalSize=$((totalSize+size))
 						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $i"
 						echo "$output" | log
-						unset "images[$i]" # ERROR value too great for base
+						#unset "IMAGES_TO_DELETE[$i]" # ERROR value too great for base
+						IMAGES_TO_DELETE=("${IMAGES_TO_DELETE/$i}")
 					fi
 				done
 			done
@@ -369,9 +360,9 @@ function cleanVolumes {
 			done
 
 		fi
-		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
+		if [[ ${CONTAINERS_TO_DELETE[@]} ]]; then
 			echo "Dangling volumes that would be removed from containers to be deleted..."
-			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
+			for j in "${CONTAINERS_TO_DELETE[@]}"; do
 				local status
 				local output
 				local driver
@@ -420,13 +411,13 @@ function cleanNetworks {
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on removal of networks:"
 		# Add Stopped containers' empty networks if they would exist
-		if [[ ${CONTAINTERS_TO_DELETE[@]} ]]; then
-			for j in "${CONTAINTERS_TO_DELETE[@]}"; do
+		if [[ ${CONTAINERS_TO_DELETE[@]} ]]; then
+			for j in "${CONTAINERS_TO_DELETE[@]}"; do
 				id="$(docker inspect -f '{{json .NetworkSettings.Networks.NetworkID}}' "$j")"
-				arrayContains "$id" "${emptyNetworks[@]}"
-				inNetworkArray=$?
+
+				inNetworkArray=$(arrayContains "$id" "${emptyNetworks[@]}")
 				if [[ $id != null && $inNetworkArray == false ]]; then
-					emptyNetworks+=($id)
+					emptyNetworks+=("$id")
 				fi
 			done
 		fi
@@ -631,31 +622,6 @@ function containersToDelete {
 	fi
 }
 
-# CURRENTLY NOT IN USE
-# @info sets global array variable for volumes to delete.
-function volumesToDelete {
-	if $STOP_CONTAINERS && $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -aq)"
-	elif $STOP_CONTAINERS && ! $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=running)"
-	elif ! $STOP_CONTAINERS && $DELETE_CREATED; then
-		IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
-	fi
-
-	for i in "${CONTAINTERS_TO_DELETE[@]}" ; do
-		# IF not used by other containers
-		new="$(docker inspect -f '{{json .Mounts}}' "$i")"
-		#if [[ arrayContains "$new" "${images[@]}" == 0 ]]; then
-		#	echo FOUND!!!!!!!!
-		#else
-		#	echo NOT FOUND!!!!
-		#fi
-		echo NEW VOLUME is "$new"
-	done
-	return 1
-}
-
-# TODO implement this to check containers for ones using the images still
 #@ info sets global images to delete for dry run. CURRENTLY NOT IN USE
 function usedImages {
 	# For loop goes through appending to array of images with images used in containers queued to remove
@@ -689,18 +655,14 @@ function globalImagesToDelete {
 	done
 }
 
-function networksToDelete {
-	return 1
-}
-
 
 # @info:	sets global variables for a dry run
 function setDryRunGlobal {
 	IFS=$'\n'
-	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
+	CONTAINERS_TO_DELETE=($(containersToDelete delete))
 	REMAINING_CONTAINERS=($(containersToDelete remaining))	# Add time delta
 	IMAGES_IN_USE=($(usedImages))
-	UNUSED_IMAGES=($(globalImagesToDelete))
+	IMAGES_TO_DELETE=($(globalImagesToDelete))
 	#VOLUMES_TO_DELETE=($(volumesToDelete))
 }
 # @info:	Default run option, cleans stopped containers and images
@@ -732,13 +694,13 @@ function dockerClean {
 # @info:	Main function
 Check
 parseCli "$@"
-echo USED IMAGES
-for i in "${IMAGES_IN_USE[@]}"; do
-	echo "$i"
-done
-echo
-echo UNUSED IMAGES
-for j in "${UNUSED_IMAGES[@]}"; do
-	echo "$j"
-done
+#echo USED IMAGES
+#for i in "${IMAGES_IN_USE[@]}"; do
+#	echo "$i"
+#done
+#echo
+#echo UNUSED IMAGES
+#for j in "${IMAGES_TO_DELETE[@]}"; do
+#	echo "$j"
+#done
 exit 0
