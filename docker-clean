@@ -72,8 +72,10 @@ declare DELETE_CREATED=true
 # @info:	Global arrays of objects that would be deleted, used for dry run accuracy.
 declare -a CONTAINTERS_TO_DELETE	# Currently in use
 declare -a REMAINING_CONTAINERS		# Currently in use
-declare -a IMAGES_IN_USE			# Work in progress
-declare -a UNUSED_IMAGES			# Work in progress
+declare -a IMAGES_IN_USE			# Currently in use
+declare -a UNUSED_IMAGES			# Currently in use
+declare -a CONTAINERS				# Currently in use
+
 #declare -a VOLUMES_TO_DELETE		# Not in use
 #declare -a NETWORKS_TO_DELETE		# Not in use
 
@@ -260,11 +262,6 @@ function cleanContainers {
 			echo #Spacing
 		fi # end dry run
 	else
-		if $DELETE_CREATED; then
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited -f STATUS=created)"
-		else
-			IFS=$'\n' read -rd '' -a containers <<<"$(docker ps -q -f STATUS=exited)"
-		fi
 	    if [ ! "${CONTAINTERS_TO_DELETE[@]}" ]; then
 	        echo "No containers To clean!"
 	    else
@@ -623,6 +620,13 @@ function containersToDelete {
 		IFS=$'\n' read -rd '' -a remainingContainers <<<"$(docker ps -q -f STATUS=running)"
 	fi
 
+	if [[ $1 =~ all ]]; then
+		IFS=$'\n' read -rd '' -a allContainers <<<"$(docker ps -aq)"
+		for value in "${allContainers[@]}" ; do
+			echo "$value"
+		done
+	fi
+
 	if [[ $1 =~ delete ]]; then
 		for value in "${containers[@]}" ; do
 			echo "$value"
@@ -663,7 +667,7 @@ function volumesToDelete {
 function usedImages {
 	# For loop goes through appending to array of images with images used in containers queued to remove
 	#declare -a used
-	for i in "${REMAINING_CONTAINERS[@]}" ; do
+	for i in "${CONTAINERS[@]}" ; do
 		# IF not used by other containers
 
 		new="$(docker inspect -f '{{json .Image}}' "$i")"
@@ -696,6 +700,7 @@ function networksToDelete {
 # @info:	sets global variables for a dry run
 function setDryRunGlobal {
 	IFS=$'\n'
+	CONTAINERS=($(containersToDelete all))
 	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
 	REMAINING_CONTAINERS=($(containersToDelete remaining))
 	IMAGES_IN_USE=($(usedImages))
@@ -739,5 +744,10 @@ echo
 echo UNUSED IMAGES
 for j in "${UNUSED_IMAGES[@]}"; do
 	echo "$j"
+done
+echo
+echo All Containers
+for k in "${CONTAINERS[@]}"; do
+	echo "$k"
 done
 exit 0
