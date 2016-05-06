@@ -597,7 +597,7 @@ function arrayContains {
 	local seeking=$1; shift
 	local in=1
 	for element; do
-		if [[ $element == $seeking ]]; then
+		if [[ "$element" == "$seeking" ]]; then
 			in=0
 			break
 		fi
@@ -669,45 +669,23 @@ function usedImages {
 		new="$(docker inspect -f '{{json .Image}}' "$i")"
 		new=${new##*:} 		# Cuts inspect output off before the colon -- "sha:"
 		new=${new:0:12} 	# Take only first 12 characters from image sha
-		#contained=arrayContains "$new" "${images_to_remove[@]}"
-		#contained=$?
 		echo "$new"
 	done
 }
 
 function globalImagesToDelete {
+	# starts with all images and then pulls just the unused images
 	#if $DELETE_TAGGED; then
 		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
 	#else
 	#	IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
 	#fi
-
 	for i in "${images[@]}" ; do
-		#echo $i
-		#echo got here now
-		#echo "$i"
-		#arrayContains "$i" "${IMAGES_IN_USE[@]}"
-		contained=($(arrayContains "$i" "${IMAGES_IN_USE[@]}"))
-
-		#container=$?
-		#echo $i
-		if [[ $contained -eq 1 ]]; then
-			echo $i
+		# Call arry contains function
+		if [[ $(arrayContains "$i" "${IMAGES_IN_USE[@]}") -eq 1 ]]; then
+			echo "$i"
 		fi
 	done
-	#for value in "${images_to_remove[@]}" ; do
-	##	echo "$value"
-	#done
-	#if [[ $1 =~ remaining ]]; then
-	#	for value in "${used[@]}"; do
-	#		echo "$x"
-	#	done
-	#elif [[ $1 =~ remove ]] ; then
-	#	for x in "${images_to_remove[@]}" ; do
-	#		echo "$x"
-	#	done
-	#fi
-
 }
 
 function networksToDelete {
@@ -755,11 +733,11 @@ Check
 parseCli "$@"
 echo USED IMAGES
 for i in "${IMAGES_IN_USE[@]}"; do
-	echo $i
+	echo "$i"
 done
 echo
 echo UNUSED IMAGES
 for j in "${UNUSED_IMAGES[@]}"; do
-	echo $j
+	echo "$j"
 done
 exit 0
