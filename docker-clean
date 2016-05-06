@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="1.4.1"
+declare VERSION="2.0.0"
 
 # @info:	Required Docker version for Volume and Network functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -127,21 +127,51 @@ function version {
 
 # @info:	Prints out usage
 function usage {
-	echo "Docker Clean Usage Options:"
+	echo
+	echo "  Docker Clean Usage Options: "
+	echo "-------------------------------"
+	echo
   	echo "-h or --help        Opens this help menu"
   	echo "-v or --version     Prints the current docker-clean version"
   	echo
-  	echo "-a or --all         Stops and removes all Containers, Images, and Restarts docker"
-  	echo "-c or --containers  Stops and removes Stopped and Running Containers"
-  	echo "-i or --images      Stops and removes all Containers and Images"
-  	echo "-net or --networks  Removes all empty Networks"
-	echo "-s or --stop        Stops all running Containers"
+	echo " Running without any options will remove dangling volumes and untagged images only."
+	echo " All of the options are option, and while they overlap they can all be run concurrently."
+	echo " NOTE: By default, created containers will always be included, see -d, --created."
 	echo
-	echo "--dry-run           Adding this additional flag at the end will list items to be"
-	echo "                    removed without running the remove or stop commands"
+	echo "stop         Stops and removes all containers, cleans dangling volumes, and networks"
 	echo
-	echo "-l or --log         Adding this as an additional flag will list all"
-	echo "                    image, volume, and container deleting output"
+	echo "images       Removes all tagged and untagged images, stopped containers, "
+	echo "             dangling volumes, and networks"
+	echo
+	echo "run          Removes all stopped containers, untagged images, dangling volumes, and networks"
+	echo
+	echo "all          Stops and removes all containers, images, volumes and networks"
+	echo
+	echo "Additional Flag options:"
+	echo "Flag "
+	echo
+	echo "-n   or --dry-run     Adding this additional flag will list items to be"
+	echo "                      removed without executing any stopping or removing commands"
+	echo
+	echo "-s   or --stop        Stops all running containers"
+	echo
+  	echo "-c   or --containers  Removes all stopped containers"
+	echo
+  	echo "-i   or --images      Removes all untagged images"
+	echo
+  	echo "-net or --networks    Removes all empty Networks (all network cleans are only empty)"
+	echo
+	echo "-r   or --restart     Restarts the docker machine/daemon"
+	echo
+	echo "-d   or --created     By default, CREATED containers are set to be removed.  Adding this"
+	echo "                      flag will ensure that all created containers are not cleaned"
+	echo
+	echo "-t   or --tagged      Removes all tagged images"
+	echo
+	echo "-a   or --all         Stops and removes all Containers, Images, AND Restarts docker"
+	echo
+	echo "-l   or --log         Adding this as an additional flag will list all"
+	echo "                      image, volume, and container deleting output"
 
 
 }
