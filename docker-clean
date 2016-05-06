@@ -28,7 +28,6 @@
 # TODO change default to not remove stopped containers
 # TODO change -all to all but restart, add a -r --restart to restart daemon
 
-
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
@@ -595,10 +594,19 @@ function echoSize {
 # @info:	NOTE: Must run status check after calling to check result.
 # @args:	Arg 1 is string, arg2 is array
 function arrayContains {
-		for i in "${@:2}"; do
-			[[ "$i" == "$1" ]] && return 0;
-		done
-		return 1
+	local seeking=$1; shift
+	local in=1
+	for element; do
+		if [[ $element == $seeking ]]; then
+			in=0
+			break
+		fi
+	done
+	echo $in
+		#for i in "${@:2}"; do
+		#	[[ "$i" == "$1" ]] && return 0;
+		#done
+		#return 1
 }
 
 # @info: sets global container variable arrays
@@ -652,27 +660,53 @@ function volumesToDelete {
 
 # TODO implement this to check containers for ones using the images still
 #@ info sets global images to delete for dry run. CURRENTLY NOT IN USE
-function imagesToDelete {
-	if $DELETE_TAGGED; then
-		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
-	else
-		IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
-	fi
-
+function usedImages {
 	# For loop goes through appending to array of images with images used in containers queued to remove
-	declare -a used
+	#declare -a used
 	for i in "${REMAINING_CONTAINERS[@]}" ; do
 		# IF not used by other containers
 
-		new="$(docker inspect -f '{{json .Image}}' $i)"
+		new="$(docker inspect -f '{{json .Image}}' "$i")"
 		new=${new##*:} 		# Cuts inspect output off before the colon -- "sha:"
 		new=${new:0:12} 	# Take only first 12 characters from image sha
-		arrayContains "$new" "${images[@]}"
-		contained=$?
-		#if [[ contained -eq 0 ]]; then
-			echo $new
+		#contained=arrayContains "$new" "${images_to_remove[@]}"
+		#contained=$?
+		echo "$new"
 	done
-	for j in
+}
+
+function globalImagesToDelete {
+	#if $DELETE_TAGGED; then
+		IFS=$'\n' read -rd '' -a images <<<"$(docker images -a -q)"
+	#else
+	#	IFS=$'\n' read -rd '' -a images <<<"$(docker images -aq --filter "dangling=true")"
+	#fi
+
+	for i in "${images[@]}" ; do
+		#echo $i
+		#echo got here now
+		#echo "$i"
+		#arrayContains "$i" "${IMAGES_IN_USE[@]}"
+		contained=($(arrayContains "$i" "${IMAGES_IN_USE[@]}"))
+
+		#container=$?
+		#echo $i
+		if [[ $contained -eq 1 ]]; then
+			echo $i
+		fi
+	done
+	#for value in "${images_to_remove[@]}" ; do
+	##	echo "$value"
+	#done
+	#if [[ $1 =~ remaining ]]; then
+	#	for value in "${used[@]}"; do
+	#		echo "$x"
+	#	done
+	#elif [[ $1 =~ remove ]] ; then
+	#	for x in "${images_to_remove[@]}" ; do
+	#		echo "$x"
+	#	done
+	#fi
 
 }
 
@@ -686,7 +720,8 @@ function setDryRunGlobal {
 	IFS=$'\n'
 	CONTAINTERS_TO_DELETE=($(containersToDelete delete))
 	REMAINING_CONTAINERS=($(containersToDelete remaining))
-	IMAGES_IN_USE=($(imagesToDelete))
+	IMAGES_IN_USE=($(usedImages))
+	UNUSED_IMAGES=($(globalImagesToDelete))
 	#VOLUMES_TO_DELETE=($(volumesToDelete))
 }
 # @info:	Default run option, cleans stopped containers and images
@@ -721,5 +756,10 @@ parseCli "$@"
 echo USED IMAGES
 for i in "${IMAGES_IN_USE[@]}"; do
 	echo $i
+done
+echo
+echo UNUSED IMAGES
+for j in "${UNUSED_IMAGES[@]}"; do
+	echo $j
 done
 exit 0
