@@ -19,17 +19,7 @@
   run docker ps
   [ $status = 0 ]
 }
-@ test "Test network removal" {
-    build
-    [ $status = 0 ]
-    run docker network create testNet
-    run docker network create testNet2
-    run docker network connect testNet web
-    run docker network connect testNet2 extra
-    ./docker-clean --network
 
-
-}
 @test "Docker Clean Version echoes" {
   run ./docker-clean -v
   [ $status = 0 ]

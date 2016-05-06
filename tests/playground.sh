@@ -40,6 +40,26 @@ function counter {
 
 }
 
+function networks {
+    echo NETWORKS
+    IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
+	declare -a emptyNetworks
+	for i in "${networks[@]}"; do
+		containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
+        containers=${containers:3}
+        if [[ -z $containers ]]; then
+            echo EMTPY
+        fi
+        echo Container: ${containers}
+		name="$(docker network inspect -f '{{json .Name}}' "$i")"
+		if [[ -n "$containers" ]] && [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
+            echo "$i"
+            emptyNetworks+=("$i")
+		fi
+	done
+}
+
+#networks
 #echo $running_Count
 
 function countTest {
@@ -105,6 +125,10 @@ function build() {
      docker pull zzrot/alpine-node
      docker run -d -P --name extra -v /webapp zzrot/alpine-caddy
      docker run -d -P --name web -v /webapp training/webapp python app.py
+     docker network create testNet
+     docker network create testNet2
+     docker network connect testNet web
+     docker network connect testNet2 extra
     #run docker run -d ghost
     #run docker run -d alpine-caddy
     #run docker kill ghost
