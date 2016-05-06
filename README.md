@@ -76,8 +76,8 @@ For a more in depth look at the usage and commands run without browsing the scri
 
 ### Team members
 
-* [Sean Kilgarriff](https://github.com/Skilgarriff) sean@zzrot.com
-* [Killian Brackey](https://github.com/killianbrackey) killian@zzrot.com
+* [Sean Kilgarriff](https://github.com/Skilgarriff) sean@zzrot.com T: [@seankilgarriff](https://twitter.com/SeanKilgarriff)
+* [Killian Brackey](https://github.com/killianbrackey) killian@zzrot.com T: [@kmbrackey](https://twitter.com/kmbrackey)
 
 Don't hesitate to get in contact with either one of us with problems, questions, etc.
 
@@ -105,10 +105,6 @@ We use ShellCheck to keep our code consistent and readable. Any feature pushed t
 (Keep in mind that bats does not have to be ShellChecked, and thus if you are adding tests to .bats don't worry about linting.)
 
 You can either download the ShellCheck program: https://github.com/koalaman/shellcheck or use the ShellCheck website: http://www.shellcheck.net/
-
-
-Don’t get discouraged! We estimate that the response time from the
-maintainers is around: 24 hours.
 
 ## License
 
