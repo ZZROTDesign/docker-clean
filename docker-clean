@@ -442,19 +442,21 @@ function globalEmptyNetworks {
 		for j in "${REMAINING_CONTAINERS[@]}";  do
 			connectedNetworks="$(docker inspect -f '{{json .NetworkSettings.Networks}}' "$j")"
 			for k in "${emptyNetworks[@]}"; do
-			if [[ $connectedNetworks =~ $k ]]; then
-				emptyNetworks=(${emptyNetworks[@]/$k})
-			fi
+				if [[ $connectedNetworks =~ $k ]]; then
+					emptyNetworks=(${emptyNetworks[@]/$k})
+				fi
 			done
 		done
 	fi
 	#echo "${#emptyNetworks[@]}"
 	for x in "${emptyNetworks[@]}"; do
+		x=(${x/" "})  # remove spaces
 		echo "$x"
 	done
 }
 
 function cleanNetworks {
+: <<'END'
 	#setEmptyNetworks\
 	IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
 	declare -a emptyNetworks
@@ -466,8 +468,10 @@ function cleanNetworks {
 			emptyNetworks+=("$i")
 		fi
 	done
+END
 	if [[ $DRY_RUN == true ]]; then
 		echo "Dry run on removal of networks:"
+:<<'END'
 		# Add Stopped containers' empty networks if they would exist
 		if [[ ${CONTAINERS_TO_DELETE[@]} ]]; then
 			for j in "${CONTAINERS_TO_DELETE[@]}"; do
@@ -479,11 +483,12 @@ function cleanNetworks {
 				fi
 			done
 		fi
-		if [[ ! ${emptyNetworks[@]} ]]; then
+END
+		if [[ ! ${EMPTY_NETWORKS[@]} ]]; then
 			echo "No empty networks. Running without -n or --dry-run flag won't remove any networks."
 		else
 			echo "Running without -n or --dry-run flag will remove the listed networks:"
-			for i in "${emptyNetworks[@]}"; do
+			for i in "${EMPTY_NETWORKS[@]}"; do
 				local name
 				name="$(docker network inspect -f '{{json .Name}}' "$i")"
 				local driver
@@ -492,16 +497,16 @@ function cleanNetworks {
 			done
 		fi # End Dry Run
 	else
-		if [[ ! "${emptyNetworks[@]}" ]]; then
+		if [[ ! "${EMPTY_NETWORKS[@]}" ]]; then
 			echo "No empty networks!"
 			echo
 		else
 			local count=0
 			echo "Removing empty networks..."
-			for i in "${emptyNetworks[@]}"; do
+			for i in "${EMPTY_NETWORKS[@]}"; do
 				if docker network rm "$i" 2>&1 | log ; then
 					local -a notCleaned
-					notCleaned=$(arrayContains "${emptyNetworks[@]}")
+					notCleaned=$(arrayContains "${EMPTY_NETWORKS[@]}")
 					if [[ notCleaned -eq 0 ]]; then
 						echo "No empty networks!"
 						echo
