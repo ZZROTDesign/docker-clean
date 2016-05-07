@@ -68,9 +68,9 @@ declare DELETE_CREATED=true
 declare -a CONTAINERS_TO_DELETE	# Currently in use
 declare -a IMAGES_IN_USE			# Currently in use
 declare -a IMAGES_TO_DELETE			# Currently in use
-declare -a REMAINING_CONTAINERS		# Work in progress -- use for exited time delta
+declare -a REMAINING_CONTAINERS		# Currently in use
+declare -a EMPTY_NETWORKS			# Currently in use
 #declare -a VOLUMES_TO_DELETE		# Not in use
-declare -a EMPTY_NETWORKS			# Work in progress
 
 
 #FUNCTIONS
@@ -429,53 +429,30 @@ function cleanVolumes {
 
 function globalEmptyNetworks {
 	IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
-	#local -a emptyNetworks
+	local -a emptyNetworks
 	for i in "${networks[@]}"; do
 		containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
 		containers=${containers:3} # remove empty container string brackets
 		name="$(docker network inspect -f '{{json .Name}}' "$i")"
 		if [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
 			emptyNetworks+=("$i")
-			#echo "$i"
 		fi
 	done
-	:<<END
-	for x in "${emptyNetworks[@]}"; do
-		if [[ $x == */" "* ]]; then
-			echo why is there a space here
-		fi
-		echo "$x"
-		#echo LENGHT: ${#x}
-	done
-END
-	#echo "${#emptyNetworks[@]}"
-	#:<<END
 	if [[ "${REMAINING_CONTAINERS[@]}" ]]; then
 		for j in "${REMAINING_CONTAINERS[@]}";  do
 			local -a connectedNetworks
 			connectedNetworks="$(docker inspect -f '{{json .NetworkSettings.Networks}}' "$j")"
 			length="${#emptyNetworks[@]}"
 			for k in `seq 0 $length`; do
-				#k=(${k//" "})  # remove spaces
 				checking="${emptyNetworks[$k]}"
-				#echo CHECKING "$checking"
 				if [[ $connectedNetworks =~ $checking ]]; then
-					#echo REMOVING $checking
 					emptyNetworks=("${emptyNetworks[@]:0:$k}" "${emptyNetworks[@]:$(($k+1))}")
-					#echo ${emptyNetworks[@]}
 				fi
 			done
 		done
 	fi
-#END
-	#emptyNetworks=(${emptyNetworks[@]//" "})
-	#echo "${#emptyNetworks[@]}"
 	for x in "${emptyNetworks[@]}"; do
-		if [[ $x == */" "* ]]; then
-			echo why is there a space here
-		fi
 		echo "$x"
-		#echo LENGHT: ${#x}
 	done
 }
 
@@ -504,7 +481,6 @@ function cleanNetworks {
 			for i in "${EMPTY_NETWORKS[@]}"; do
 				if docker network rm "$i" 2>&1 | log ; then
 					local -a notCleaned
-					#echo LENGTH: ${EMPTY_NETWORKS[0]}
 					count=$((count+1))
 
 				fi
@@ -759,17 +735,21 @@ function dockerClean {
 # @info:	Main function
 Check
 parseCli "$@"
+
+# Used for testing global arrays
+: <<'END'
 echo EMTPY NETWORKS
 for i in "${EMPTY_NETWORKS[@]}"; do
 	echo "$i"
 done
-#echo USED IMAGES
-#for i in "${IMAGES_IN_USE[@]}"; do
-#	echo "$i"
-#done
-#echo
-#echo UNUSED IMAGES
-#for j in "${IMAGES_TO_DELETE[@]}"; do
-#	echo "$j"
-#done
+echo USED IMAGES
+for i in "${IMAGES_IN_USE[@]}"; do
+	echo "$i"
+done
+echo
+echo UNUSED IMAGES
+for j in "${IMAGES_TO_DELETE[@]}"; do
+	echo "$j"
+done
+END
 exit 0

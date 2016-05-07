@@ -20,21 +20,6 @@
   [ $status = 0 ]
 }
 
-@test "Test network removal" {
-    skip
-    build
-    [ $status = 0 ]
-    run docker network create testNet
-    run docker network create testNet2
-    run docker network connect testNet web
-    run ./docker-clean --networks
-
-    used="$(docker network ls -qf name='testNet')"
-    empty="$(docker network ls -qf name='testNet2')"
-    [ $used ]
-    [ -z $empty ]
-
-}
 @test "Docker Clean Version echoes" {
   run ./docker-clean -v
   [ $status = 0 ]
@@ -87,6 +72,21 @@
     [[ $listedImages == $afterListedImages ]]
     [[ $volumes == $afterVolumes ]]
     clean
+}
+
+@test "Test network removal" {
+    build
+    [ $status = 0 ]
+    run docker network create one
+    run docker network create two
+    run docker network connect testNet container
+    run ./docker-clean --networks
+
+    used="$(docker network ls -qf name='one')"
+    empty="$(docker network ls -qf name='two')"
+    [[ $used ]]
+    [[ -z $empty ]]
+
 }
 
 @test "Test container stopping (-s --stop)" {
@@ -249,7 +249,7 @@ function build() {
     run docker pull zzrot/whale-awkward
     run docker pull zzrot/alpine-ghost
     run docker pull zzrot/alpine-node
-    run docker run -d zzrot/alpine-caddy
+    run docker run -d --name container zzrot/alpine-caddy
 }
 
 function buildWithVolumes {
