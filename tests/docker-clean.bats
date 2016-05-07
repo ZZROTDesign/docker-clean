@@ -19,15 +19,20 @@
   run docker ps
   [ $status = 0 ]
 }
-@ test "Test network removal" {
+
+@test "Test network removal" {
+    skip
     build
     [ $status = 0 ]
     run docker network create testNet
     run docker network create testNet2
     run docker network connect testNet web
-    run docker network connect testNet2 extra
-    ./docker-clean --network
+    run ./docker-clean --networks
 
+    used="$(docker network ls -qf name='testNet')"
+    empty="$(docker network ls -qf name='testNet2')"
+    [ $used ]
+    [ -z $empty ]
 
 }
 @test "Docker Clean Version echoes" {

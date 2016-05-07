@@ -44,6 +44,7 @@ function networks {
     echo NETWORKS
     IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
 	declare -a emptyNetworks
+    : <<'END'
 	for i in "${networks[@]}"; do
 		containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
         containers=${containers:3}
@@ -57,6 +58,8 @@ function networks {
             emptyNetworks+=("$i")
 		fi
 	done
+END
+
 }
 
 #networks
