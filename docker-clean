@@ -205,7 +205,7 @@ function checkNetworkVersion {
 	local Docker_Version
 	Docker_Version="$(docker --version | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')"
 	if [ "$(printVersion "$Docker_Version")" -gt "$(printVersion "$NETWORK_REQUIRED_VERSION")" ]; then
-		HAS_NETWORK_VERSION=true
+		echo false
 	fi
 }
 
@@ -444,18 +444,13 @@ function cleanVolumes {
 
 #@ info:	Sets global array of empty networks
 function globalEmptyNetworks {
-	checkNetworkVersion
 	IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
 	local -a emptyNetworks
 	for i in "${networks[@]}"; do
-		if [[ "$HAS_NETWORK_VERSION" == true ]]; then
-			containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
-			containers=${containers:3} # remove empty container string brackets
-			name="$(docker network inspect -f '{{json .Name}}' "$i")"
-			if [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
-				emptyNetworks+=("$i")
-			fi
-		else
+		containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
+		containers=${containers:3} # remove empty container string brackets
+		name="$(docker network inspect -f '{{json .Name}}' "$i")"
+		if [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
 			emptyNetworks+=("$i")
 		fi
 	done
@@ -723,19 +718,20 @@ function globalImagesToDelete {
 
 
 # @info:	sets global variables for a dry run
-function setDryRunGlobal {
+function setGlobal {
 	IFS=$'\n'
 	CONTAINERS_TO_DELETE=($(containersToDelete delete))
 	REMAINING_CONTAINERS=($(containersToDelete remaining))	# Add time delta
 	IMAGES_IN_USE=($(usedImages))
 	IMAGES_TO_DELETE=($(globalImagesToDelete))
 	EMPTY_NETWORKS=($(globalEmptyNetworks))
+	HAS_NETWORK_VERSION=($(checkNetworkVersion))
 	#VOLUMES_TO_DELETE=($(volumesToDelete))
 }
 # @info:	Default run option, cleans stopped containers and images
 function dockerClean {
 	#if [[ $DRY_RUN == true ]]; then
-	setDryRunGlobal
+	setGlobal
 	#fi
 
 	if $STOP_CONTAINERS; then
