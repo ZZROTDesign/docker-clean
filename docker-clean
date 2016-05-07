@@ -443,10 +443,10 @@ function globalEmptyNetworks {
 			local -a connectedNetworks
 			connectedNetworks="$(docker inspect -f '{{json .NetworkSettings.Networks}}' "$j")"
 			length="${#emptyNetworks[@]}"
-			for k in `seq 0 $length`; do
+			for k in $(seq 0 "$length"); do
 				checking="${emptyNetworks[$k]}"
 				if [[ $connectedNetworks =~ $checking ]]; then
-					emptyNetworks=("${emptyNetworks[@]:0:$k}" "${emptyNetworks[@]:$(($k+1))}")
+					emptyNetworks=("${emptyNetworks[@]:0:$k}" "${emptyNetworks[@]:(($k+1))}")
 				fi
 			done
 		done
@@ -480,7 +480,6 @@ function cleanNetworks {
 			echo "Removing empty networks..."
 			for i in "${EMPTY_NETWORKS[@]}"; do
 				if docker network rm "$i" 2>&1 | log ; then
-					local -a notCleaned
 					count=$((count+1))
 
 				fi
