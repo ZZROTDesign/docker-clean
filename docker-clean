@@ -26,10 +26,16 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="2.0.1"
+declare VERSION="2.0.2"
 
-# @info:	Required Docker version for Volume and Network functionality
+# @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
+
+# @info:	Required version for docker network inspect filters
+declare NETWORK_REQUIRED_VERSION="1.10.0"
+
+# @info:	Boolean for determining which network cleaning function to use
+declare HAS_NETWORK_VERSION=false
 
 # @info:	Boolean for storing Docker version info
 declare HAS_VERSION=false
@@ -192,6 +198,15 @@ function checkVersion  {
         echo "Your Version of Docker is below 1.9.0 which is required for full functionality."
         echo "Please upgrade your Docker daemon. Until then, the Volume and Network processing will not work."
     fi
+}
+
+# @info:	Checks if network inspect filters are compatible
+function checkNetworkVersion {
+	local Docker_Version
+	Docker_Version="$(docker --version | sed 's/[^0-9.]*\([0-9.]*\).*/\1/')"
+	if [ "$(printVersion "$Docker_Version")" -gt "$(printVersion "$NETWORK_REQUIRED_VERSION")" ]; then
+		HAS_NETWORK_VERSION=true
+	fi
 }
 
 # @info:	Checks to see if Docker is installed and connected
@@ -427,14 +442,20 @@ function cleanVolumes {
 	fi
 }
 
+#@ info:	Sets global array of empty networks
 function globalEmptyNetworks {
+	checkNetworkVersion
 	IFS=$'\n' read -rd '' -a networks <<<"$(docker network ls -q)"
 	local -a emptyNetworks
 	for i in "${networks[@]}"; do
-		containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
-		containers=${containers:3} # remove empty container string brackets
-		name="$(docker network inspect -f '{{json .Name}}' "$i")"
-		if [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
+		if [[ "$HAS_NETWORK_VERSION" == true ]]; then
+			containers="$(docker network inspect -f '{{json .Containers}}' "$i")"
+			containers=${containers:3} # remove empty container string brackets
+			name="$(docker network inspect -f '{{json .Name}}' "$i")"
+			if [[ "$name" != '"bridge"' ]] && [[ "$name" != '"host"' ]] && [[ "$name" != '"none"' ]]; then
+				emptyNetworks+=("$i")
+			fi
+		else
 			emptyNetworks+=("$i")
 		fi
 	done
@@ -457,36 +478,42 @@ function globalEmptyNetworks {
 }
 
 function cleanNetworks {
-	if [[ $DRY_RUN == true ]]; then
-		echo "Dry run on removal of networks:"
-		if [[ ! ${EMPTY_NETWORKS[@]} ]]; then
-			echo "No empty networks. Running without -n or --dry-run flag won't remove any networks."
+	if [[ $HAS_NETWORK_VERSION == true ]]; then
+		if [[ $DRY_RUN == true ]]; then
+			echo "Dry run on removal of networks:"
+			if [[ ! ${EMPTY_NETWORKS[@]} ]]; then
+				echo "No empty networks. Running without -n or --dry-run flag won't remove any networks."
+			else
+				echo "Running without -n or --dry-run flag will remove the listed networks:"
+				for i in "${EMPTY_NETWORKS[@]}"; do
+					local name
+					name="$(docker network inspect -f '{{json .Name}}' "$i")"
+					local driver
+					driver="$(docker network inspect -f '{{json .Driver}}' "$i")"
+					echo "Network ID: $i NAME: $name DRIVER: $driver"
+				done
+			fi # End Dry Run
 		else
-			echo "Running without -n or --dry-run flag will remove the listed networks:"
-			for i in "${EMPTY_NETWORKS[@]}"; do
-				local name
-				name="$(docker network inspect -f '{{json .Name}}' "$i")"
-				local driver
-				driver="$(docker network inspect -f '{{json .Driver}}' "$i")"
-				echo "Network ID: $i NAME: $name DRIVER: $driver"
-			done
-		fi # End Dry Run
-	else
-		if [[ "${#EMPTY_NETWORKS[@]}" -eq 0 ]]; then
-			echo "No empty networks!"
-			echo
-		else
-			local count=0
-			echo "Removing empty networks..."
-			for i in "${EMPTY_NETWORKS[@]}"; do
-				if docker network rm "$i" 2>&1 | log ; then
-					count=$((count+1))
+			if [[ "${#EMPTY_NETWORKS[@]}" -eq 0 ]]; then
+				echo "No empty networks!"
+				echo
+			else
+				local count=0
+				echo "Removing empty networks..."
+				for i in "${EMPTY_NETWORKS[@]}"; do
+					if docker network rm "$i" 2>&1 | log ; then
+						count=$((count+1))
 
-				fi
-			done
-			echo "Networks removed: $count"
-			echo
+					fi
+				done
+				echo "Networks removed: $count"
+				echo
+			fi
 		fi
+	else
+		echo "Docker-clean only has support for Network removal on Docker Versions 1.10 and up."
+		echo "Docker will not enable you to remove networks in use, and you can use the "
+		echo "following command at your own risk: docker network rm \$(docker network ls -q)"
 	fi
 }
 
