@@ -438,19 +438,19 @@ function globalEmptyNetworks {
 		fi
 	done
 	#echo "${#emptyNetworks[@]}"
-	if [[ "$REMAINING_CONTAINERS" ]]; then
+	if [[ "${REMAINING_CONTAINERS[@]}" ]]; then
 		for j in "${REMAINING_CONTAINERS[@]}";  do
 			connectedNetworks="$(docker inspect -f '{{json .NetworkSettings.Networks}}' "$j")"
 			for k in "${emptyNetworks[@]}"; do
-			if [[ $connectedNetworks =~ "$k" ]]; then
-				emptyNetworks=("${EMPTY_NETWORKS[@]/"$k"}")
+			if [[ $connectedNetworks =~ $k ]]; then
+				emptyNetworks=(${emptyNetworks[@]/$k})
 			fi
 			done
 		done
 	fi
 	#echo "${#emptyNetworks[@]}"
-	for k in "${emptyNetworks[@]}"; do
-		echo "$k"
+	for x in "${emptyNetworks[@]}"; do
+		echo "$x"
 	done
 }
 
