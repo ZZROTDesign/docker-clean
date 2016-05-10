@@ -26,7 +26,7 @@
 #ENVIRONMENT VARIABLES
 
 # @info:	Docker-clean current version
-declare VERSION="2.0.2"
+declare VERSION="2.0.3"
 
 # @info:	Required Docker version for Volume functionality
 declare REQUIRED_VERSION="1.9.0"
@@ -364,7 +364,7 @@ function cleanImages {
 			todelete="${IMAGES_TO_DELETE[*]}"
 			 while [[ "$try" -lt "${#IMAGES_TO_DELETE[@]}" ]]; do
 				for i in $(seq 0 "${#IMAGES_TO_DELETE[@]}"); do
-					try=$(($try+1))
+					try=$((try+1))
 					local output
 					local status
 					local repotag
