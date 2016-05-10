@@ -370,19 +370,26 @@ function cleanImages {
 					local repotag
 					local size
 					local image
+					local validInput
+					validInput=true
 					image="${IMAGES_TO_DELETE[$i]}"
 					image=${image// /}
-					repotag="$(docker inspect -f '{{json .RepoTags}}' "$image")"
-					size="$(docker inspect -f '{{json .Size}}' "$image")"
-					docker rmi -f "$image" &>/dev/null
-					status=$?
-					if [[ $status -eq 0 ]] ; then
-						count=$((count+1))
-						totalSize=$((totalSize+size))
-						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $image"
-						echo "$output" | log
-						#unset "IMAGES_TO_DELETE[$i]" # ERROR value too great for base
-						todelete=("${todelete[@]:0:$i}" "${todelete[@]:(($i+1))}")
+					if [[ "${#image}" -lt 12 ]]; then
+						validInput=false
+					fi
+					if [[ $validInput == true ]]; then
+						repotag="$(docker inspect -f '{{json .RepoTags}}' "$image")"
+						size="$(docker inspect -f '{{json .Size}}' "$image")"
+						docker rmi -f "$image" &>/dev/null
+						status=$?
+						if [[ $status -eq 0 ]] ; then
+							count=$((count+1))
+							totalSize=$((totalSize+size))
+							output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $image"
+							echo "$output" | log
+							#unset "IMAGES_TO_DELETE[$i]" # ERROR value too great for base
+							todelete=("${todelete[@]:0:$i}" "${todelete[@]:(($i+1))}")
+						fi
 					fi
 				done
 			done
@@ -635,12 +642,14 @@ fi
 function echoSize {
 	local mega
 	local giga
-	mega=$(($1/1000000))
-	giga=$(($1/1000000000))
-	if [[ $giga == 0 ]]; then
-		echo "You've cleared approximately MB: $mega of space!"
-	else
-		echo "You've cleared approximately MB: $mega or GB: $giga of space!"
+	if [[ $1 -gt 0 ]]; then
+		mega=$(($1 / 1000000))
+		giga=$(($1 / 1000000000))
+		if [[ $giga == 0 ]]; then
+			echo "You've cleared approximately MB: $mega of space!"
+		else
+			echo "You've cleared approximately MB: $mega or GB: $giga of space!"
+		fi
 	fi
 }
 
