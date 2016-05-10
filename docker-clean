@@ -358,17 +358,20 @@ function cleanImages {
 	        echo "No images to delete!"
 	    else
 			local count=0
-			local totalSize=0
+			local try=0
 			echo "Cleaning images..."
-			while [[ "${IMAGES_TO_DELETE[@]}" ]] ; do
+			local -a todelete
+			todelete="${IMAGES_TO_DELETE[*]}"
+			 while [[ "$try" -lt "${#IMAGES_TO_DELETE[@]}" ]]; do
 				for i in $(seq 0 "${#IMAGES_TO_DELETE[@]}"); do
+					try=$(($try+1))
 					local output
 					local status
 					local repotag
 					local size
 					local image
 					image="${IMAGES_TO_DELETE[$i]}"
-					echo IMAGE: $image
+					image=${image// /}
 					repotag="$(docker inspect -f '{{json .RepoTags}}' "$image")"
 					size="$(docker inspect -f '{{json .Size}}' "$image")"
 					docker rmi -f "$image" &>/dev/null
@@ -379,7 +382,7 @@ function cleanImages {
 						output="DELETED: REPOSITORY/TAG: $repotag IMAGE ID: $image"
 						echo "$output" | log
 						#unset "IMAGES_TO_DELETE[$i]" # ERROR value too great for base
-						IMAGES_TO_DELETE=("${IMAGES_TO_DELETE[@]:0:$i}" "${IMAGES_TO_DELETE[@]:(($i+1))}")
+						todelete=("${todelete[@]:0:$i}" "${todelete[@]:(($i+1))}")
 					fi
 				done
 			done
