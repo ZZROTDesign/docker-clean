@@ -17,9 +17,10 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
     sudo chmod +x /usr/local/bin/docker-clean
 
 ## Homebrew Install
-
-    brew tap zzrotdesign/tap
+    brew update
     brew install docker-clean
+
+**UPDATE:** Docker-clean v2.0.3+ will be available without using our tap.  However we will keep both maintained.
 
 #### Upgrade (for new versions)
 
