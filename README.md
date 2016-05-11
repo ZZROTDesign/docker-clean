@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v2.0.2)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
+[![Build Status](https://travis-ci.org/ZZROTDesign/docker-clean.svg?branch=v2.0.3)](https://travis-ci.org/ZZROTDesign/docker-clean)[![GitHub release](https://img.shields.io/github/release/zzrotDesign/docker-clean.svg)](https://github.com/ZZROTDesign/docker-clean/releases)
 # Docker-Clean
 
 [![Join the chat at https://gitter.im/ZZROTDesign/docker-clean](https://badges.gitter.im/ZZROTDesign/docker-clean.svg)](https://gitter.im/ZZROTDesign/docker-clean?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -12,7 +12,7 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 ## Install
 
-    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v2.0.2/docker-clean |
+    curl -s https://raw.githubusercontent.com/ZZROTDesign/docker-clean/v2.0.3/docker-clean |
     sudo tee /usr/local/bin/docker-clean > /dev/null && \
     sudo chmod +x /usr/local/bin/docker-clean
 

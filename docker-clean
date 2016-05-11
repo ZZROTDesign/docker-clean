@@ -154,7 +154,6 @@ function usage {
 	echo "all          Stops and removes all containers, images, volumes and networks"
 	echo
 	echo "Additional Flag options:"
-	echo "Flag "
 	echo
 	echo "-n   or --dry-run     Adding this additional flag will list items to be"
 	echo "                      removed without executing any stopping or removing commands"
