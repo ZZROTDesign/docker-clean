@@ -567,7 +567,7 @@ function restartMachine {
 			# Upstart covers SysV and OpenRC as well.
 			if [[ $init_system =~ upstart  ]]; then
 				if [[ $DRY_RUN == false ]]; then
-					sudo service docker restart
+					sudo service "docker" restart
 				else
 					echo "Restart command that would be run: sudo service docker restart"
 				fi
@@ -579,7 +579,7 @@ function restartMachine {
 				fi
 			elif [[ $init_system =~ rc ]]; then
 				if [[ $DRY_RUN == false ]]; then
-					sudo launchctl restart docker
+					sudo launchctl restart "docker"
 				else
 					echo "Restart command that would be run: sudo launchctl restart docker"
 				fi
