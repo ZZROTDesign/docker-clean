@@ -78,8 +78,20 @@ declare -a REMAINING_CONTAINERS		# Currently in use
 declare -a EMPTY_NETWORKS			# Currently in use
 #declare -a VOLUMES_TO_DELETE		# Not in use
 
+# @info:	Docker host to use (default to empty or localhost).
+declare DOCKER_HOST
 
 #FUNCTIONS
+
+# @info:  Overrides the system docker daemon so we can pass in a host
+# @args:	Global Arguments $@
+function docker(){
+	if [ -z "$DOCKER_HOST" ]; then
+		command "docker" "$@"
+	else
+		command "docker" -H "$DOCKER_HOST" "$@"
+	fi
+}
 
 # @info:    Parses and validates the CLI arguments
 # @args:	Global Arguments $@
@@ -101,11 +113,13 @@ function parseCli(){
 		esac
 	while [[ "$#" -gt 0 ]]; do
 		key="$1"
+		val="$2"
 		case $key in
 			stop ) STOP_CONTAINERS=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			images ) DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			run ) CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
 			all ) STOP_CONTAINERS=true; DELETE_TAGGED=true; CLEAN_CONTAINERS=true; CLEAN_IMAGES=true; CLEAN_VOLUMES=true; CLEAN_NETWORKS=true ;;
+			-H | --host) DOCKER_HOST=$val; shift;;
 			-s | --stop) STOP_CONTAINERS=true ;;
 			-n | --dry-run) DRY_RUN=true ;;
 			-l | --log) VERBOSE=true ;;
@@ -154,6 +168,10 @@ function usage {
 	echo "all          Stops and removes all containers, images, volumes and networks"
 	echo
 	echo "Additional Flag options:"
+	echo
+	echo "-H   or --host        Specifies the docker host to run against"
+	echo "                      Useful for docker swarm maintenance"
+	echo "                      ie: -H 127.0.0.1:4000"
 	echo
 	echo "-n   or --dry-run     Adding this additional flag will list items to be"
 	echo "                      removed without executing any stopping or removing commands"
