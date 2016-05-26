@@ -18,6 +18,9 @@ This guide walks through proper usage and briefly explains the command(s) behind
 
     -net or --networks    Removes all empty Networks (all network cleans are only empty)
 
+    -H   or --host        Specifies the docker host to run against
+	                      Useful for docker swarm maintenance ie: -H 127.0.0.1:4000"
+
      -r   or --restart     Restarts the docker machine/daemon
 
      -d   or --created     By default, CREATED containers are set to be removed.  Adding this
@@ -138,6 +141,16 @@ Restart (Linux)
 
 
 Stops and removes all containers, images, and dangling volumes and restarts the docker daemon (supports OSX, Windows, and Linux).
+
+#### Specifying the Docker Host
+
+For running on a docker host, you can use the flag, useful for maintenance of docker swarm integrations, you can use the `-H` or `--host` to provide a host.
+
+Example:
+
+`$ docker-clean -H 127.0.0.1:4000`
+
+Specifies to run the docker-clean command at 127.0.0.1:4000
 
 ### Additional Flags
 
