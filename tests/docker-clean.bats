@@ -17,7 +17,28 @@
 
 @test "Run docker ps (check daemon connectivity)" {
   run docker ps
-  [ $status = 0 ]
+  [ $status == 0 ]
+}
+
+@test "Test Clean containers" {
+    build
+    [[ $status == 0 ]]
+    run docker create alpine ash
+    # Test removes created contaienrs
+    runningContainers="$(docker ps -aq)"
+    run docker stop $runningContainers
+
+    run ./docker-clean -c
+    runningContainers="$(docker ps -aq)"
+    [ ! $runningContainers ]
+    build
+    run docker create alpine ash
+    runningContainers="$(docker ps -aq)"
+    run docker stop $runningContainers
+    run ./docker-clean -c -d
+    runningContainers="$(docker ps -aq)"
+    [[ $runningContainers ]]
+    clean
 }
 
 @test "Docker Clean Version echoes" {
@@ -31,7 +52,7 @@
 
   clean
   runningContainers="$(docker ps -aq)"
-  [ ! $runningContainers ]
+  [[ ! $runningContainers ]]
   }
 
 @test "Help menu opens" {
