@@ -20,27 +20,6 @@
   [ $status == 0 ]
 }
 
-@test "Test Clean containers" {
-    build
-    [[ $status == 0 ]]
-    run docker create alpine ash
-    # Test removes created contaienrs
-    runningContainers="$(docker ps -aq)"
-    run docker stop $runningContainers
-
-    run ./docker-clean -c
-    runningContainers="$(docker ps -aq)"
-    [ ! $runningContainers ]
-    build
-    run docker create alpine ash
-    runningContainers="$(docker ps -aq)"
-    run docker stop $runningContainers
-    run ./docker-clean -c -d
-    runningContainers="$(docker ps -aq)"
-    [[ $runningContainers ]]
-    clean
-}
-
 @test "Docker Clean Version echoes" {
   run ./docker-clean -v
   [ $status = 0 ]
@@ -67,6 +46,28 @@
   [[ ${lines[0]} =~ "Options:" ]]
   #clean
 }
+
+@test "Test Clean containers" {
+    build
+    [[ $status == 0 ]]
+    run docker create alpine ash
+    # Test removes created contaienrs
+    runningContainers="$(docker ps -aq)"
+    run docker stop $runningContainers
+
+    run ./docker-clean -c
+    runningContainers="$(docker ps -aq)"
+    [ ! $runningContainers ]
+    build
+    run docker create alpine ash
+    runningContainers="$(docker ps -aq)"
+    run docker stop $runningContainers
+    run ./docker-clean -c -d
+    runningContainers="$(docker ps -aq)"
+    [[ $runningContainers ]]
+    clean
+}
+
 
 # Runs most powerful command and confirms nothing cleaned
 @test "Test Dry Run (runs most powerful removal command in dry run)" {
