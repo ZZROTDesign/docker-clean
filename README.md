@@ -28,6 +28,12 @@ In order to use the volume capabilities, it is required that the Docker Daemon i
 
 For curl installs, re-running the script above will install the newest version.
 
+## Running from a docker container
+
+``` shell
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock boomtownroi/docker-clean [optional flags below]
+```
+
 
 ## Usage
 
