@@ -31,7 +31,7 @@ For curl installs, re-running the script above will install the newest version.
 ## Running from a docker container
 
 ``` shell
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock boomtownroi/docker-clean [optional flags below]
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock zzrot/docker-clean [optional flags below]
 ```
 
 
