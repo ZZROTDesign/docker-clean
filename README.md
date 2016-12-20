@@ -35,7 +35,7 @@ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock zzrot/docker-clean 
 ```
 
 *Docker Image tags can be found on [Docker Hub](https://hub.docker.com/r/zzrot/docker-clean/tags/)*
-for different docker-clean versions 2.0.4+ with various image sizes.
+for different docker-clean versions 2.0.4+ with various image sizes.  
 
 
 ## Usage
