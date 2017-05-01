@@ -1,0 +1,19 @@
+*If you are filing a bug report, please answer these questions. If your issue is not a bug report, you do not need to use this template.*
+
+#### 1. What version of Docker-Clean are you running (` docker-clean --version`)?
+
+
+#### 2. What command are you trying to run?
+
+
+#### 3. What did you expect to see?
+
+
+#### 4. What did you see instead ( 'docker-clean -l or --verbose' for the entire log )?
+
+
+#### 5. What are your system specs?
+
+Docker Version:
+Docker-Machine Version:
+OS/Version:
