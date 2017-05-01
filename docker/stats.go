@@ -9,6 +9,7 @@ type Stats struct {
 	ImagesRemoved     int
 	NetworksRemoved   int
 	SpaceSavedInMB    int
+	Options           Options // options used on this run of docker clean
 	Error             error
 }
 
@@ -18,14 +19,21 @@ func (s *Stats) returnErrorStats(err error) *Stats {
 }
 
 func (s *Stats) String() string {
-	return fmt.Sprintf(`
+	dryRunString := ""
+	if s.Options.DryRun {
+		dryRunString = "\nDRY RUN: All stats are projection of real run"
+	}
+
+	return fmt.Sprintf(`%s
 Containers Stopped: %d
 Containers Removed: %d
 Images Removed: %d
 Space Saved In MB: %d
-`, s.ContainersStopped,
+`, dryRunString,
+		s.ContainersStopped,
 		s.ContainersRemoved,
 		s.ImagesRemoved,
 		s.SpaceSavedInMB,
 	)
+
 }
