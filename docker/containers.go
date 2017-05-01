@@ -38,6 +38,57 @@ func GetAllContainers() ([]types.Container, error) {
 	return containers, nil
 }
 
+// StopAllContainers stops all containers
+func StopAllContainers(opts ...Options) *Stats {
+	stats := &Stats{}
+	options := Options{}
+	// use first options object passed
+	if len(opts) > 0 {
+		options = opts[0]
+		stats.Options = options
+	}
+
+	containers, err := GetAllContainers()
+	if err != nil {
+		glog.Error(err)
+		return stats.returnErrorStats(err)
+	}
+
+	// run in background context
+	context := context.Background()
+
+	for _, container := range containers {
+		if container.State == ContainerStateRunning {
+			if !options.DryRun {
+				err = dockerCLI.ContainerStop(context, container.ID, defaultContainerStopTimeout)
+				if err != nil {
+					glog.Error(err)
+					return stats.returnErrorStats(err)
+				}
+			}
+			stats.ContainersStopped++
+		}
+
+		// remove with force, volumes, and links
+		// TODO : make optional -- this is the nuclear option
+		if !options.DryRun {
+
+			err = dockerCLI.ContainerRemove(context, container.ID, types.ContainerRemoveOptions{
+				Force:         true,
+				RemoveVolumes: true,
+			})
+			if err != nil {
+				glog.Error(err)
+				return stats.returnErrorStats(err)
+			}
+		}
+		stats.ContainersRemoved++
+
+	}
+
+	return stats
+}
+
 // StopAndRemoveAllContainers stops and removes all containers
 func StopAndRemoveAllContainers(opts ...Options) *Stats {
 	stats := &Stats{}
