@@ -16,37 +16,44 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/zzrotdesign/docker-clean/docker"
 )
 
 // stopCmd represents the stop command
 var stopCmd = &cobra.Command{
 	Use:   "stop",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Stops all running containers",
+	Long:  `Stops all running containers`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 		fmt.Println("stop called")
 	},
 }
 
+var Verbose bool
+var DryRun bool
+
 func init() {
 	RootCmd.AddCommand(stopCmd)
 
 	// Here you will define your flags and configuration settings.
+	stopCmd.PersistentFlags().BoolVarP(&DryRun, "dry-run", "n", false, "Run as dry run")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// stopCmd.PersistentFlags().String("foo", "", "A help for foo")
+	var stats *docker.Stats
+	if stopCmd.Flag("dry-run") != nil {
+		fmt.Println("Docker clean dry run...")
+		stats = docker.StopAndRemoveAllContainers(docker.Options{DryRun: true})
+	} else {
+		stats = docker.StopAndRemoveAllContainers()
+	}
+	if stats.Error != nil {
+		fmt.Println(stats.Error.Error())
+		os.Exit(100)
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// stopCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	fmt.Println(stats.String())
 
 }
